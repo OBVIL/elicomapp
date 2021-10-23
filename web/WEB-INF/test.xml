@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<!-- Ce fichier est lu à l’indexation et au redémarrage de l’application -->
+<properties>
+  <!-- Intitulé affichable du corpus -->
+  <entry key="label">Delacroix, correspondances</entry>
+  <!-- Chemin du dossier où écrire les index lucene -->
+  <entry key="dstdir">bases/</entry>
+  <!-- Chemin de fichiers à indexer -->
+  <entry key="src">/var/www/html/delacroix-xml/*.xml</entry>
+  <!-- Transformation à appliquer aux sources XML -->
+  <entry key="xsl">xsl/alix-elicom.xsl</entry>
+</properties>
