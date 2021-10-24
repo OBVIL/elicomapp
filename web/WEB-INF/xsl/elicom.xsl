@@ -161,12 +161,11 @@
       tei:date
     | tei:persName
     | tei:placeName
-    
+    | tei:rs
     ">
-    <span class="{local-name()}">
+    <span class="{normalize-space(concat(local-name(), ' ', @type))}">
       <xsl:apply-templates/>
     </span>
-    
   </xsl:template>
   <xsl:template match="tei:hi">
     <xsl:variable name="el">
@@ -245,6 +244,12 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <!-- Line Break -->
+  <xsl:template match="tei:lb">
+    <br/>
+  </xsl:template>
+  
   <!-- Footnotes -->
   <xsl:template match="*" mode="footnote">
     <xsl:apply-templates select="*" mode="footnote"/>

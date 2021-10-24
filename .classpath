@@ -7,5 +7,9 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="web/WEB-INF/ext/jsp-api_tomcat7.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/ext/servlet-api_tomcat7.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/alix.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/lucene-core-8.10.1.jar"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
 </classpath>

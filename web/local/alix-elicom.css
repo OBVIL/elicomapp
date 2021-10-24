@@ -1,0 +1,17 @@
+@charset "UTF-8";
+
+:root {
+  --bg: #faf9f6;
+  --text: #000;
+  --bghi: #40403c;
+  --texthi: #afa;
+  --textlo: #aaa;
+  --textinv: #000;
+  --link: #9fb79f;
+  --bg2: #c3b7aa;;
+  --text2: #fff;
+  --text2hi: #fff;
+  --text2inv: #fff;
+  --bg3: #ddd;
+  --text3: #333;
+}
