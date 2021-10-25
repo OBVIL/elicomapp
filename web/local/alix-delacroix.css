@@ -4,6 +4,7 @@
   --bg: #f5ebea;
   --text: #000;
   --link: var(--bg2);
+  --title:#b83919;
   --bghi: #0f4640;
   --texthi: #fff;
   --bglo: #fff;
@@ -11,7 +12,7 @@
   --textinv: #000;
 
   --bg2: #0f4640;
-  --text2: #fff;
+  --text2: #f5ebea;
   --text2hi: #fff;
   --text2inv: #fff;
   --bg3: #ddd;
@@ -40,6 +41,10 @@ body {
   right:0;
 }
 
+.heading {
+  color: var(--title);
+  font-size: 117%;;
+}
 
 
 /* l’édition d’une lettre */

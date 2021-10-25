@@ -97,7 +97,7 @@ public void kwic(final PageContext page, final Alix alix, final TopDocs topDocs,
 <%
 pars.forms = alix.forms(pars.q, pars.field.name());
 // local param
-pars.left = 50;
+pars.left = 60;
 pars.right = 70;
 
 
@@ -141,25 +141,7 @@ span.left {display: inline-block; text-align: right; width: <%= Math.round(10+pa
     <header>
       <%@ include file="local/tabs.jsp"%>
       <form  class="search">
-        <%= selectCorpus(alix.name) %>
-        <label for="book" title="Limiter la sélection à un seul livre">Livre</label>
-        <%= selectBook(alix, pars.book) %>
-        
-        <br/>
-        
-        <label for="q">Chercher</label>
-        <input name="q" class="q" id="q" value="<%=JspTools.escape(pars.q)%>" autocomplete="off" size="60" autofocus="autofocus" 
-          onfocus="this.setSelectionRange(this.value.length,this.value.length);"
-          oninput="this.form['start'].value='';"
-        />
-        <select name="f" onchange="this.form.submit()">
-          <option/>
-          <%=pars.field.options("score occs year year_inv")%>
-        </select>
-        <!-- 
-        <label>Expressions <input type="checkbox" name="expression" value="true" <%= (pars.expression)?"checked=\"checked\"":"" %>/></label>
-         -->
-        <br/>
+        <input name="q" value="<%=JspTools.escape(pars.q)%>" type="hidden"/>
         <% // prev / next nav
         if (pars.start > 1 && pars.q != null) {
           int n = Math.max(1, pars.start - pars.hpp);
@@ -182,6 +164,7 @@ span.left {display: inline-block; text-align: right; width: <%= Math.round(10+pa
         }
         */
         %>
+        <label for="sort">Trier par</label>
         <select name="sort" onchange="this.form['start'].value=''; this.form.submit()" title="Ordre">
           <option/>
           <%= pars.sort.options() %>
