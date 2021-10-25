@@ -6,7 +6,7 @@
 <%!
 static public enum Tab {
   index("<strong>Delacroix, correspondance</strong>", "index.jsp", "Accueil", new String[]{}) { },
-  freqs("Fréquences", "freqs.jsp", "Fréquences par mots", new String[]{"f", "cat", "order", "book", "q", "right", "left"}) { },
+  freqs("Fréquences", "freqs.jsp", "Fréquences par mots", new String[]{}) { },
   // cloud("Nuage", "nuage.jsp", "Nuage de mots", new String[]{"f", "cat", "order", "book", "q", "right", "left"}) { },
   // wordnet("Réseau", "reseau.jsp", "Réseaux de mots", new String[]{"f", "cat", "order", "book", "q", "right", "left"}) { },
   // books("Livres", "livres.jsp", "Fréquences par livres/compilations", new String[]{"f", "q"}) { },
@@ -75,7 +75,7 @@ static public enum Tab {
   <%= Tab.nav(request) %>
   <form action="conc.jsp">
     <span class="right">
-      <input name="q" id="q" value="<%=JspTools.escape(pars.q)%>" autocomplete="off" size="50" 
+      <input name="q" id="q" value="<%=JspTools.escape(pars.q)%>" autocomplete="off" size="30" 
         onfocus="this.setSelectionRange(this.value.length,this.value.length);"
         oninput="this.form['start'].value='';"
       />

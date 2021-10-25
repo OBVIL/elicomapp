@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@ include file="jsp/prelude.jsp" %>
 <%
-pars.limit = tools.getInt("limit", 100);
+pars.limit = tools.getInt("limit", 200);
 if (pars.limit < 0) pars.limit = 1;
 if (pars.limit > 1000) pars.limit = 1000;
 FormEnum results = freqList(alix, pars);
@@ -19,23 +19,11 @@ results.sort(pars.order.sorter(), pars.limit);
       <form class="search" action="#">
         <a  class="icon" href="csv.jsp?<%= tools.url(new String[]{"q", "cat", "book", "left", "right", "distrib", "mi"}) %>"><img src="static/icon_csv.svg" alt="Export intégral des données au format "></a>
         <a class="icon" href="tableur.jsp?<%= tools.url(new String[]{"q", "cat", "book", "left", "right", "distrib", "mi", "limit"}) %>"><img src="static/icon_excel.svg" alt="Export des données visibles pour Excel"></a>
-        <%= selectCorpus(alix.name) %>
-        <%= selectBook(alix, pars.book) %>
-        <button type="submit">▶</button>
-        
-        <br/>
-
-        <input name="limit" type="text" value="<%= pars.limit %>" class="num4" size="2"/>
-        <select name="f" onchange="this.form.submit()">
-          <option/>
-          <%=pars.field.options()%>
-        </select>
         <label for="cat" title="Filtrer les mots par catégories grammaticales">filtre</label>
         <select name="cat" onchange="this.form.submit()">
           <option/>
           <%=pars.cat.options()%>
         </select>
-        <a class="help button" href="#cat">?</a>
              <%
              /*
         <label for="distrib" title="Algorithme d’ordre des mots sélectionné">Score</label>
@@ -59,17 +47,10 @@ results.sort(pars.order.sorter(), pars.limit);
         <select name="order" onchange="this.form.submit()">
           <option/>
           <%
-          if (pars.book != null || pars.q != null) out.println(pars.order.options("score freq hits occs docs"));
-          else out.println(pars.order.options("score freq hits"));
+          if (pars.book != null || pars.q != null) out.println(pars.order.options("freq hits score occs docs"));
+          else out.println(pars.order.options("freq hits score "));
           %>
         </select>
-        <br/>
-        <label for="q" title="Mots fréquents autour d’un ou plusieurs mots">Co-occurrents de</label>
-        <input name="q" class="q" onclick="this.select()" type="text" value="<%=tools.escape(pars.q)%>" size="40" />
-        <input name="left" value="<%=pars.left%>" size="1" class="num3"/>
-        <label for="left" title="Nombre de mots à capturer à gauche">à gauche</label>
-        <input name="right" value="<%=pars.right%>" size="1" class="num3"/>
-        <label for="right" title="Nombre de mots à capturer à droite">à droite</label>
       </form>
     </header>
     <main>
@@ -181,45 +162,6 @@ results.sort(pars.order.sorter(), pars.limit);
           %>
         </tbody>
       </table>
-      <article class="text">
-        <section id="cat">
-          <h1>Catégories grammaticales</h1>
-          <p>Les mots indexés sont catégorisés selon une <b>nature</b> (pas selon une <strike>fonction</strike> dans la phrase),
-          c’est-à-dire ce que le mot peut <em>être</em> dans un dictionnaire,
-           indépendamment de ses contextes d’emploi.
-          Ainsi par exemple, un mot comme <em>aimé</em> peut être employé comme verbe « <em>cette personne, je l’ai trop aimée</em> », comme adjectif « <em>la personne aimée</em> »,
-          ou comme substantif « <em>mon aimée</em> » ; le logiciel ne fera pas la différence et indiquera seulement <em>participe passé</em>.
-          L’histoire du participe passé en français montre en effet une grande fluidité entre les catégories, notamment par l’effet du passif
-          « <em>cette mode a été aimée, puis oubiée</em> ».
-          Un jeu de catégories résulte nécessairement d’une théorie linguistique, consciente ou inconsciente, 
-          mais la pondération a ici surtout été conduite par l’ordre des fréquences, et la commodité dans un moteur de recherche.
-          Il s’agit de donner des poignées sémantiques utiles sur les textes, par exemple pour comparer ceux qui 
-          comporteraient plus ou moins de négation, ou d’interrogation.
-          Les étiquettes connues des dictionnaires seront présentées selon le format suivant
-        </p>
-        <dt>Numéro. <strong>Intitulé</strong> <small>(code)</small></dt>
-        <dd><em>Glose</em></dd>
-        <%
-        StringBuilder html = new StringBuilder();
-        html.append("<dl>\n");
-        for (int i = 0; i < 256; i++) {
-          Tag tag = Tag.tag(i);
-          if (tag == null) continue;
-          String indent = "  ";
-          if ((i % 16) != 0) indent = "    ";
-          if ((i % 16) == 0 && i != 0) html.append("  </dl></dd>\n");
-          html.append(indent+"<dt>"+String.format("%02X", tag.flag())+". <strong>"+tag.label()+"</strong> <small>("+tag.name()+")</small></dt>\n");
-          html.append(indent+"<dd><em>"+tag.desc()+"</em></dd>\n");
-          if ((i % 16) == 0) html.append("  <dd><dl>\n");
-        }
-        html.append("  </dl></dd>\n");
-        html.append("</dl>\n");
-        out.println(html);
-        %>
-        </section>
-      
-      </article>
-      <p> </p>
     </main>
     <%@ include file="local/footer.jsp"%>
     <a id="totop" href="#top">△</a>
