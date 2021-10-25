@@ -5,14 +5,14 @@
 <%@ page import="java.util.Map" %>
 <%!
 static public enum Tab {
-  index("<strong>Elicom</strong>", "index.jsp", "Accueil", new String[]{}) { },
-  freqs("Table", "table.jsp", "Fréquences par mots", new String[]{"f", "cat", "order", "book", "q", "right", "left"}) { },
+  index("<strong>Delacroix, correspondance</strong>", "index.jsp", "Accueil", new String[]{}) { },
+  freqs("Fréquences", "freqs.jsp", "Fréquences par mots", new String[]{"f", "cat", "order", "book", "q", "right", "left"}) { },
   // cloud("Nuage", "nuage.jsp", "Nuage de mots", new String[]{"f", "cat", "order", "book", "q", "right", "left"}) { },
   // wordnet("Réseau", "reseau.jsp", "Réseaux de mots", new String[]{"f", "cat", "order", "book", "q", "right", "left"}) { },
   // books("Livres", "livres.jsp", "Fréquences par livres/compilations", new String[]{"f", "q"}) { },
   // chapters("Chapitres", "chapitres.jsp", "Fréquences par texte (chapitres, articles)", new String[]{"f", "q"}) { },
-  kwic("Concordance", "conc.jsp", "Recherche de mot", new String[]{"q", "book"}) { },
-  doc("Liseuse", "doc.jsp", "Lire une lettre", new String[]{"id", "q"}) { },
+  // kwic("Concordance", "conc.jsp", "Recherche de mot", new String[]{"q", "book"}) { },
+  // doc("Liseuse", "doc.jsp", "Lire une lettre", new String[]{"id", "q"}) { },
   ;
 
   final public String label;
@@ -73,4 +73,13 @@ static public enum Tab {
 %>
 <nav class="tabs">
   <%= Tab.nav(request) %>
+  <form action="conc.jsp">
+    <span class="right">
+      <input name="q" id="q" value="<%=JspTools.escape(pars.q)%>" autocomplete="off" size="50" 
+        onfocus="this.setSelectionRange(this.value.length,this.value.length);"
+        oninput="this.form['start'].value='';"
+      />
+      <button type="submit">▶</button>
+    </span>
+  </form>
 </nav>

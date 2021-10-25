@@ -10,12 +10,12 @@ results.sort(pars.order.sorter(), pars.limit);
 <!DOCTYPE html>
 <html>
   <head>
-    <jsp:include page="local/head.jsp" flush="true"/>
-    <title><%=alix.props.get("label")%> [Alix]</title>
+   <%@ include file="local/head.jsp"%>
+    <title><%=alix.props.get("label")%> [Elicom]</title>
   </head>
   <body>
     <header id="top">
-      <jsp:include page="local/tabs.jsp" flush="true"/>
+      <%@ include file="local/tabs.jsp"%>
       <form class="search" action="#">
         <a  class="icon" href="csv.jsp?<%= tools.url(new String[]{"q", "cat", "book", "left", "right", "distrib", "mi"}) %>"><img src="static/icon_csv.svg" alt="Export intégral des données au format "></a>
         <a class="icon" href="tableur.jsp?<%= tools.url(new String[]{"q", "cat", "book", "left", "right", "distrib", "mi", "limit"}) %>"><img src="static/icon_excel.svg" alt="Export des données visibles pour Excel"></a>
@@ -221,6 +221,7 @@ results.sort(pars.order.sorter(), pars.limit);
       </article>
       <p> </p>
     </main>
+    <%@ include file="local/footer.jsp"%>
     <a id="totop" href="#top">△</a>
     <script src="<%= hrefHome %>vendor/sortable.js">//</script>
   </body>

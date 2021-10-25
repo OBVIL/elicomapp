@@ -85,7 +85,7 @@ public void kwic(final PageContext page, final Alix alix, final TopDocs topDocs,
     out.print(doc.get("analytic"));
     out.println("</a></header>");
     for (String l: lines) {
-      out.println("<div class=\"line\"><small>"+ ++occ +"</small>"+l+"</div>");
+      out.println("<div class=\"line\">"+l+"<small>"+ (++occ) +"</small>" + "</div>");
     }
     out.println("</article>");
     if (++docs >= pars.hpp) break;
@@ -131,15 +131,15 @@ out.println("<!-- get topDocs "+(System.nanoTime() - nanos) / 1000000.0 + "ms\" 
 <!DOCTYPE html>
 <html>
   <head>
-   <jsp:include page="local/head.jsp" flush="true" />
-   <title>Concordance, <%= alix.props.get("label")%> [Alix]</title>
+   <%@ include file="local/head.jsp"%>
+   <title><%= alix.props.get("label")%> [Elicom]</title>
    <style>
 span.left {display: inline-block; text-align: right; width: <%= Math.round(10+pars.left * 1.0)%>ex; padding-right: 1ex;}
     </style>
   </head>
   <body>
     <header>
-      <jsp:include page="local/tabs.jsp" flush="true" />
+      <%@ include file="local/tabs.jsp"%>
       <form  class="search">
         <%= selectCorpus(alix.name) %>
         <label for="book" title="Limiter la sélection à un seul livre">Livre</label>
@@ -148,7 +148,6 @@ span.left {display: inline-block; text-align: right; width: <%= Math.round(10+pa
         <br/>
         
         <label for="q">Chercher</label>
-        <button style="position: absolute; left: -9999px" type="submit">▶</button>
         <input name="q" class="q" id="q" value="<%=JspTools.escape(pars.q)%>" autocomplete="off" size="60" autofocus="autofocus" 
           onfocus="this.setSelectionRange(this.value.length,this.value.length);"
           oninput="this.form['start'].value='';"
@@ -190,6 +189,7 @@ span.left {display: inline-block; text-align: right; width: <%= Math.round(10+pa
        </form> 
     </header>
     <main>
+      <div class="conc">
        <!-- 
        query=<%= query %> 
        totalHits=?? 
@@ -216,8 +216,10 @@ if (topDocs != null) {
 }
     */
         %>
+      </div>
       <p> </p>
     </main>
+    <%@ include file="local/footer.jsp"%>
   </body>
   <!-- <%= ((System.nanoTime() - time) / 1000000.0) %> ms  -->
 </html>

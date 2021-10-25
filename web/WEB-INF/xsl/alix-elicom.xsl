@@ -81,7 +81,9 @@ Reçoit une lettre en un seul fichier
       <xsl:text>&#10;</xsl:text>
       <article class="letter">
         <!-- Id ? -->
-        <xsl:apply-templates/>
+        <div class="body">
+          <xsl:apply-templates/>
+        </div>
         <xsl:if test=".//tei:note">
           <xsl:processing-instruction name="index_off"/>
           <footer class="footnotes">

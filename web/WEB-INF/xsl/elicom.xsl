@@ -275,6 +275,27 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  <xsl:template match="tei:ref">
+    <a>
+      <xsl:attribute name="href">
+        <xsl:call-template name="href"/>
+      </xsl:attribute>
+      <xsl:apply-templates/>
+    </a>
+  </xsl:template>
+  <xsl:template name="href">
+    <xsl:param name="url" select="@target"/>
+    <xsl:choose>
+      <xsl:when test="starts-with($url, 'http')">
+        <xsl:value-of select="$url"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$url"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  <!-- note in body without call -->
+  <xsl:template match="tei:body/tei:note"/>
   <xsl:template match="tei:note">
     <a class="fncall">
       <xsl:attribute name="href">

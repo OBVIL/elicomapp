@@ -4,6 +4,7 @@
   --bg: #faf9f6;
   --text: #000;
   --bghi: #40403c;
+  --bglo: #fff;
   --texthi: #afa;
   --textlo: #aaa;
   --textinv: #000;
@@ -14,4 +15,6 @@
   --text2inv: #fff;
   --bg3: #ddd;
   --text3: #333;
+  --NAME: #f00;
+  --SUB: #000;
 }

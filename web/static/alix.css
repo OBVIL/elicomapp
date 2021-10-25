@@ -2,6 +2,7 @@
 
 :root {
   --bg: #555550;
+  --bglo: #40403c;
   --bghi: #40403c;
   --text: #eee;
   --texthi: #afa;
@@ -14,6 +15,11 @@
   --text2inv: #fff;
   --bg3: #ddd;
   --text3: #333;
+  --NAME: #c80;
+  --SUB: #fff;
+  --ADJ: var(--SUB);
+  --fontui: "Segoe UI", Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --fontdoc: serif;
 }
 
 /**
@@ -79,7 +85,7 @@ b.mark:target {
 }
 
 html {
-  scrollbar-color: var(--bg3) var(--bg);
+  scrollbar-color: var(--bg2) var(--bg);
 }
 
 body::-webkit-scrollbar {
@@ -87,7 +93,7 @@ body::-webkit-scrollbar {
 }
 
 body::-webkit-scrollbar-thumb {
-  background: var(--bg3);
+  background: var(--bg2);
   border-radius: 20px;       /* roundness of the scroll thumb */
   border: 3px solid transparent;  /* creates padding around scroll thumb */
 }
@@ -95,11 +101,16 @@ body::-webkit-scrollbar-thumb {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: sans-serif;
+  font-family: var(--fontui);
 }
 
 td.no {
   color: var(--textlo);
+}
+
+nav.tabs {
+  display: flex;
+  align-items: center;
 }
 
 nav.tabs a,
@@ -119,18 +130,26 @@ nav.tabs a {
 
 nav.tabs a.selected,
 nav.tabs a:hover {
-  background-color: var(--bg2);
-  color: var(--text2hi);
+  background-color: var(--bg);
+  color: var(--text);
   text-decoration: none;
 }
 
-nav.tabs form.base {
+nav.tabs form {
   display: block;
   padding: 2px 0.5rem;
   margin: 0;
   float: right;
+  flex-grow: 4;
 }
 
+nav.tabs form .right {
+  font-size: 1.2rem;
+  float: right;
+}
+nav.tabs form button {
+  color: var(--bg);
+}
 
 /**
  * Global HTML
@@ -148,6 +167,7 @@ select,
 textarea,
 input {
   font-size: inherit;
+  color: inherit;
 }
 
 html,
@@ -162,6 +182,7 @@ html {
 }
 body {
   width: 100%;
+  min-height: 100%;
 }
 
 body,
@@ -184,6 +205,10 @@ a:focus, a:active {
 
 em {
   font-weight: 500;
+}
+
+img.banner {
+  max-width: 100%;
 }
 
 strong,
@@ -241,7 +266,7 @@ select {
   margin: 1px;
   outline: none;
   border-radius: 3px;
-  border: 1px solid var(--textinv);
+  border: 1px solid;
   /*
   -moz-appearance: none;
   -webkit-appearance: none;
@@ -356,7 +381,7 @@ button[type="submit"].right {
 
 button[type="submit"] {
   background: transparent;
-  color:var(--text);
+  color: inherit;
   font-size: 102%;
   /*
   outline: unset;
@@ -447,9 +472,18 @@ nav.terms {
 nav.seealso div.bibl {
   text-align: left;
   line-height: 120%;
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
   border-bottom: 1px var(--text) solid;
+}
+
+nav.seealso div.bibl a {
+  display: block;
+  padding: 0.5rem;
+}
+
+nav.seealso div.bibl a:hover {
+  text-decoration: none;
+  background-color: var(--bghi);
+  color: var(--texthi);
 }
 
 .seealso .analytic {
@@ -584,7 +618,7 @@ caption a {
 
 .mod3,
 .mod8 {
-  background-color: var(--bghi);
+  background-color: var(--bglo);
 }
 
 
@@ -660,13 +694,14 @@ td.form a {
   border: none;
   padding: 1px 1rem;
 }
+
 td.form a.NAME {
-  color: #c80;
+  color: var(--NAME);
 }
 
 td.form a.SUB,
 td.form a.ADJ {
-  color: #fff;
+  color: var(--SUB);
 }
 
 
@@ -749,7 +784,6 @@ header {
   background: var(--bg3);
   color: var(--text3);
 }
-
 
 mark {
   background: transparent;
@@ -870,13 +904,17 @@ details {
  * Search results, kwic or snips
  */
 
+main > div.conc {
+  padding: 1rem;
+}
+
 article.kwic header {
   color: var(--textlo);
   border-bottom: 1px solid var(--textlo);
   text-align: left;
   margin: 1rem 0 0.2rem 0;
   line-height: 120%;
-  padding: 1px 1rem;
+  padding: 1px 0;
   font-weight: 400;
 }
 
@@ -896,6 +934,8 @@ article.kwic header a {
 
 article.kwic header a:hover {
   text-decoration: none;
+  background-color: var(--bghi);
+  color: var(--texthi);
 }
 
 div.line a {
@@ -910,6 +950,9 @@ article.kwic div.line {
   white-space: nowrap;
 }
 
+article.kwic div.line small {
+  float: right;
+}
 
 
 article.kwic .surname {
@@ -930,11 +973,12 @@ article.kwic mark {
 /** Liseuse */
 
 a.form {
-  display: block;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
 
 .form small {
-  float: right;
   color: #000;
 }
 
@@ -1044,15 +1088,15 @@ svg.d3cloud text {
   font-family: sans-serif;
   text-anchor: middle;
   font-weight: 500;
-  fill: #fff;
+  /* fill: #fff; */
 }
 
 svg.d3cloud .SUB {
-  fill: #000;
+  fill: var(--SUB);
 }
 
 svg.d3cloud .NAME {
-  fill: #f00;
+  fill: var(--NAME);
 }
 
 
