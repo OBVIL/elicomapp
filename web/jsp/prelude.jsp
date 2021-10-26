@@ -64,7 +64,6 @@ static final DecimalFormat frdec5 = new DecimalFormat("0.0000E0", frsyms);
 static final DecimalFormat dfScore = new DecimalFormat( "0.00000", ensyms);
 /** Fields to retrieve in document for a book */
 final static HashSet<String> BOOK_FIELDS = new HashSet<String>(Arrays.asList(new String[] {Alix.BOOKID, "byline", "year", "title"}));
-final static HashSet<String> CHAPTER_FIELDS = new HashSet<String>(Arrays.asList(new String[] {Alix.BOOKID, Alix.ID, "year", "title", "analytic", "pages"}));
 
 final static Sort sortYear = new Sort(
   new SortField[] {
@@ -78,8 +77,6 @@ final static Sort sortYear = new Sort(
 final static String YEAR = "year";
 /** Key prefix for current corpus in session */
 final static String CORPUS_ = "corpus_";
-/** A filter for documents */
-final static Query QUERY_CHAPTER = new TermQuery(new Term(Alix.TYPE, DocType.chapter.name()));
 
 static String formatScore(double real)
 {

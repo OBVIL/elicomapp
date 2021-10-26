@@ -135,6 +135,9 @@
     | tei:address
     | tei:addrLine
     | tei:postscript
+    | tei:opener/tei:stamp
+    | tei:closer/tei:stamp
+    | tei:body/tei:stamp
     ">
     <div class="{local-name()}">
       <xsl:apply-templates/>
@@ -162,6 +165,7 @@
     | tei:persName
     | tei:placeName
     | tei:rs
+    | tei:stamp
     ">
     <span class="{normalize-space(concat(local-name(), ' ', @type))}">
       <xsl:apply-templates/>
@@ -323,6 +327,12 @@
         <xsl:apply-templates/>
       </div>
     </aside>
+  </xsl:template>
+  <!-- Temp problems in SQL import -->
+  <xsl:template match="tei:sup">
+    <sup>
+      <xsl:apply-templates/>
+    </sup>
   </xsl:template>
   <xsl:template match="*">
     <b class="el">&lt;<xsl:value-of select="name()"/>&gt;</b>

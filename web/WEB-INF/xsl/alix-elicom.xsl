@@ -49,6 +49,8 @@ Reçoit une lettre en un seul fichier
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
+      <xsl:text>&#10;  </xsl:text>
+      <alix:field name="type" type="meta">letter</alix:field>
       <xsl:apply-templates mode="alix"/>
       <xsl:text>&#10;</xsl:text>
     </alix:document>
@@ -72,6 +74,15 @@ Reçoit une lettre en un seul fichier
   
 
   <xsl:template match="tei:body" mode="alix">
+    <xsl:variable name="pbs" select=".//tei:pb"/>
+    <xsl:if test="$pbs">
+      <xsl:text>&#10;  </xsl:text>
+      <alix:field name="pbs" type="int">
+        <xsl:attribute name="value">
+          <xsl:value-of select="count($pbs)"/>
+        </xsl:attribute>
+      </alix:field>
+    </xsl:if>
     <xsl:apply-templates select=".//tei:persName" mode="alix"/>
     <xsl:apply-templates select=".//tei:placeName" mode="alix"/>
     <xsl:apply-templates select=".//tei:name" mode="alix"/>
