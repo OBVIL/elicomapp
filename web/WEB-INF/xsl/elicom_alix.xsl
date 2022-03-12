@@ -17,8 +17,8 @@ Reçoit une lettre en un seul fichier
 
   exclude-result-prefixes="tei saxon"
 >
-  <xsl:import href="elicom.xsl"/>
-  <xsl:output indent="yes" encoding="UTF-8" method="xml"/>
+  <xsl:import href="elicom_html.xsl"/>
+  <xsl:output indent="yes" encoding="UTF-8" method="xml" omit-xml-declaration="yes"/>
   
   <!-- Name of file, provided by caller -->
   <xsl:param name="filename"/>
