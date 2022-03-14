@@ -62,23 +62,27 @@ a.xred,
     /* color: var(--bg2); */
 }
 
-.mark b {
-    background: var(--text);
-    color: var(--bg)
+mark.mark {
+    padding: 0 0.5rem;
+    border-radius: 0.2rem;
 }
 
 .mark a.prev,
 .mark a.next {
-    color: var(--bg3)
+    color: var(--textlo);
 }
 
 a:target,
 mark:target,
-b.mark:target {}
+b.mark:target {
+    border: 0.2px solid var(--textlo);
+    background: transparent;    
+}
 
 html {
-    scrollbar-color: var(--textlo) var(--bg);
+    scrollbar-color: var(--textlo) var(--bglo);
 }
+
 
 body::-webkit-scrollbar {
     background: var(--bglo);
@@ -98,6 +102,7 @@ body {
     font-family: sans-serif;
 }
 
+
 td.no {
     color: var(--textlo);
 }
@@ -112,6 +117,11 @@ nav.tabs {
     border-bottom: 1px solid var(--border);
 }
 
+nav.tabs form {
+    padding-left: 2rem;
+    float: left;
+}
+
 nav.tabs a {
     padding: 5px 0.5rem;
     float: left;
@@ -122,10 +132,12 @@ nav.tabs a {
 
 nav.tabs a.selected,
 nav.tabs a:hover {
+    /*
     background-color: var(--bghi);
     color: var(--texthi);
+    */
     text-decoration: none;
-    border-color: var(--border) var(--border) var(--bghi) var(--border);
+    border-color: var(--border) var(--border) var(--bglo) var(--border);
 }
 
 nav.tabs form.base {
@@ -166,11 +178,30 @@ html {
 
 body {
     width: 100%;
+    position: relative;
+    height: auto;
+    min-height: 100% !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-body,
-body main {
+main {
     position: relative;
+    flex-grow: 4;
+}
+
+#footer {
+    margin-top: 2rem;
+}
+
+#footer nav {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#footer nav > a {
+  display: block;
 }
 
 a {
@@ -255,7 +286,7 @@ select {
     margin: 1px;
     outline: none;
     border-radius: 3px;
-    border: 1px solid var(--textinv);
+    border: 1px solid var(--border);
     /*
   -moz-appearance: none;
   -webkit-appearance: none;
@@ -263,6 +294,10 @@ select {
   */
 }
 
+input[type="text"] {
+    padding: 2px 1rem;
+    
+}
 form.search .button,
 form.search input,
 form.search button,
@@ -428,6 +463,7 @@ main {
 
 article.text,
 div.text {
+    font-size: 19px;
     width: 50rem;
     padding: 2rem;
     margin-left: auto;
@@ -786,10 +822,6 @@ mark {
     background: transparent;
 }
 
-mark:target {
-    border: none;
-}
-
 mark:target b {
     /*
   outline: #cf1308 solid 1px;
@@ -813,11 +845,7 @@ body.facet,
 .sortable caption,
 .hit .bibl a {}
 
-.keywords a,
-.mark a.prev,
-.mark a.next {
-    rgba(128, 70, 13, 0.5);
-}
+
 
 
 /**
@@ -937,11 +965,13 @@ article.kwic div.line {
     white-space: nowrap;
 }
 
+/*
 article.kwic .surname {
     font-variant: small-caps;
     font-size: 115%;
     font-weight: bold;
 }
+*/
 
 article.kwic .title {
     font-style: italic;
@@ -968,8 +998,7 @@ a.form {
     position: fixed;
     z-index: 4;
     right: 0;
-    background-color: var(--bg);
-    border-left: 1px solid var(--text);
+    border-left: 1px solid var(--border);
     top: 0;
     bottom: 0;
     width: 2rem;

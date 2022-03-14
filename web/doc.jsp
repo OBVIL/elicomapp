@@ -1,39 +1,28 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
+<%@ include file="jsp/elicom.jsp" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ page import="java.text.*"%>
-<%@ page import="java.util.*"%>
+
 <%@ page import="org.apache.lucene.document.Document"%>
 <%@ page import="org.apache.lucene.index.IndexReader"%>
 <%@ page import="org.apache.lucene.index.Term"%>
 <%@ page import="org.apache.lucene.search.*"%>
 <%@ page import="org.apache.lucene.util.BitSet"%>
 <%@ page import="org.apache.lucene.util.SparseFixedBitSet"%>
-<%@ page import="alix.Names" %>
-<%@ page import="alix.fr.Tag" %>
-<%@ page import="alix.lucene.Alix" %>
-<%@ page import="alix.lucene.search.*" %>
-<%@ page import="alix.util.*" %>
-<%@ page import="alix.web.*" %>
+
 <%
 JspTools tools = new JspTools(pageContext);
+StringBuilder body = new StringBuilder();
+request.setAttribute("body", body); // used by the template tag
+Alix alix = alix(tools, body); // get an alix instance, body could be populated by errors
+
 // count of words for seealso query
 int formLen = tools.getInt("words", 30);
 
-StringBuilder body = new StringBuilder();
-while(true) {
-    if (Alix.pool.size() < 1) {
-        body.append("<h1 class=\"error\">Problème d’installation, êtes-vous sûr qu’il y a une a une base indexée ?</h1>\n");
-        break;
-    }
-    Alix alix = (Alix) tools.getMap("base", Alix.pool, null, "alix.base");
-    String baseName = request.getParameter("base");
-    if (alix == null && baseName != null) {
-        body.append("<h1 class=\"error\">Base \"" + baseName + "\" indiponible</h1>");
-        break;
-    }
-    baseName = (String) Alix.pool.keySet().toArray()[0];
-    alix = Alix.pool.get(baseName);
-    String id = tools.getString("id", null);
+
+while(alix != null) {
+    
+    
+    String id = request.getParameter("id");
     if (id == null) {
         body.append("<h1 class=\"error\">Aucun document demandé</h1>");
         break;
@@ -50,9 +39,36 @@ while(true) {
     body.append("<div class=\"bibl\">");
     body.append(doc.doc().get("bibl"));
     body.append("</div>\n");
-    final String q = tools.getString("q", null);
+    
+    StringBuilder keywords = new StringBuilder();
+    keywords.append("<p class=\"keywords\">");
+    // get specific forms
     final String text = "text";
     final String f = tools.getString("f", text);
+    FormEnum forms = doc.results(f, OptionDistrib.g.scorer(), OptionCat.NOSTOP.tags());
+    forms.sort(FormEnum.Order.score, formLen);
+    formLen = forms.limit(); // if less than requested
+    int[] formIds = new int[formLen];
+    forms.reset();
+    BooleanQuery.Builder qBuilder = new BooleanQuery.Builder();
+    int i = 0;
+    boolean first = true;
+    while(forms.hasNext()) {
+        forms.next();
+        if (first) {
+            first = false;
+        }
+        else {
+            keywords.append(", ");
+        }
+        keywords.append(forms.form());
+        
+        Query tq = new TermQuery(new Term(f, forms.form()));
+        qBuilder.add(tq, BooleanClause.Occur.SHOULD);
+    }
+    keywords.append("</p>");
+    
+    final String q = request.getParameter("q");
     if (q == null) {
         body.append(doc.doc().get(text));
     }
@@ -61,19 +77,6 @@ while(true) {
         body.append(doc.hilite(f, terms));
     }
     body.append("</div>\n");
-    // get specific forms
-    FormEnum forms = doc.results(f, OptionDistrib.g.scorer(), OptionCat.NOSTOP.tags());
-    forms.sort(FormEnum.Order.score, formLen);
-    formLen = forms.limit(); // if less than requested
-    int[] formIds = new int[formLen];
-    forms.reset();
-    BooleanQuery.Builder qBuilder = new BooleanQuery.Builder();
-    int i = 0;
-    while(forms.hasNext()) {
-        forms.next();
-        Query tq = new TermQuery(new Term(f, forms.form()));
-        qBuilder.add(tq, BooleanClause.Occur.SHOULD);
-    }
     Query mlt = qBuilder.build();
     body.append("<nav class=\"seealso\">\n");
     body.append("<h5>Sur les mêmes sujets…</h5>\n");
@@ -90,9 +93,8 @@ while(true) {
         body.append(aDoc.get("bibl"));
         body.append("</a>");
     }
-    break;
+    break; // !! KEEP IT
 }
-request.setAttribute("body", body);
 %>
 <t:elicom>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>

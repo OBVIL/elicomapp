@@ -1,19 +1,15 @@
-<%@tag description="Elicom template" pageEncoding="UTF-8"%>
-<%@tag import="alix.web.Webinf" %>
-<%@tag import="alix.web.JspTools" %>
+<%@ tag description="Elicom template" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
+<%@ tag import="alix.web.JspTools" %>
 <%@attribute name="hrefHome" type="java.lang.String" required="true" %>
 <%@attribute name="title" type="java.lang.String" required="true" %>
+<%@attribute name="head" fragment="true" %>
+<%@attribute name="header" fragment="true" %>
 <%!
-/** Load bases from WEB-INF/, one time */
-static {
-    if (!Webinf.bases) {
-        Webinf.bases();
-    }
-}
 
 static public enum Tab {
     index("<strong>Elicom</strong>", "index.jsp", "Présentation", new String[]{}) { },
     kwic(null, "conc.jsp", null, new String[]{"q"}) { },
+    doc(null, "doc.jsp", null, new String[]{"q"}) { },
     ;
 
     final public String label;
@@ -80,23 +76,32 @@ JspTools tools = new JspTools((javax.servlet.jsp.PageContext)jspContext);
 String q = tools.getString("q", "");
 %>
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8"/>
         <title>${title}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
         <link href="${hrefHome}vendor/teinte.css" rel="stylesheet"/>
         <link href="${hrefHome}static/alix.css" rel="stylesheet"/>
+        <jsp:invoke fragment="head"/>
     </head>
     <body>
         <header id="header">
             <nav class="tabs">
                 <%= Tab.nav(request) %>
                 <form action="<%= Tab.kwic.href %>">
-                    <input type="text" value="<%= q %>"/>
+                    <input 
+                    name="q"
+                    size="50" 
+                    type="text" 
+                    value="<%= JspTools.escape(q) %>"
+                    autofocus="autofocus"
+                    onfocus="this.setSelectionRange(this.value.length,this.value.length);"
+                    />
                     <button type="submit">▶</button>
                 </form>
             </nav>
+            <jsp:invoke fragment="header"/>
         </header>
         <main id="main">
             <div class="row">

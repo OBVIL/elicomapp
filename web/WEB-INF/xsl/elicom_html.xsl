@@ -116,6 +116,12 @@
       <xsl:apply-templates/>
     </em>
   </xsl:template>
+
+  <xsl:template match="tei:figure">
+    <figure>
+      <xsl:apply-templates/>
+    </figure>
+  </xsl:template>
   
   <xsl:template match="tei:quote">
     <blockquote>
@@ -222,6 +228,31 @@
       <xsl:apply-templates/>
     </li>
   </xsl:template>
+  
+  <!-- Spaces vertical or horizontal -->
+  <xsl:template match="tei:space">
+    <xsl:variable name="nbsp">                             </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="text() != ''">
+        <samp>
+          <xsl:value-of select="substring($nbsp, 1, string-length(.))"/>
+        </samp>
+      </xsl:when>
+      <xsl:when test="@extent">
+        <samp class="space" style="{@extent}"/>
+      </xsl:when>
+      <xsl:when test="@unit = 'chars'">
+        <samp>
+          <xsl:value-of select="substring($nbsp, 1, @quantity)"/>
+        </samp>
+      </xsl:when>
+      <xsl:otherwise>
+        <samp class="space" style="width:2em;">    </samp>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates/>
+  </xsl:template>
+  
 
   <xsl:template match="tei:table">
     <table>
@@ -327,6 +358,7 @@
       <xsl:apply-templates/>
     </sup>
   </xsl:template>
+  
   <!-- specific Voltaire -->
   <xsl:template match="tei:ptr"/>
   <xsl:template match="*">

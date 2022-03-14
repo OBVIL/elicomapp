@@ -344,7 +344,7 @@ Reçoit une lettre en un seul fichier
     <!-- if more than one, let it cry ? -->
     <xsl:if test="normalize-space($value) != '' and not(preceding-sibling::tei:date)">
       <xsl:text>&#10;  </xsl:text>
-      <alix:field type="int" name="dateSent" value="{normalize-space($value)}"/>
+      <alix:field type="int" name="date" value="{normalize-space($value)}"/>
     </xsl:if>
   </xsl:template>
 
