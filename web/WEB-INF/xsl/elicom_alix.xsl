@@ -45,12 +45,37 @@ Reçoit une lettre en un seul fichier
             <xsl:value-of select="$filename"/>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:message terminate="no">NO id for this book, will be hard to retrieve</xsl:message>
+            <xsl:message terminate="no">NO id for this document, will be hard to retrieve</xsl:message>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:attribute>
       <xsl:text>&#10;  </xsl:text>
       <alix:field name="type" type="meta">letter</alix:field>
+      
+      <!-- Build a bibl line -->
+        <xsl:for-each select="tei:teiHeader/tei:profileDesc/tei:correspDesc">
+          <alix:field name="bibl" type="meta">
+            <xsl:if test="tei:correspAction[@type='sent']/tei:date/@when">
+              <span class="date">
+                <xsl:value-of select="tei:correspAction[@type='sent']/tei:date/@when"/>
+              </span>
+              <xsl:text>, </xsl:text>
+            </xsl:if>
+            <xsl:for-each select="(tei:correspAction[@type='sent']/tei:persName)[1]">
+              <span class="sender">
+                <xsl:text>de </xsl:text>
+                <xsl:call-template name="key"/>
+              </span>
+            </xsl:for-each>
+            <xsl:for-each select="(tei:correspAction[@type='received']/tei:persName)[1]">
+              <span class="receiver">
+                <xsl:text> à </xsl:text>
+                <xsl:call-template name="key"/>
+              </span>
+            </xsl:for-each>
+          </alix:field>
+        </xsl:for-each>
+      
       <xsl:apply-templates mode="alix"/>
       <xsl:text>&#10;</xsl:text>
     </alix:document>
@@ -191,8 +216,8 @@ Reçoit une lettre en un seul fichier
   </xsl:template>
   
 
-  <xsl:template name="key" match="*[@key]" mode="key">
-    <xsl:variable name="string">
+  <xsl:template name="key" match="*" mode="key">
+    <xsl:variable name="str1">
       <xsl:choose>
         <xsl:when test="@key and normalize-space(@key) != ''">
           <xsl:value-of select="normalize-space(@key)"/>
@@ -204,18 +229,37 @@ Reçoit une lettre en un seul fichier
       </xsl:choose>
     </xsl:variable>
     <!-- Maybe a value in the form : Surname, Firstname (birth, death) -->
-    <xsl:variable name="name" select="normalize-space(substring-before(concat(translate($string, ' ', ' '), '('), '('))"/>
+    <xsl:variable name="str2">
+      <xsl:choose>
+        <xsl:when test="contains($str1, '(')">
+          <xsl:value-of select="normalize-space(substring-before($str1, '('))"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$str1"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="str3">
+      <xsl:choose>
+        <xsl:when test="contains($str2, '[')">
+          <xsl:value-of select="normalize-space(substring-before($str2, '['))"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$str2"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     <xsl:choose>
       <!-- Name,  -->
-      <xsl:when test="contains($name, ',')">
+      <xsl:when test="contains($str3, ',')">
         <span class="surname">
-          <xsl:value-of select="normalize-space(substring-before($name, ','))"/>
+          <xsl:value-of select="normalize-space(substring-before($str3, ','))"/>
         </span>
         <xsl:text>, </xsl:text>
-        <xsl:value-of select="normalize-space(substring-after($name, ','))"/>
+        <xsl:value-of select="normalize-space(substring-after($str3, ','))"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:copy-of select="$name"/>
+        <xsl:copy-of select="$str3"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
