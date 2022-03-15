@@ -226,6 +226,32 @@ a:active {
     padding: 10px 2rem 10px 2rem;
 }
 
+blockquote {
+    margin: 2em 2rem 2em 2rem;
+    font-style: italic;
+}
+
+blockquote em {
+    font-style: normal;
+}
+
+.lg {
+    margin: 1em 0 1em 2rem;
+}
+
+h4.speaker {
+    font-weight: normal;
+    margin: 1ex 0 0 2rem;
+}
+
+p {
+    text-align: justify;
+}
+
+blockquote .lg {
+    margin: 0 0 1ex 0;
+}
+
 em {
     font-weight: 500;
 }

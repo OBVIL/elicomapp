@@ -116,53 +116,56 @@ pars.start = tools.getInt("start", 1);
 long nanos = System.nanoTime();
 Query query = null;
 Query qWords = null;
-if (pars.q != null) {
-    qWords = alix.query(pars.f, pars.q);
-}
-
-if (qWords != null) {
-    query = qWords;
-}
-else {
-    query = new TermQuery(new Term("type", "letter"));
-}
-
-pars.sort = (OptionSort) tools.getEnum("sort", OptionSort.date, "alixSort");
-TopDocs topDocs = pars.sort.top(alix.searcher(), query);
-
-
-// alix.props.get("label")
-
-body.append("<div>\n");
-// prev / next nav
-body.append("<form>\n");
-body.append("<input type=\"hidden\" name=\"q\" value=\"" + JspTools.escape(pars.q) + "\">\n");
-if (pars.start > 1 && pars.q != null) {
-    int n = Math.max(1, pars.start - pars.hpp);
-    body.append("<button name=\"next\" type=\"submit\" onclick=\"this.form['start'].value=" + n + "\">◀</button>\n");
-}
-if (topDocs != null) {
-    long max = topDocs.totalHits.value;
-    body.append("<input  name=\"start\" value=\"" + pars.start + "\" autocomplete=\"off\" class=\"start num3\"/>\n");
-    body.append("<span class=\"hits\"> / " + max + "</span>\n");
-    int n = pars.start + pars.hpp;
-    if (n < max) {
-        body.append("<button name=\"next\" type=\"submit\" onclick=\"this.form['start'].value=" + n + "\">▶</button>");
+while (alix != null) {
+    if (pars.q != null) {
+        qWords = alix.query(pars.f, pars.q);
     }
+    
+    if (qWords != null) {
+        query = qWords;
+    }
+    else {
+        query = new TermQuery(new Term("type", "letter"));
+    }
+    
+    pars.sort = (OptionSort) tools.getEnum("sort", OptionSort.date, "alixSort");
+    TopDocs topDocs = pars.sort.top(alix.searcher(), query);
+    
+    
+    // alix.props.get("label")
+    
+    body.append("<div>\n");
+    // prev / next nav
+    body.append("<form>\n");
+    body.append("<input type=\"hidden\" name=\"q\" value=\"" + JspTools.escape(pars.q) + "\">\n");
+    if (pars.start > 1 && pars.q != null) {
+        int n = Math.max(1, pars.start - pars.hpp);
+        body.append("<button name=\"next\" type=\"submit\" onclick=\"this.form['start'].value=" + n + "\">◀</button>\n");
+    }
+    if (topDocs != null) {
+        long max = topDocs.totalHits.value;
+        body.append("<input  name=\"start\" value=\"" + pars.start + "\" autocomplete=\"off\" class=\"start num3\"/>\n");
+        body.append("<span class=\"hits\"> / " + max + "</span>\n");
+        int n = pars.start + pars.hpp;
+        if (n < max) {
+            body.append("<button name=\"next\" type=\"submit\" onclick=\"this.form['start'].value=" + n + "\">▶</button>");
+        }
+    }
+    body.append("</form>\n");
+    /*
+    
+                <select name="sort"
+                    onchange="this.form['start'].value=''; this.form.submit()"
+                    title="Ordre">
+                    <option />
+                    pars.sort.options()
+                </select>
+    */
+    pars.href = "doc.jsp?"; // TODO, centralize nav
+    body.append(kwic(alix, topDocs, pars));
+    body.append("</div>\n");
+    break;
 }
-body.append("</form>\n");
-/*
-
-            <select name="sort"
-                onchange="this.form['start'].value=''; this.form.submit()"
-                title="Ordre">
-                <option />
-                pars.sort.options()
-            </select>
-*/
-pars.href = "doc.jsp?"; // TODO, centralize nav
-body.append(kwic(alix, topDocs, pars));
-body.append("</div>\n");
 %>
 <t:elicom>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
