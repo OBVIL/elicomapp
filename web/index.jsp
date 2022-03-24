@@ -1,5 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%
 StringBuilder body = new StringBuilder();
 request.setAttribute("body", body); // used by the template tag
@@ -7,7 +6,6 @@ request.setAttribute("body", body); // used by the template tag
 %>
 <t:elicom>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
-    <jsp:attribute name="hrefHome"></jsp:attribute>
     <jsp:attribute name="head">
     <style>
 span.left {

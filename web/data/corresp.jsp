@@ -1,7 +1,4 @@
 <%@ page language="java" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
-<%@ include file="../jsp/elicom.jsp" %>
-
-
 <%@ page import="java.util.*" %>
 <%@ page import="java.util.regex.*" %>
 

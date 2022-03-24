@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
+<%-- Jsp prelude for elicom, will be include to all jsp by a web.xml conf --%>
+<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <%@ page import="java.text.*"%>
 <%@ page import="java.util.*"%>
@@ -88,5 +90,27 @@ public class Pars {
 
 }
 
+
+%>
+<%
+{ // enclose to limit variable scope
+    String hrefHome = "";
+    String path = (String)request.getAttribute("path");
+    if (path == null) {
+        path = request.getRequestURI();
+        String context = request.getContextPath();
+        int pos = path.indexOf(context);
+        if (pos >= 0) {
+            path = path.substring(pos + context.length());
+        }
+        request.setAttribute("path", path);
+    }
+    for (int i = 1, len = path.length(); i < len; i++) {
+        if (path.charAt(i) == '/') {
+            hrefHome += "../";
+        }
+    }
+    request.setAttribute("hrefHome", hrefHome);
+}
 
 %>

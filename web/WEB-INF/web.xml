@@ -8,12 +8,7 @@
 >
     <display-name>Elicom</display-name>
     <welcome-file-list>
-        <welcome-file>index.html</welcome-file>
-        <welcome-file>index.htm</welcome-file>
         <welcome-file>index.jsp</welcome-file>
-        <welcome-file>default.html</welcome-file>
-        <welcome-file>default.htm</welcome-file>
-        <welcome-file>default.jsp</welcome-file>
     </welcome-file-list>
     <mime-mapping>
         <extension>ndjson</extension>
@@ -30,9 +25,15 @@
     <filter>
         <filter-name>UrlRewriteFilter</filter-name>
         <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+        <!-- for dev -->
         <init-param>
             <param-name>confReloadCheckInterval</param-name>
             <param-value>10</param-value>
+        </init-param>
+        <init-param>
+            <param-name>logLevel</param-name>
+            <!-- TRACE, DEBUG, INFO (default), WARN, ERROR, FATAL, -->
+            <param-value>DEBUG</param-value>
         </init-param>
     </filter>
     <filter-mapping>
@@ -41,4 +42,12 @@
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
+    <jsp-config>
+        <jsp-property-group>
+            <display-name>Elicom</display-name>
+            <url-pattern>*.jsp</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+            <include-prelude>/jsp/prelude.jspf</include-prelude>
+        </jsp-property-group>
+    </jsp-config>
 </web-app>
