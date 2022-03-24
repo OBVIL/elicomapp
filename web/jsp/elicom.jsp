@@ -16,6 +16,7 @@
 <%@ page import="alix.Names" %>
 <%@ page import="alix.util.*" %>
 <%@ page import="alix.web.*" %>
+<%@ page import="alix.web.Error" %>
 
 <%!
 /** Load bases from WEB-INF/, one time */
@@ -25,21 +26,39 @@ static {
     }
 }
 
-/** Get an alix insance */
-public Alix alix(JspTools tools, StringBuilder html)
+final String TEXT = "text";
+
+
+/** Get an alix instance */
+public Alix alix(JspTools tools, StringBuilder html) throws IOException
 {
+    //test if Alix available with at least on base
     if (Alix.pool.size() < 1) {
-        html.append("<h1 class=\"error\">Problème d’installation, êtes-vous sûr qu’il y a une a une base indexée ?</h1>\n");
+        if (html != null) {
+            html.append(Error.BASE_NONE.html() + "\n");
+        }
+        else {
+            tools.out.println("{\"errors\":" + Error.BASE_NONE.json() + "}");
+        }
+        tools.response.setStatus(Error.BASE_NONE.status());
         return null;
     }
     Alix alix = (Alix) tools.getMap("base", Alix.pool, null, "alix.base");
     String baseName = tools.request().getParameter("base");
     if (alix == null && baseName != null) {
-        html.append("<h1 class=\"error\">Base \"" + baseName + "\" indisponible</h1>");
+        if (html != null) {
+            html.append(Error.BASE_NOTFOUND.html(baseName));
+        }
+        else {
+            tools.out.println("{\"errors\":" + Error.BASE_NOTFOUND.json(baseName) + "}");
+        }
+        tools.response.setStatus(Error.BASE_NOTFOUND.status());
         return null;
     }
-    baseName = (String) Alix.pool.keySet().toArray()[0];
-    alix = Alix.pool.get(baseName);
+    else if (alix == null) {
+        baseName = (String) Alix.pool.keySet().toArray()[0];
+        alix = Alix.pool.get(baseName);
+    }
     return alix;
 }
 

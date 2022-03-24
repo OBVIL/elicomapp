@@ -1,21 +1,30 @@
 <%@ tag description="Elicom template" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@ tag import="alix.web.JspTools" %>
+<%@ tag import="alix.web.Link" %>
 <%@attribute name="hrefHome" type="java.lang.String" required="true" %>
 <%@attribute name="title" type="java.lang.String" required="true" %>
 <%@attribute name="head" fragment="true" %>
 <%@attribute name="header" fragment="true" %>
+<%@attribute name="inc" fragment="true" %>
 <%!
 
-static public enum Tab {
-    index("<strong>Elicom</strong>", "index.jsp", "Présentation", new String[]{}) { },
-    kwic(null, "conc.jsp", null, new String[]{"q"}) { },
-    doc(null, "doc.jsp", null, new String[]{"q"}) { },
+static public enum Tab implements Link {
+    index("Présentation", "apropos", "Présentation", new String[]{}),
+    explore("Explorer les correspondances", "", "Présentation", new String[]{}),
+    kwic(null, "conc.jsp", null, new String[]{"q"}),
+    doc(null, "doc.jsp", null, new String[]{"q"}),
+    about("Aide et contact", "aide", null, null),
     ;
 
-    final public String label;
     final public String href;
+    public String href() { return href; }
+    final public String label;
+    public String label() { return label; }
     final public String hint;
+    public String hint() { return hint; }
     final public String[] pars;
+    public String[] pars() { return pars; }
+    
     private Tab(final String label, final String href, final String hint, final String[] pars) {
         this.label = label ;
         this.href = href;
@@ -24,51 +33,7 @@ static public enum Tab {
         else this.pars = pars;
     }
 
-    public static String nav(final HttpServletRequest request)
-    {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for(Tab tab:Tab.values()) {
-            if (tab.label == null) {
-                continue;
-            }
-            tab.a(sb, request);
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
 
-    public void a(final StringBuilder sb, final HttpServletRequest request)
-    {
-        String here = request.getRequestURI();
-        here = here.substring(here.lastIndexOf('/')+1);
-        
-        sb.append("<a");
-        sb.append(" href=\"").append(this.href);
-        boolean first = true;
-        for (String par: pars) {
-            String value = request.getParameter(par);
-            if (value == null) continue;
-            value = JspTools.escape(value);
-            if (first) {
-                first = false;
-                sb.append("?");
-            }
-            else {
-                sb.append("&amp;");
-            }
-            sb.append(par).append("=").append(value);
-        }
-        sb.append("\"");
-        if (hint != null) sb.append(" title=\"").append(hint).append("\"");
-        sb.append(" class=\"tab");
-        if (this.href.equals(here)) sb.append(" selected");
-        else if (here.equals("") && this.href.startsWith("index"))  sb.append(" selected");
-        sb.append("\"");
-        sb.append(">");
-        sb.append(label);
-        sb.append("</a>");
-    }
 }
 %>
 <%
@@ -88,25 +53,13 @@ String q = tools.getString("q", "");
     <body>
         <header id="header">
             <nav class="tabs">
-                <%= Tab.nav(request) %>
-                <form action="<%= Tab.kwic.href %>">
-                    <input 
-                    name="q"
-                    size="50" 
-                    type="text" 
-                    value="<%= JspTools.escape(q) %>"
-                    autofocus="autofocus"
-                    onfocus="this.setSelectionRange(this.value.length,this.value.length);"
-                    />
-                    <button type="submit">▶</button>
-                </form>
+                <%= Tab.about.nav(request, (String)request.getAttribute("hrefHome")) %>
             </nav>
             <jsp:invoke fragment="header"/>
         </header>
         <main id="main">
-            <div class="row">
-                <jsp:doBody/>
-            </div>
+            <jsp:invoke fragment="inc"/>
+            <jsp:doBody/>
         </main>
         <footer id="footer">
             <nav>

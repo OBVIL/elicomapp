@@ -180,5 +180,43 @@ span.left {
 }
     </style>
     </jsp:attribute>
-    <jsp:body>${body}</jsp:body>
+    <jsp:body>
+        <form class="row">
+            <div>
+                <label>Expéditeur</label>
+                <div class="senders">
+                    <!-- input  -->
+                </div>
+                <input type="text"/>
+                <div class="suggest">
+                    <!-- dynamic suggestion -->
+                </div>
+            </div>
+            <div>
+                <input placeholder="Mots clés"/>
+                <div class="suggest">
+                    <!-- suggestion of terms -->
+                </div>
+                <div>
+                    <label>De</label>
+                    <input size="4"/>
+                    <label>à</label>
+                    <input size="4"/>
+                </div>
+            </div>
+            <div>
+                <label>Destinataire</label>
+                <div class="receivers">
+                    <!-- input  -->
+                </div>
+                <input type="text"/>
+                <div class="suggest">
+                    <!-- dynamic suggestion -->
+                </div>
+            </div>
+        </form>
+        <div>Lieux : …</div>
+        <div>Graphe</div>
+        <div>Concordance infinie</div>
+    </jsp:body>
 </t:elicom>
