@@ -1,0 +1,83 @@
+@charset "UTF-8";
+#header {
+    position: relative;
+}
+
+form.elicom {
+    margin-top: 1rem;
+}
+
+form.elicom>* {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+form.elicom fieldset {
+    position: relative;
+    border-color: var(--borderlo);
+}
+
+fieldset.left {
+    text-align: left;
+}
+
+fieldset.center {
+    text-align: center;
+}
+
+fieldset.right {
+    text-align: right;
+}
+
+form.elicom input[type=text],
+form.elicom fieldset {
+    padding-inline-start: 0.75em;
+    padding-inline-end: 0.75em;
+}
+
+form.elicom .suggest {
+    left: 0.75em;
+    right: 0.75em;
+    padding-left: 0;
+    padding-right: 0;
+    border-left: none;
+    border-right: none;
+}
+
+form.elicom label,
+form.elicom input[type=text] {
+    display: block;
+    width: 100%;
+}
+
+fieldset.multiple label a {
+    text-decoration: none;
+    color: #000;
+    cursor: pointer;
+    font-size: 105%;
+}
+
+fieldset.multiple label a:hover {
+    color: #800;
+}
+
+.suggest .corres {
+    cursor: pointer;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    width: 100%;
+}
+
+.suggest .corres:hover {
+    background: var(--bghi);
+    color: var(--texthi);
+}
+
+.suggest .corres:hover mark {
+    color: var(--texthi);
+}

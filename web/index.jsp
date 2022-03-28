@@ -11,28 +11,40 @@ request.setAttribute("body", body); // used by the template tag
 span.left {
     display: inline-block;
     text-align: right;
-    width: ${left}ex;
+    width: 60ex;
     padding-right: 1ex;
 }
+span.right {
+    display: inline-block;
+    width: 70ex;
+    text-align: left;
+}
+div.line {
+    width: 130ex;
+    margin-left: auto;
+    margin-right: auto;
+}
+
     </style>
     </jsp:attribute>
     <jsp:body>
-        <form class="row">
-            <div>
-                <label>Expéditeur</label>
-                <div class="senders">
-                    <!-- input  -->
-                </div>
-                <input type="text"/>
-                <div class="suggest">
-                    <!-- dynamic suggestion -->
-                </div>
-            </div>
+        <form class="row elicom" name="elicom" action="">
+            <fieldset class="multiple left">
+                <legend>Expéditeur(s)</legend>
+                <input type="text" class="multiple" data-url="data/sender.ndjson" data-name="senderid"/>
+            </fieldset>
+            <fieldset class="center">
+                <legend>Mots clés</legend>
+                <input type="text" name="q"/>
+                <button type="submit">Rechercher</button>
+            </fieldset>
+            <fieldset class="multiple right">
+                <legend>Destinataire(s)</legend>
+                <input type="text" class="multiple" data-url="data/receiver.ndjson" data-name="receiverid"/>
+            </fieldset>
+            <!-- 
             <div>
                 <input placeholder="Mots clés"/>
-                <div class="suggest">
-                    <!-- suggestion of terms -->
-                </div>
                 <div>
                     <label>De</label>
                     <input size="4"/>
@@ -40,19 +52,11 @@ span.left {
                     <input size="4"/>
                 </div>
             </div>
-            <div>
-                <label>Destinataire</label>
-                <div class="receivers">
-                    <!-- input  -->
-                </div>
-                <input type="text"/>
-                <div class="suggest">
-                    <!-- dynamic suggestion -->
-                </div>
-            </div>
-        </form>
         <div>Lieux : …</div>
         <div>Graphe</div>
-        <div>Concordance infinie</div>
+             -->
+        </form>
+        <div id="conc" data-url="data/conc">
+        </div>
     </jsp:body>
 </t:elicom>

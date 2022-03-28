@@ -11,6 +11,7 @@
 <%@ page import="org.apache.lucene.index.IndexReader"%>
 <%@ page import="org.apache.lucene.index.Term"%>
 <%@ page import="org.apache.lucene.search.*"%>
+<%@ page import="org.apache.lucene.search.BooleanClause.Occur"%>
 
 <%@ page import="alix.fr.Tag" %>
 <%@ page import="alix.lucene.Alix" %>
@@ -45,14 +46,15 @@ public Alix alix(JspTools tools, StringBuilder html) throws IOException
         tools.response.setStatus(Error.BASE_NONE.status());
         return null;
     }
-    Alix alix = (Alix) tools.getMap("base", Alix.pool, null, "alix.base");
-    String baseName = tools.request().getParameter("base");
+    final String BASE = "base";
+    Alix alix = (Alix) tools.getMap(BASE, Alix.pool, null, "alix.base");
+    String baseName = tools.request().getParameter(BASE);
     if (alix == null && baseName != null) {
         if (html != null) {
-            html.append(Error.BASE_NOTFOUND.html(baseName));
+            html.append(Error.BASE_NOTFOUND.html(BASE, baseName));
         }
         else {
-            tools.out.println("{\"errors\":" + Error.BASE_NOTFOUND.json(baseName) + "}");
+            tools.out.println("{\"errors\":" + Error.BASE_NOTFOUND.json(BASE, baseName) + "}");
         }
         tools.response.setStatus(Error.BASE_NOTFOUND.status());
         return null;
@@ -69,14 +71,13 @@ public class Pars {
     String q; // word query
     String f; // a possible field name (lemma or forms)
     int start; // start record in search results
-    int hpp; // hits per page
+    int limit; // a linit in a list of records
     int left; // coocs, left context in words
     int right; // coocs, right context in words
     
     // not verified
     OptionCat cat; // word categories to filter
     OptionOrder order;// order in list of terms and facets
-    int limit; // results, limit of result to show
     int dist; // wordnet, context width in words
     int nodes; // number of nodes in wordnet
     boolean expression; // kwic, filter multi word expression

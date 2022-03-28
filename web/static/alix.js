@@ -51,8 +51,8 @@ var alix = function() {
         });
         q.addEventListener('keydown', function(e) {
             e = e || window.event;
-            if (e.keyCode == 27) {
-                q.blur(); //27 is the code for escape
+            if (e.key == 'Esc' || e.key == 'Escape') {
+                q.blur();
                 suggest.style.display = 'none';
             }
         });

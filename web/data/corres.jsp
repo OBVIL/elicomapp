@@ -9,7 +9,6 @@
 <%@ page import="org.apache.lucene.index.IndexReader"%>
 <%@ page import="org.apache.lucene.index.Term"%>
 <%@ page import="org.apache.lucene.search.*"%>
-<%@ page import="org.apache.lucene.search.BooleanClause.Occur"%>
 <%@ page import="org.apache.lucene.util.BitSet"%>
 
 <%@ page import="alix.lucene.Alix" %>
@@ -26,24 +25,24 @@ final static Pattern QSPLIT = Pattern.compile("[\\?\\*\\p{L}]+");
 <%
 // -----------
 // data common prelude
+response.setHeader("Access-Control-Allow-Origin", "*"); // cross domain fo browsers
 long time = System.nanoTime();
 JspTools tools = new JspTools(pageContext);
-response.setHeader("Access-Control-Allow-Origin", "*"); // cross domain fo browsers
-String ext = tools.getStringList("ext", Arrays.asList(new String[]{"", ".ndjson", ".js", ".json"}), "");
-String mime = pageContext.getServletContext().getMimeType("a" + ext);
-if (mime != null) response.setContentType(mime);
-//get an alix instance, output errors
 Alix alix = alix(tools, null); 
 if (alix == null) {
   return;
 }
+String ext = tools.getStringList("ext", Arrays.asList(new String[]{"", ".ndjson", ".js", ".json"}), "");
+String mime = pageContext.getServletContext().getMimeType("a" + ext);
+if (mime != null) response.setContentType(mime);
+//get an alix instance, output errors
 // -----------
 
 // the field to get a list from
-String field = tools.getStringList("f", Arrays.asList(new String[]{SENDER, RECEIVER}), null);
-// bad field, send an error ?
+final String F = "f";
+String field = tools.getStringList(F, Arrays.asList(new String[]{SENDER, RECEIVER}), null);
 if (field == null) {
-    out.println("{\"errors\":" + Error.FIELD_NOTFOUND.json() + "}");
+    out.println("{\"errors\":" + Error.FIELD_NOTFOUND.json(F, request.getParameter(F)) + "}");
     response.setStatus(Error.FIELD_NOTFOUND.status());
     return;
 }
@@ -75,8 +74,10 @@ if (callback != null) {
 BitSet filter = null;
 int clauses = 0;
 BooleanQuery.Builder qbuild = new BooleanQuery.Builder();
+
 String[] ids = request.getParameterValues(fieldFilter + "id");
 if (ids != null) {
+    BooleanQuery.Builder builder = new BooleanQuery.Builder();
     final FieldFacet facet = alix.fieldFacet(fieldFilter, TEXT);
     for (String id: ids) {
         int facetId = -1;
@@ -89,14 +90,36 @@ if (ids != null) {
         }
         String value = facet.form(facetId);
         clauses++;
-        qbuild.add(new TermQuery(new Term(fieldFilter, value)), Occur.MUST);
+        builder.add(new TermQuery(new Term(fieldFilter, value)), Occur.SHOULD);
+    }
+    BooleanQuery query = builder.build();
+    if (query.clauses().size() < 1) {
+    }
+    else if (query.clauses().size() == 1) {
+        qbuild.add(query.clauses().get(0).getQuery(), Occur.MUST);
+    }
+    else  {
+        qbuild.add(query, Occur.MUST);
     }
 }
+// query words
+Query qword = alix.query( "text", request.getParameter("q"));
+if (qword != null) {
+    qbuild.add(qword, Occur.MUST);
+}
+// TODO date ?
+Query query = qbuild.build();
+if (((BooleanQuery)query).clauses().size() < 1) {
+    query = null;
+}
+else if (((BooleanQuery)query).clauses().size() == 1) {
+    query = ((BooleanQuery)query).clauses().get(0).getQuery();
+}
 // get a bitset filter from results of the query
-if (clauses > 0) {
+if (query != null) {
     IndexSearcher searcher = alix.searcher();
     CollectorBits qbits = new CollectorBits(searcher);
-    searcher.search(qbuild.build(), qbits);
+    searcher.search(query, qbits);
     filter = qbits.bits();
 }
 
@@ -107,9 +130,10 @@ if (".js".equals(ext) || ".json".equals(ext)) {
 }
 int limit = tools.getInt("limit", 20);
 Pattern hi = null; // hilite 
-String q = tools.getString("q", null);
-if (q != null) {
-    Matcher m = QSPLIT.matcher(q);
+String glob = tools.getString("glob", null);
+if (glob != null) {
+    glob = Char.toLowASCII(glob);
+    Matcher m = QSPLIT.matcher(glob);
     boolean first = true;
     StringBuilder sb = new StringBuilder();
     int parts = 0;
@@ -164,9 +188,9 @@ while (results.hasNext()) {
         hilited.setLength(0);
         while (matcher.find()) {
             hilited.append(copy.subSequence(lastEnd, matcher.start()));
-            hilited.append("<b>");
+            hilited.append("<mark>");
             hilited.append(copy.subSequence(matcher.start(), matcher.end()));
-            hilited.append("</b>");
+            hilited.append("</mark>");
             lastEnd = matcher.end();
         }
         if (lastEnd == 0) { // nothing found
@@ -187,16 +211,17 @@ while (results.hasNext()) {
     }
     out.print("    {");
     out.print("\"n\":" + n);
+    out.print(", \"id\":" + results.formId());
     out.print(", \"hits\":");
     if (filter != null) {
-        out.println(results.hits());
+        out.print(results.hits());
     }
     else {
         out.print(results.docs());
     }
-    out.print(", " + "\"form\":" + JSONWriter.valueToString(form));
+    out.print(", " + "\"text\":" + JSONWriter.valueToString(form));
     if (hi != null) {
-        out.print(", " + "\"hilited\":" + JSONWriter.valueToString(hilited.toString()));
+        out.print(", " + "\"html\":" + JSONWriter.valueToString(hilited.toString()));
     }
     out.print("}");
     if (--limit < 0) {

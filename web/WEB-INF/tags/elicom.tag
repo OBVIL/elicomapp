@@ -66,6 +66,7 @@ String hrefHome = (String)request.getAttribute("hrefHome");
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
         <link href="${hrefHome}vendor/teinte.css" rel="stylesheet"/>
         <link href="${hrefHome}static/alix.css" rel="stylesheet"/>
+        <link href="${hrefHome}static/elicom.css" rel="stylesheet"/>
         <jsp:invoke fragment="head"/>
     </head>
     <body>
@@ -89,5 +90,6 @@ String hrefHome = (String)request.getAttribute("hrefHome");
                 <a>©</a>
             </nav>
         </footer>
+        <script src="${hrefHome}static/elicom.js">//</script>
     </body>
 </html>

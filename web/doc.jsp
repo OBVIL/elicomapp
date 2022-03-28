@@ -1,5 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
-<%@ include file="jsp/elicom.jsp" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <%@ page import="org.apache.lucene.document.Document"%>
@@ -35,6 +34,7 @@ while(alix != null) {
     final Doc doc = new Doc(alix, docId);
     request.setAttribute("title", doc.doc().get("bibl")); // transmitted to template
 
+    body.append("<div class=\"row\">\n");
     body.append("<div class=\"text\">\n");
     body.append("<div class=\"bibl\">");
     body.append(doc.doc().get("bibl"));
@@ -93,11 +93,13 @@ while(alix != null) {
         body.append(aDoc.get("bibl"));
         body.append("</a>");
     }
+    body.append("</nav>\n");
+    body.append("</div>\n");
+    
     break; // !! KEEP IT
 }
 %>
 <t:elicom>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
-    <jsp:attribute name="hrefHome"></jsp:attribute>
     <jsp:body>${body}</jsp:body>
 </t:elicom>

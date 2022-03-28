@@ -3,15 +3,16 @@
     --bg: #fff;
     --text: #000000;
     --bghi: #40403c;
-    --texthi: #448;
+    --texthi: #fff;
     --bglo: #ddd;
-    --border: #fff;
     --textlo: #666;
+    --textlo2: #aaa;
+    --border: #eee;
+    --borderlo: #fff;
     --textinv: #000;
     --link: #404080;
     --bg2: #608060;
     --text2: #000;
-    --textlo2: var(--bg);
     --texthi2: #fff;
     --textinv2: #fff;
     --bg3: #ddd;
@@ -76,13 +77,12 @@ a:target,
 mark:target,
 b.mark:target {
     border: 0.2px solid var(--textlo);
-    background: transparent;    
+    background: transparent;
 }
 
 html {
     scrollbar-color: var(--textlo) var(--bglo);
 }
-
 
 body::-webkit-scrollbar {
     background: var(--bglo);
@@ -100,21 +100,25 @@ body {
     background-color: var(--bglo);
     color: var(--textlo);
     font-family: sans-serif;
+    height: 100%;
+    width: 100%;
 }
-
 
 td.no {
     color: var(--textlo);
+}
+
+nav.tabs {
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 nav.tabs a,
 nav.tabs {
     background-color: var(--bglo);
     color: var(--textlo);
-}
-
-nav.tabs {
-    border-bottom: 1px solid var(--border);
 }
 
 nav.tabs form {
@@ -124,9 +128,9 @@ nav.tabs form {
 
 nav.tabs a {
     padding: 5px 0.5rem;
-    float: left;
-    border: 1px solid transparent;
-    border-bottom-color: var(--border);
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-bottom: 1px solid var(--borderlo);
     margin-bottom: -1px;
 }
 
@@ -137,7 +141,9 @@ nav.tabs a:hover {
     color: var(--texthi);
     */
     text-decoration: none;
-    border-color: var(--border) var(--border) var(--bglo) var(--border);
+    border-color: var(--borderlo) var(--borderlo) var(--bg) var(--borderlo);
+    color: var(--text);
+    background-color: var(--bg);
 }
 
 nav.tabs form.base {
@@ -200,8 +206,8 @@ main {
     justify-content: space-evenly;
 }
 
-#footer nav > a {
-  display: block;
+#footer nav>a {
+    display: block;
 }
 
 a {
@@ -312,7 +318,7 @@ select {
     margin: 1px;
     outline: none;
     border-radius: 3px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--borderlo);
     /*
   -moz-appearance: none;
   -webkit-appearance: none;
@@ -322,8 +328,8 @@ select {
 
 input[type="text"] {
     padding: 2px 1rem;
-    
 }
+
 form.search .button,
 form.search input,
 form.search button,
@@ -528,19 +534,18 @@ nav.seealso div.bibl {
 }
 
 nav.seealso a.bibl {
-    display:block;
+    display: block;
     text-align: left;
     line-height: 120%;
     padding: 0.5rem;
-    border-bottom: 1px var(--border) solid;
+    border-bottom: 1px var(--borderlo) solid;
 }
-
 
 nav.seealso a.bibl:hover {
     background-color: var(--bg);
     color: var(--text);
     text-decoration: none;
-}  
+}
 
 .seealso .analytic {
     color: var(--text);
@@ -595,12 +600,8 @@ article.snip mark {
 }
 
 .suggest {
-    /*
-  margin-top: -15px;
-  padding-top: 25px;
-  */
     background: var(--bg);
-    color: var(--text);
+    color: var(--textlo);
     border-top: none;
     display: none;
     text-align: left;
@@ -610,8 +611,10 @@ article.snip mark {
     border: 1px solid var(--bg);
     border-radius: 10px;
     box-shadow: 0 4px 4px #888;
+    /*
     right: 30px;
     left: 30px;
+    */
 }
 
 .progress {
@@ -872,8 +875,6 @@ body.facet,
 .hit .bibl a {}
 
 
-
-
 /**
  * Global styling
  */
@@ -949,6 +950,10 @@ details {
  * Search results, kwic or snips
  */
 
+article.kwic {
+    text-align: center;
+}
+
 article.kwic header {
     color: var(--textlo);
     border-bottom: 1px solid var(--textlo);
@@ -991,6 +996,7 @@ article.kwic div.line {
     white-space: nowrap;
 }
 
+
 /*
 article.kwic .surname {
     font-variant: small-caps;
@@ -1006,6 +1012,17 @@ article.kwic .title {
 article.kwic mark {
     background: var(--bg);
     font-weight: bold;
+}
+
+div.line small {
+    display: inline-block;
+    text-align: left;
+    width: 2rem;
+}
+
+div.line a {
+    background-color: var(--bg);
+    padding: 0 1ex;
 }
 
 
@@ -1024,7 +1041,7 @@ a.form {
     position: fixed;
     z-index: 4;
     right: 0;
-    border-left: 1px solid var(--border);
+    border-left: 1px solid var(--borderlo);
     top: 0;
     bottom: 0;
     width: 2rem;

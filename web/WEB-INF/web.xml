@@ -32,8 +32,9 @@
         </init-param>
         <init-param>
             <param-name>logLevel</param-name>
-            <!-- TRACE, DEBUG, INFO (default), WARN, ERROR, FATAL, -->
+            <!-- TRACE, DEBUG, INFO (default), WARN, ERROR, FATAL
             <param-value>DEBUG</param-value>
+             -->
         </init-param>
     </filter>
     <filter-mapping>
