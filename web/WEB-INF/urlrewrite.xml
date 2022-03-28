@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 4.0//EN" "http://www.tuckey.org/res/dtds/urlrewrite4.0.dtd">
+<!--
+
+    Configuration file for UrlRewriteFilter
+    http://www.tuckey.org/urlrewrite/
+
+-->
+<urlrewrite>
+
+    <rule>
+        <name>Resource exists</name>
+        <condition type="request-filename" operator="isfile"/>
+        <to last="true">-</to>
+    </rule>
+
+    <rule>
+        <name>Data, sender</name>
+        <condition type="request-filename" operator="notfile"/>
+        <from>^/data/sender(\.ndjson|\.js|\.json)?$</from>
+        <set name="path">$0</set>
+        <to last="true">/data/corres.jsp?ext=$1&amp;f=sender</to>
+    </rule>
+
+    <rule>
+        <name>Data, receivers</name>
+        <condition type="request-filename" operator="notfile"/>
+        <from>^/data/receiver(\.ndjson|\.js|\.json)?$</from>
+        <set name="path">$0</set>
+        <to last="true">/data/corres.jsp?ext=$1&amp;f=receiver</to>
+    </rule>
+
+
+    <rule>
+        <name>Data multi formats</name>
+        <condition type="request-filename" operator="notfile"/>
+        <from>^/data/([^\./]+)(\.ndjson|\.js|\.json)?$</from>
+        <set name="path">$0</set>
+        <to last="true">/data/$1.jsp?ext=$2</to>
+    </rule>
+
+
+    <rule>
+        <name>Catch all</name>
+        <condition type="request-filename" operator="notfile"/>
+        <condition type="request-filename" operator="notdir"/>
+        <set name="path">$0</set>
+        <to last="true">/jsp/page.jsp</to>
+    </rule>
+
+
+<!-- 
+<rule enabled="true" match-type="regex">
+    <name>Enabling CORS Headers</name>
+    <from>^/path/someMorePath.*$</from>
+    <condition name="origin" operator="equal">([a-z.\/\/0-9]+)</condition>
+    <set type="response-header" name="Access-Control-Allow-Origin">%1</set>
+    <set type="response-header" name="Access-Control-Allow-Credentials">true</set>
+</rule>
+ -->
+<!-- 
+
+
+    <rule>
+        <note>
+        The rule means that requests to /test/status/ will be redirected to /rewrite-status the url will be rewritten.
+        </note>
+        <from>/test/status/</from>
+        <to type="redirect">%{context-path}/rewrite-status</to>
+    </rule>
+    
+    <outbound-rule>
+        <note>
+        The outbound-rule specifies that when response.encodeURL is called (if you are using JSTL c:url) the url /rewrite-status will be rewritten to /test/status/. The above rule and this outbound-rule means that end users should never see the url /rewrite-status only /test/status/ both in thier location bar and in hyperlinks in your pages.
+        </note>
+        <from>/rewrite-status</from>
+        <to>/test/status/</to>
+    </outbound-rule>
+ -->
+    
+
+</urlrewrite>
