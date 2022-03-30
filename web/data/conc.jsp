@@ -5,10 +5,6 @@
 <%@ page import="alix.lucene.util.WordsAutomatonBuilder"%>
 
 <%!
-final static String SENDER = "sender";
-final static String SENDERID = "senderid";
-final static String RECEIVER = "receiver";
-final static String RECEIVERID = "receiverid";
 
 
 
@@ -23,7 +19,7 @@ long time = System.nanoTime();
 JspTools tools = new JspTools(pageContext);
 Alix alix = alix(tools, null); //get an alix instance, output errors
 if (alix == null) return;
-String ext = tools.getStringList("ext", Arrays.asList(new String[]{""}), "");
+String ext = tools.getStringInList("ext", Arrays.asList(new String[]{""}), "");
 //-----------
 
 Pars pars = new Pars();
@@ -31,8 +27,8 @@ pars.href = "doc.jsp?"; //TODO, centralize nav
 pars.left = 50; // left context, chars
 request.setAttribute("left", pars.left + 10);
 pars.right = 70; // right context, chars
-pars.f = tools.getStringList("f", Arrays.asList(new String[]{"text", "text_orth"}), "text"); // 
-pars.limit = 100;
+pars.f = tools.getStringInList("f", Arrays.asList(new String[]{"text", "text_orth"}), "text"); // 
+pars.limit = 200;
 pars.q = request.getParameter("q");
 pars.start = tools.getInt("start", 1);
 
@@ -50,21 +46,21 @@ for (String field: new String[]{SENDER, RECEIVER}) {
         final FieldFacet facet = alix.fieldFacet(field, TEXT);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         for (String id: ids) {
-            int facetId = -1;
-            try {
-                facetId = Integer.parseInt(id);
-            }
-            catch (Exception e) {
-                // output error ?
-                continue;
-            }
-            String value = facet.form(facetId);
-            build = true;
-            hasFilter = true;
-            builder.add(new TermQuery(new Term(field, value)), Occur.SHOULD);
+    int facetId = -1;
+    try {
+        facetId = Integer.parseInt(id);
+    }
+    catch (Exception e) {
+        // output error ?
+        continue;
+    }
+    String value = facet.form(facetId);
+    build = true;
+    hasFilter = true;
+    builder.add(new TermQuery(new Term(field, value)), Occur.SHOULD);
         }
         if (build) {
-            filterBuilder.add(builder.build(), Occur.MUST);
+    filterBuilder.add(builder.build(), Occur.MUST);
         }
     }
 }
@@ -160,7 +156,7 @@ while (i < max) {
     out.println("  </header>");
     if (lines != null) {
         for (String l: lines) {
-            out.println("  <div class=\"line\"><small>"+ ++occ +"</small>"+l+"</div>");
+    out.println("  <div class=\"line\"><small>"+ ++occ +"</small>"+l+"</div>");
         }
     }
     
@@ -170,6 +166,4 @@ while (i < max) {
     if (++docs >= pars.limit) break;
     continue;
 }
-
-
 %>

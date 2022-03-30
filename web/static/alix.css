@@ -2,7 +2,7 @@
 :root {
     --bg: #fff;
     --text: #000000;
-    --bghi: #40403c;
+    --bghi: #808078;
     --texthi: #fff;
     --bglo: #ddd;
     --textlo: #666;
@@ -1376,10 +1376,12 @@ input.nb {
 
 .butbar {
     text-align: right;
-    padding-right: 3px;
+    padding: 5px 0px;
 }
 
 .butbar button {
+    border: var(--borderlo) 1px solid !important;
+    background-color: var(--bglo);
     cursor: pointer;
     display: inline-block;
     border: none;
@@ -1398,6 +1400,10 @@ input.nb {
   -webkit-appearance: none;
   -moz-appearance: none;
   */
+}
+
+.butbar button:hover {
+    background-color: var(--borderlo);
 }
 
 #totop {

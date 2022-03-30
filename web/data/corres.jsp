@@ -1,26 +1,6 @@
 <%@ page language="java" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
-<%@ page import="java.util.*" %>
-<%@ page import="java.util.regex.*" %>
-
-<%@ page import="org.json.*" %>
-
-<%@ page import="org.apache.lucene.analysis.Analyzer"%>
-<%@ page import="org.apache.lucene.document.Document"%>
-<%@ page import="org.apache.lucene.index.IndexReader"%>
-<%@ page import="org.apache.lucene.index.Term"%>
-<%@ page import="org.apache.lucene.search.*"%>
-<%@ page import="org.apache.lucene.util.BitSet"%>
-
-<%@ page import="alix.lucene.Alix" %>
-<%@ page import="alix.lucene.analysis.MetaAnalyzer" %>
-<%@ page import="alix.lucene.search.*" %>
-<%@ page import="alix.web.*" %>
-
 <%!
-final static String SENDER = "sender";
-final static String RECEIVER = "receiver";
 final static Pattern QSPLIT = Pattern.compile("[\\?\\*\\p{L}]+");
-
 %>
 <%
 // -----------
@@ -32,7 +12,7 @@ Alix alix = alix(tools, null);
 if (alix == null) {
   return;
 }
-String ext = tools.getStringList("ext", Arrays.asList(new String[]{"", ".ndjson", ".js", ".json"}), "");
+String ext = tools.getStringInList("ext", Arrays.asList(new String[]{"", ".ndjson", ".js", ".json"}), "");
 String mime = pageContext.getServletContext().getMimeType("a" + ext);
 if (mime != null) response.setContentType(mime);
 //get an alix instance, output errors
@@ -40,7 +20,7 @@ if (mime != null) response.setContentType(mime);
 
 // the field to get a list from
 final String F = "f";
-String field = tools.getStringList(F, Arrays.asList(new String[]{SENDER, RECEIVER}), null);
+String field = tools.getStringInList(F, Arrays.asList(new String[]{SENDER, RECEIVER}), null);
 if (field == null) {
     out.println("{\"errors\":" + Error.FIELD_NOTFOUND.json(F, request.getParameter(F)) + "}");
     response.setStatus(Error.FIELD_NOTFOUND.status());
@@ -50,9 +30,9 @@ String fieldFilter = RECEIVER;
 if (RECEIVER.equals(field)) {
     fieldFilter = SENDER;
 }
+// ids to filter
+TreeSet<Integer> idSet = tools.getIntSet(field);
 
-
-// parameters
 
 
 
@@ -69,59 +49,10 @@ if (callback != null) {
     }
     out.print(JspTools.escape(callback) +"(");
 }
+// field from which to buil a query filter
+Set<String> qPars = new TreeSet<>((Arrays.asList("q", fieldFilter)));
+BitSet filter = filter(tools, alix, qPars);
 
-// get a doc filter 
-BitSet filter = null;
-int clauses = 0;
-BooleanQuery.Builder qbuild = new BooleanQuery.Builder();
-
-String[] ids = request.getParameterValues(fieldFilter + "id");
-if (ids != null) {
-    BooleanQuery.Builder builder = new BooleanQuery.Builder();
-    final FieldFacet facet = alix.fieldFacet(fieldFilter, TEXT);
-    for (String id: ids) {
-        int facetId = -1;
-        try {
-            facetId = Integer.parseInt(id);
-        }
-        catch (Exception e) {
-            // output error ?
-            continue;
-        }
-        String value = facet.form(facetId);
-        clauses++;
-        builder.add(new TermQuery(new Term(fieldFilter, value)), Occur.SHOULD);
-    }
-    BooleanQuery query = builder.build();
-    if (query.clauses().size() < 1) {
-    }
-    else if (query.clauses().size() == 1) {
-        qbuild.add(query.clauses().get(0).getQuery(), Occur.MUST);
-    }
-    else  {
-        qbuild.add(query, Occur.MUST);
-    }
-}
-// query words
-Query qword = alix.query( "text", request.getParameter("q"));
-if (qword != null) {
-    qbuild.add(qword, Occur.MUST);
-}
-// TODO date ?
-Query query = qbuild.build();
-if (((BooleanQuery)query).clauses().size() < 1) {
-    query = null;
-}
-else if (((BooleanQuery)query).clauses().size() == 1) {
-    query = ((BooleanQuery)query).clauses().get(0).getQuery();
-}
-// get a bitset filter from results of the query
-if (query != null) {
-    IndexSearcher searcher = alix.searcher();
-    CollectorBits qbits = new CollectorBits(searcher);
-    searcher.search(query, qbits);
-    filter = qbits.bits();
-}
 
 // first line
 if (".js".equals(ext) || ".json".equals(ext)) {
@@ -139,14 +70,14 @@ if (glob != null) {
     int parts = 0;
     while (m.find()) {
         if (first) {
-            first = false;
+    first = false;
         }
         else {
-            sb.append("|");
+    sb.append("|");
         }
         String group = m.group();
         if (group.length() <= 3) {
-            sb.append("\\b");
+    sb.append("\\b");
         }
         sb.append(group);
         parts++;
@@ -155,7 +86,7 @@ if (glob != null) {
         String re = sb.toString();
         re = re.replaceAll("\\?", "\\\\p{L}").replaceAll("\\*", "\\\\p{L}*");
         try {
-            hi = Pattern.compile(re);
+    hi = Pattern.compile(re);
         }
         finally{}
     }
@@ -177,7 +108,10 @@ final StringBuilder hilited = new StringBuilder();
 int n = 1;
 while (results.hasNext()) {
     results.next();
+    final int formId = results.formId();
+    if (idSet.contains(formId)) continue;
     final String form = results.form();
+    
     // filter by regex
     if (hi != null) {
         copy.copy(form);
@@ -187,17 +121,17 @@ while (results.hasNext()) {
         int lastEnd = 0;
         hilited.setLength(0);
         while (matcher.find()) {
-            hilited.append(copy.subSequence(lastEnd, matcher.start()));
-            hilited.append("<mark>");
-            hilited.append(copy.subSequence(matcher.start(), matcher.end()));
-            hilited.append("</mark>");
-            lastEnd = matcher.end();
+    hilited.append(copy.subSequence(lastEnd, matcher.start()));
+    hilited.append("<mark>");
+    hilited.append(copy.subSequence(matcher.start(), matcher.end()));
+    hilited.append("</mark>");
+    lastEnd = matcher.end();
         }
         if (lastEnd == 0) { // nothing found
-            continue;
+    continue;
         }
         else if (lastEnd < copy.length()) {
-            hilited.append(copy.subSequence(lastEnd, form.length()));
+    hilited.append(copy.subSequence(lastEnd, form.length()));
         }
     }
     if (first) {
@@ -248,5 +182,4 @@ if (callback != null) {
     out.print(");");
 }
 out.println();
-
 %>

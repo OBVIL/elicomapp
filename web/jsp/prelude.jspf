@@ -4,6 +4,7 @@
 
 <%@ page import="java.text.*"%>
 <%@ page import="java.util.*"%>
+<%@ page import="java.util.regex.*" %>
 <%@ page import="java.io.IOException"%>
 
 <%@ page import="org.apache.lucene.analysis.Analyzer"%>
@@ -12,10 +13,15 @@
 <%@ page import="org.apache.lucene.index.Term"%>
 <%@ page import="org.apache.lucene.search.*"%>
 <%@ page import="org.apache.lucene.search.BooleanClause.Occur"%>
+<%@ page import="org.apache.lucene.util.BitSet"%>
+
+<%@ page import="org.json.*" %>
 
 <%@ page import="alix.fr.Tag" %>
+<%@ page import="alix.fr.Tag.TagFilter" %>
 <%@ page import="alix.lucene.Alix" %>
 <%@ page import="alix.lucene.search.*" %>
+
 <%@ page import="alix.Names" %>
 <%@ page import="alix.util.*" %>
 <%@ page import="alix.web.*" %>
@@ -29,8 +35,93 @@ static {
     }
 }
 
+/** http param field */
+final static String F = "f";
+/** http param word query */
+final static String Q = "q";
+final static String RECEIVER = "receiver";
+final static String SENDER = "sender";
 final String TEXT = "text";
+/** http param from which build a query for graphs */
+final static Set<String> GRAPH_PARS = Set.of(SENDER, RECEIVER);
 
+/**
+ * For graphs, color of words
+ */
+public String color(int tag)
+{
+    String color = "rgba(255, 255, 255, 1)";
+    if (Tag.SUB.sameParent(tag)) color = "rgba(32, 32, 32, 0.8)";
+    else if (Tag.ADJ.sameParent(tag)) color = "rgba(240, 255, 240, 0.7)";
+    else if (Tag.NAME.sameParent(tag)) color = "rgba(255, 192, 0, 1)";
+    else if (Tag.VERB.flag == tag) color = "rgba(255, 255, 255, 0.9)";
+    // else if (Tag.isAdj(tag)) color = "rgba(255, 128, 0, 1)";
+    else color = "rgba(66, 66, 160, 0.9)";
+    return color;
+
+}
+/**
+ * Centralized build of a query fron request params
+ */
+public Query query(JspTools tools, Alix alix, Set<String> pars) throws IOException
+{
+    // get a doc filter 
+    BitSet filter = null;
+    int clauses = 0;
+    BooleanQuery.Builder qbuild = new BooleanQuery.Builder();
+
+    for (String field: new String[]{SENDER, RECEIVER}) {
+        if (!pars.contains(field)) continue;
+        final Set<Integer> idSet = tools.getIntSet(field+"id");
+        if (idSet.size() < 1) continue;
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
+        final FieldFacet facet = alix.fieldFacet(field, TEXT);
+        for (int i: idSet) {
+            String form = facet.form(i);
+            if (form == null) continue;
+            builder.add(new TermQuery(new Term(field, form)), Occur.SHOULD);
+        }
+        BooleanQuery query = builder.build();
+        if (query.clauses().size() < 1) {
+        }
+        else if (query.clauses().size() == 1) {
+            qbuild.add(query.clauses().get(0).getQuery(), Occur.MUST);
+        }
+        else  {
+            qbuild.add(query, Occur.MUST);
+        }
+    }
+    
+    // query words
+    if (pars.contains("q")) {
+        Query qword = alix.query( "text", tools.request().getParameter("q"));
+        if (qword != null) {
+            qbuild.add(qword, Occur.MUST);
+        }
+    }
+    // TODO date ?
+    Query query = qbuild.build();
+    if (((BooleanQuery)query).clauses().size() < 1) {
+        query = null;
+    }
+    else if (((BooleanQuery)query).clauses().size() == 1) {
+        query = ((BooleanQuery)query).clauses().get(0).getQuery();
+    }
+    return query;
+}
+
+/**
+ * Get a bitset document filter by query
+ */
+public BitSet filter(JspTools tools, Alix alix, Set<String> pars) throws IOException
+{
+    Query query = query(tools, alix, pars);
+    if (query == null) return null;
+    IndexSearcher searcher = alix.searcher();
+    CollectorBits qbits = new CollectorBits(searcher);
+    searcher.search(query, qbits);
+    return qbits.bits();
+}
 
 /** Get an alix instance */
 public Alix alix(JspTools tools, StringBuilder html) throws IOException

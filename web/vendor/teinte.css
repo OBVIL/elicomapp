@@ -670,7 +670,7 @@ input[type="submit"].but,
     cursor: pointer;
     display: inline;
     cursor: pointer;
-    border: 1px solid #AAA !important;
+    border: 1px solid #AAA;
     background-color: #E2DED0;
     padding: 2px 5px 0 5px;
     margin: 1px;

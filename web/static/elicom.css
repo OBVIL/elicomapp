@@ -1,4 +1,8 @@
 @charset "UTF-8";
+html {
+    overflow-y: scroll;
+}
+
 #header {
     position: relative;
 }
@@ -80,4 +84,9 @@ fieldset.multiple label a:hover {
 
 .suggest .corres:hover mark {
     color: var(--texthi);
+}
+
+#graph {
+    height: 50vh;
+    background-color: var(--bghi);
 }
