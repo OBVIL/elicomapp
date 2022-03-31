@@ -23,7 +23,7 @@ if (mime != null) response.setContentType(mime);
 //-----------
 // parameters
 int nodeLen = tools.getInt("nodes", 50); // count of nodes
-int edgeLen = tools.getInt("edges", (int)(nodeLen * 3)); // count of edges
+int edgeLen = tools.getInt("edges", (int)(nodeLen * 2)); // count of edges
 int dist = tools.getInt("dist", 15); // distance between words, too small produce islands for smal texts
 String field = tools.getString("f", TEXT);
 TagFilter tags = OptionCat.NOSTOP.tags().clearGroup(Tag.VERB);
@@ -34,7 +34,8 @@ TagFilter tags = OptionCat.NOSTOP.tags().clearGroup(Tag.VERB);
 final FieldText ftext = alix.fieldText(field);
 final FieldRail frail = alix.fieldRail(field);
 // define the partition filter
-BitSet filter = filter(tools, alix, GRAPH_PARS);
+Query qFilter = query(alix, tools, GRAPH_PARS);
+BitSet filter = filter(alix, qFilter);
 //get nodes and sort them
 FormEnum nodes = ftext.results(tags, OptionDistrib.bm25.scorer(), filter);
 int[] formIds = nodes.sort(OptionOrder.score.order(), nodeLen);
@@ -108,6 +109,7 @@ out.println("\n  ]");
 if (".js".equals(ext) || ".json".equals(ext)) {
     out.print("\n}, \"meta\": {");
     out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
+    out.print(", \"query\": " + JSONWriter.valueToString(qFilter));
     out.print("}");
     out.println("}");
 }

@@ -50,9 +50,8 @@ if (callback != null) {
     out.print(JspTools.escape(callback) +"(");
 }
 // field from which to buil a query filter
-Set<String> qPars = new TreeSet<>((Arrays.asList("q", fieldFilter)));
-BitSet filter = filter(tools, alix, qPars);
-
+Query qFilter = query(alix, tools, GRAPH_PARS);
+BitSet filter = filter(alix, qFilter);
 
 // first line
 if (".js".equals(ext) || ".json".equals(ext)) {
@@ -171,6 +170,7 @@ while (results.hasNext()) {
 if (".js".equals(ext) || ".json".equals(ext)) {
     out.print("\n], \"meta\": {");
     out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
+    out.print(", \"query\": " + JSONWriter.valueToString(qFilter));
     if (hi != null) {
         out.print(", \"hi\": " + JSONWriter.valueToString(hi.pattern()));
     }

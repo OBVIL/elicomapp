@@ -54,6 +54,15 @@ form.elicom input[type=text] {
     width: 100%;
 }
 
+form.elicom input.date {
+    display: inline;
+    width: 13ex;
+}
+
+form small.hint {
+    display: block;
+}
+
 fieldset.multiple label a {
     text-decoration: none;
     color: #000;

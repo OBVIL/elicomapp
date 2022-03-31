@@ -8,7 +8,7 @@
 <%@ page import="java.io.IOException"%>
 
 <%@ page import="org.apache.lucene.analysis.Analyzer"%>
-<%@ page import="org.apache.lucene.document.Document"%>
+<%@ page import="org.apache.lucene.document.*"%>
 <%@ page import="org.apache.lucene.index.IndexReader"%>
 <%@ page import="org.apache.lucene.index.Term"%>
 <%@ page import="org.apache.lucene.search.*"%>
@@ -35,15 +35,24 @@ static {
     }
 }
 
-/** http param field */
+/** Name of int field for date */
+final static String DATE = "date";
+/** http param for first date of a date query */
+final static String DATE1 = "date1";
+/** http param for second date of a date query */
+final static String DATE2 = "date2";
+/** http param for a field */
 final static String F = "f";
 /** http param word query */
 final static String Q = "q";
+/** field name for a letter receiver */
 final static String RECEIVER = "receiver";
+/** field name for a letter sender */
 final static String SENDER = "sender";
+/** field name for text content */
 final String TEXT = "text";
-/** http param from which build a query for graphs */
-final static Set<String> GRAPH_PARS = Set.of(SENDER, RECEIVER);
+/** Set of http param from which build a query for graphs */
+final static Set<String> GRAPH_PARS = Set.of(SENDER, RECEIVER, DATE);
 
 /**
  * For graphs, color of words
@@ -61,9 +70,93 @@ public String color(int tag)
 
 }
 /**
+ * 17530301 -> 1753-03-01
+ * 17530000 -> 1753
+ */
+public String int2date(int value) {
+    String date = "" + value;
+    date = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+    date = date.replaceFirst("\\-00.*$", "");
+    return date;
+}
+
+/**
+ * 1753 -> 17530000
+ * 1753-03-01 -> 17530301
+ */
+public int date2int(String date) {
+    int value = Integer.MIN_VALUE;
+    if (date == null) return value;
+    date = date.trim();
+    if (!date.matches("-?\\d{1,4}(-\\d\\d)?(-\\d\\d)?")) return value;
+    boolean negative = false;
+    if (date.charAt(0) == '-') {
+        negative = true;
+        date = date.substring(1);
+    }
+    // get year, maybe negative
+    String[] parts = date.split("-");
+    try {
+        int v = Integer.parseInt(parts[0]);
+        value = v * 10000;
+    }
+    catch (Exception e) {
+        return value;
+    }
+    if (parts.length > 1) {
+       try {
+             int v = Integer.parseInt(parts[1]);
+             value += v * 100;
+         }
+         catch (Exception e) {
+             return value;
+         }
+    }
+    if (parts.length > 2) {
+        try {
+             int v = Integer.parseInt(parts[2]);
+             value += v;
+        }
+        catch (Exception e) {
+           return value;
+        }
+    }
+    if (negative) return -value;
+    return value;
+}
+ 
+/**
+ * 17530000 -> 17539999
+ */
+public int upperDate(int date)
+{
+    if (date % 10000 == 0) return date + 9999;
+    if (date % 100 == 0) return date + 99;
+    return date;
+}
+
+/**
+ * 
+ */
+public Query dateQuery(String field, String date1, String date2)
+{
+    int d1 = date2int(date1);
+    int d2 = date2int(date2);
+    if (d2 < d1) d2 = Integer.MIN_VALUE;
+    if (d1 == Integer.MIN_VALUE) return null;
+    if (d2 == Integer.MIN_VALUE) {
+        // only one date
+        d2 = upperDate(d1);
+        if (d2 == d1) return IntPoint.newExactQuery(field, d1);
+        return IntPoint.newRangeQuery(field, d1, d2);
+    }
+    return IntPoint.newRangeQuery(field, d1, upperDate(d2));
+}
+ 
+ /**
  * Centralized build of a query fron request params
  */
-public Query query(JspTools tools, Alix alix, Set<String> pars) throws IOException
+public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOException
 {
     // get a doc filter 
     BitSet filter = null;
@@ -92,9 +185,15 @@ public Query query(JspTools tools, Alix alix, Set<String> pars) throws IOExcepti
         }
     }
     
+    // dates
+    if (pars.contains(DATE) || pars.contains(DATE1) || pars.contains(DATE2)) {
+        Query query = dateQuery(DATE, tools.request().getParameter(DATE1), tools.request().getParameter(DATE2));
+        if (query != null) qbuild.add(query, Occur.MUST);
+    }
+    
     // query words
-    if (pars.contains("q")) {
-        Query qword = alix.query( "text", tools.request().getParameter("q"));
+    if (pars.contains(Q)) {
+        Query qword = alix.query( "text", tools.request().getParameter(Q));
         if (qword != null) {
             qbuild.add(qword, Occur.MUST);
         }
@@ -113,9 +212,8 @@ public Query query(JspTools tools, Alix alix, Set<String> pars) throws IOExcepti
 /**
  * Get a bitset document filter by query
  */
-public BitSet filter(JspTools tools, Alix alix, Set<String> pars) throws IOException
+public BitSet filter(final Alix alix, final Query query) throws IOException
 {
-    Query query = query(tools, alix, pars);
     if (query == null) return null;
     IndexSearcher searcher = alix.searcher();
     CollectorBits qbits = new CollectorBits(searcher);
@@ -123,7 +221,9 @@ public BitSet filter(JspTools tools, Alix alix, Set<String> pars) throws IOExcep
     return qbits.bits();
 }
 
-/** Get an alix instance */
+/** 
+ * Get an alix instance
+ */
 public Alix alix(JspTools tools, StringBuilder html) throws IOException
 {
     //test if Alix available with at least on base
@@ -157,7 +257,10 @@ public Alix alix(JspTools tools, StringBuilder html) throws IOException
     return alix;
 }
 
-/** Carry multiple parameters accross pages and  */
+/**
+ * DEPRECATED
+ * Carry multiple parameters accross pages and  
+ */
 public class Pars {
     String q; // word query
     String f; // a possible field name (lemma or forms)

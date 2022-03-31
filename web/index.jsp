@@ -3,10 +3,9 @@
 JspTools tools = new JspTools(pageContext);
 Alix alix = alix(tools, null);
 request.setAttribute(Q, JspTools.escape(request.getParameter(Q)));
-// populate form
-/*
-<label class="corres"><a class="inputDel">🞭</a> <input type="hidden" name="receiverid" value="1343"/>Voltaire</label>
-*/
+// request.setAttribute(Q, JspTools.escape(request.getParameter(Q)));
+
+// populate form with senders and receivers
 for (String field: new String[]{SENDER, RECEIVER}) {
     String[] ids = request.getParameterValues(field+"id");
     if (ids == null) continue;
@@ -32,6 +31,21 @@ for (String field: new String[]{SENDER, RECEIVER}) {
         request.setAttribute(field, sb);
     }
 }
+
+FieldInt fdate = alix.fieldInt(DATE, TEXT);
+request.setAttribute("datemin", int2date(fdate.min()));
+request.setAttribute("datemax", int2date(fdate.max()));
+int date1 = date2int(request.getParameter(DATE1));
+if (date1 > Integer.MIN_VALUE) {
+    if (date1 < fdate.min()) date1 = fdate.min();
+    request.setAttribute(DATE1, int2date(date1));
+}
+int date2 = date2int(request.getParameter(DATE2));
+if (date2 > Integer.MIN_VALUE) {
+    if (date2 > fdate.max()) date1 = fdate.max();
+    if (date2 > date1) request.setAttribute(DATE2, int2date(date2));
+}
+
 
 %>
 <t:elicom>
@@ -72,9 +86,16 @@ div.line {
                 <input type="text" class="multiple" data-url="data/sender.ndjson" data-name="senderid"/>
             </fieldset>
             <fieldset class="center">
-                <legend>Mots clés</legend>
-                <input type="text" name="q" autocomplete="off" value="${q}"/>
-                <button type="submit">Rechercher</button>
+                <legend><button type="submit">Rechercher</button></legend>
+                <div>
+                    <small class="hint">Dates au format AAAA-MM-JJ (mois et jour sont optionnels)</small>
+                Entre
+                    <input type="text" class="date" placeholder="Début" minlength="4" maxlength="10" size="10" name="date1" value="${date1}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
+                    et
+                    <input type="text" class="date" placeholder="Fin" minlength="4" maxlength="10" size="10" name="date2" value="${date2}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
+                </div>
+                <input type="text" name="q" autocomplete="off" placeholder="Mots clés" value="${q}"/>
+                
             </fieldset>
             <fieldset class="multiple right">
                 <legend>Destinataire(s)</legend>

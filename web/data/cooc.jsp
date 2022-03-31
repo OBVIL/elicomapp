@@ -89,11 +89,19 @@ if (forms == null || forms.length < 1) {
 final FieldText ftext = alix.fieldText(field);
 final FieldRail frail = alix.fieldRail(field);
 // build filter from form
-BitSet filter = filter(tools, alix, GRAPH_PARS);
+Query qFilter = query(alix, tools, GRAPH_PARS);
+BitSet filter = filter(alix, qFilter);
 int[] pivotIds = ftext.formIds(forms, filter);
 if (pivotIds == null) {
     out.println("{\"errors\":" +Error.Q_NOTFOUND.json(Q, q) + "}");
     return;
+}
+StringBuilder pivots = new StringBuilder();
+boolean first=true;
+for (int formId: pivotIds) {
+    if (first) {first = false;}
+    else {pivots.append(", ");}
+    pivots.append(ftext.form(formId));
 }
 //-----------
 
@@ -129,7 +137,6 @@ for (int i = 0; i < pivotLen; i++) {
 
 // start data output
 out.println("{ \"data\": {");
-boolean first;
 
 // A quite complex logic to get quite the same number of nodes for each pivot
 Map<Integer, Double> nodes = new HashMap<Integer, Double>();
@@ -274,6 +281,8 @@ out.println("\n  ]");
 if (".js".equals(ext) || ".json".equals(ext)) {
     out.print("\n}, \"meta\": {");
     out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
+    out.print(", \"query\": " + JSONWriter.valueToString(qFilter));
+    out.print(", \"pivots\": " + JSONWriter.valueToString(pivots));
     out.print("}");
     out.println("}");
 }

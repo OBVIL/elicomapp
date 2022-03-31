@@ -33,58 +33,22 @@ pars.q = request.getParameter("q");
 pars.start = tools.getInt("start", 1);
 
 
-Query query = null;
-Query qWords = null;
-Query qFilter = null;
-
-boolean hasFilter = false;
-BooleanQuery.Builder filterBuilder = new BooleanQuery.Builder();
-for (String field: new String[]{SENDER, RECEIVER}) {
-    String[] ids = request.getParameterValues(field + "id");
-    if (ids != null) {
-        boolean build = true;
-        final FieldFacet facet = alix.fieldFacet(field, TEXT);
-        BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        for (String id: ids) {
-    int facetId = -1;
-    try {
-        facetId = Integer.parseInt(id);
-    }
-    catch (Exception e) {
-        // output error ?
-        continue;
-    }
-    String value = facet.form(facetId);
-    build = true;
-    hasFilter = true;
-    builder.add(new TermQuery(new Term(field, value)), Occur.SHOULD);
-        }
-        if (build) {
-    filterBuilder.add(builder.build(), Occur.MUST);
-        }
-    }
-}
-if (hasFilter) {
-    qFilter = filterBuilder.build();
+// build the query from request params
+BooleanQuery.Builder builder = new BooleanQuery.Builder();
+Query qFilter = query(alix, tools, Set.of(SENDER, RECEIVER, DATE));
+if (qFilter != null) {
+    builder.add(qFilter, Occur.FILTER);
 }
 if (pars.q != null) {
-    qWords = alix.query(pars.f, pars.q);
+    Query qWords = alix.query(pars.f, pars.q);
+    if (qWords != null) builder.add(qWords, Occur.MUST);
 }
-
-if (qFilter != null && qWords != null) {
-    query = new BooleanQuery.Builder()
-        .add(qFilter, Occur.FILTER)
-        .add(qWords, Occur.MUST)
-    .build();
-}
-else if (qWords != null) {
-    query = qWords;
-}
-else if (qFilter != null) {
-    query = qFilter;
-}
-else {
+Query query = builder.build();
+if (((BooleanQuery)query).clauses().size() < 1) {
     query = new TermQuery(new Term("type", "letter"));
+}
+else if (((BooleanQuery)query).clauses().size() == 1) {
+    query = ((BooleanQuery)query).clauses().get(0).getQuery();
 }
 
 pars.sort = (OptionSort) tools.getEnum("sort", OptionSort.date, "alixSort");
