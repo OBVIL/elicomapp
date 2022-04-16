@@ -9,11 +9,11 @@
 private double count(FormEnum results, int formId, OptionOrder order)
 {
     switch (order) {
-        case score:
+        case SCORE:
             return results.score(formId);
-        case hits:
+        case HITS:
             return results.hits(formId);
-        case freq:
+        case FREQ:
             return results.freq(formId);
         default:
             return results.occs(formId);
@@ -61,7 +61,7 @@ Alix alix = alix(tools, null);
 if (alix == null) {
   return;
 }
-String ext = tools.getStringInList("ext", Arrays.asList(new String[]{".json", ".js"}), ".json");
+String ext = tools.getStringOf("ext", Set.of(".json", ".js"), ".json");
 String mime = pageContext.getServletContext().getMimeType("a" + ext);
 if (mime != null) response.setContentType(mime);
 //-----------
@@ -72,7 +72,8 @@ int edgeLen = tools.getInt("edges", (int)(nodeLen * 1.8)); // count of edges
 final int right = tools.getInt("right", 10);
 final int left = tools.getInt("left", 10);
 TagFilter tags = OptionCat.NOSTOP.tags(); // non stop words
-OptionOrder order = OptionOrder.score; // default selection by score
+OptionOrder order = OptionOrder.SCORE; // default selection by score
+OptionMI mi = OptionMI.JACCARD;
 //-----------
 // check parameters
 if (q == null) {
@@ -83,7 +84,7 @@ String field = TEXT; // ? lemmas or not ?
 //for each requested forms, get co-occurences stats
 String[] forms = alix.tokenize(q, field);
 if (forms == null || forms.length < 1) {
-    out.println("{\"errors\":" + Error.Q_NOWORD.json(Q) + "}");
+    out.println("{\"errors\":" + Error.Q_NOTFOUND.json(Q) + "}");
     return;
 }
 final FieldText ftext = alix.fieldText(field);
@@ -120,17 +121,13 @@ FormEnum[] stats = new FormEnum[pivotLen];
 for (int i = 0; i < pivotLen; i++) {
     int[] pivotx = new int[]{pivotIds[i]};
     // build a freq list for coocs
-    FormEnum results = new FormEnum(ftext);
+    FormEnum results = ftext.forms();
     results.limit = nodeLen;
     results.filter = filter; // corpus filter
-    results.left = left; // left context
-    results.right = right; // right context
     results.tags = tags; // filter word list by tags
     // DO NOT record edges here
-    long found = frail.coocs(pivotx, results); // populate the wordlist
-    // sort coocs by score 
-    frail.score(pivotx, results);
-    results.sort(order.order());
+    long found = frail.coocs(results, pivotx, left, right, mi); // populate the wordlist
+    results.sort(FormEnum.Order.SCORE);
     stats[i] = results;
 }
 
@@ -227,7 +224,7 @@ for (Map.Entry<Integer, Double> entry : nodes.entrySet()) {
     
     out.print(", \"color\":\"" + color(tag) + "\"");
     // is a pivot
-    if (entry.getValue() < 1) {
+    if (entry.getValue() == Double.MIN_VALUE) {
         out.print(", \"type\":\"hub\"");
         if (pivotLen == 1) {
             out.print(", \"x\":" + 50 + ", \"y\":" + 50 );

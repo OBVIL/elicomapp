@@ -128,6 +128,12 @@ const Elicom = function() {
             conc.innerText = '';
         }
         const formData = new FormData(Elicom.form);
+        // deletion will modify iterator
+        const keys = Array.from(formData.keys());
+        for (const key of keys) {
+            if (!formData.get(key)) formData.delete(key);
+        }
+
         const pars = new URLSearchParams(formData);
         // send query of concordance population
         let url = conc.dataset.url + "?" + pars;
@@ -239,6 +245,10 @@ const Elicom = function() {
             var url = 'data/wordnet.json' + "?" + pars;
         }
         loadJson(url, function(json) {
+            if (!json) {
+                console.log("[Elicom] load error url=" + url)
+                return;
+            }
             if (!json.data) {
                 console.log("[Elicom] grap load error\n" + json)
                 return;

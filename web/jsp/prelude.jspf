@@ -168,7 +168,7 @@ public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOExcepti
         final Set<Integer> idSet = tools.getIntSet(field+"id");
         if (idSet.size() < 1) continue;
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        final FieldFacet facet = alix.fieldFacet(field, TEXT);
+        final FieldFacet facet = alix.fieldFacet(field);
         for (int i: idSet) {
             String form = facet.form(i);
             if (form == null) continue;

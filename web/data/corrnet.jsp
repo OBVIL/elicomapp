@@ -4,10 +4,14 @@
 
 <%!
 /**
- * Frequent words linked by co-occurrence
+ * From a list of sender and receiver, show words
  */
 %>
 <%
+p
+
+
+
 //-----------
 //data common prelude
 response.setHeader("Access-Control-Allow-Origin", "*"); // cross domain fo browsers
@@ -29,7 +33,7 @@ String field = tools.getString("f", TEXT);
 // TagFilter tags = OptionCat.NOSTOP.tags();
 TagFilter tags = OptionCat.NOSTOP.tags();
 // OptionDistrib.Scorer scorer = OptionDistrib.bm25.scorer();
-OptionDistrib scorer = null;
+OptionDistrib.Scorer scorer = null;
 FormEnum.Order nodesOrder = FormEnum.Order.SCORE; // sort the nodes
 if (scorer == null) {
     nodesOrder = FormEnum.Order.FREQ; // global occs will not be tag filtered
@@ -40,12 +44,18 @@ if (scorer == null) {
 
 final FieldText ftext = alix.fieldText(field);
 final FieldRail frail = alix.fieldRail(field);
+
+
+
+
+
+
 // define the partition filter
 Query qFilter = query(alix, tools, GRAPH_PARS);
 BitSet filter = filter(alix, qFilter);
 
 //get nodes and sort them
-FormEnum nodes = ftext.forms(filter, tags, scorer);
+FormEnum nodes = ftext.forms(tags, filter, scorer);
 int[] formIds = nodes.sort(nodesOrder, nodeLen);
 nodeLen = formIds.length; // if less than requested
 //build edges from selected nodes and get the iterator to avoid orphans

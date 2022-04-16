@@ -11,7 +11,7 @@ for (String field: new String[]{SENDER, RECEIVER}) {
     if (ids == null) continue;
     StringBuilder sb = new StringBuilder();
     TreeSet<Integer> idSet = new TreeSet<Integer>();
-    final FieldFacet facet = alix.fieldFacet(field, TEXT);
+    final FieldFacet facet = alix.fieldFacet(field);
     String form = null;
     for (String id: ids) {
         int formId = -1;

@@ -3,43 +3,19 @@
 final static Pattern QSPLIT = Pattern.compile("[\\?\\*\\p{L}]+");
 %>
 <%
-p
-
-
 // -----------
 // data common prelude
 response.setHeader("Access-Control-Allow-Origin", "*"); // cross domain fo browsers
 long time = System.nanoTime();
 JspTools tools = new JspTools(pageContext);
-Alix alix = alix(tools, null); 
-if (alix == null) {
-  return;
-}
-String ext = tools.getStringOf("ext", Set.of("", ".ndjson", ".js", ".json"), "");
+String ext = tools.getStringOf("ext", Set.of(".ndjson", ".js", ".json"), ".js");
 String mime = pageContext.getServletContext().getMimeType("a" + ext);
 if (mime != null) response.setContentType(mime);
-//get an alix instance, output errors
-// -----------
-
-// the field to get a list from
-final String F = "f";
-String field = tools.getStringOf(F, Set.of(SENDER, RECEIVER), null);
-if (field == null) {
-    out.println("{\"errors\":" + Error.FIELD_NOTFOUND.json(F, request.getParameter(F)) + "}");
-    response.setStatus(Error.FIELD_NOTFOUND.status());
+//get an alix instance, errors will be outputes
+Alix alix = alix(tools, null); 
+if (alix == null) {
     return;
 }
-String fieldFilter = RECEIVER;
-if (RECEIVER.equals(field)) {
-    fieldFilter = SENDER;
-}
-// ids to filter
-TreeSet<Integer> idSet = tools.getIntSet(field);
-
-
-
-
-
 String callback = tools.getString("callback", null);
 if (!ext.equals(".js")) {
     callback = null;
@@ -52,6 +28,46 @@ if (callback != null) {
     }
     out.print(JspTools.escape(callback) +"(");
 }
+// -----------
+// parameters
+String fname = tools.getString(F, null);
+int limit = tools.getInt("limit", 20);
+String glob = tools.getString("glob", null); // highlighter in terms
+//-----------
+// check parameters
+if (fname == null) {
+    out.println("{\"errors\":" + Error.FIELD_NONE.json(F) + "}");
+    response.setStatus(Error.FIELD_NOTFOUND.status());
+    return;
+}
+String ftype = alix.ftype(fname);
+if (Names.NOTFOUND.equals(ftype)) {
+    out.println("{\"errors\":" + Error.FIELD_NOTFOUND.json(F, fname) + "}");
+    response.setStatus(Error.FIELD_NOTFOUND.status());
+    return;
+}
+// !Names.FACET.equals(ftype) 
+if (!Names.FACET.equals(ftype) && !Names.TEXT.equals(ftype)) {
+// if (true) {
+    out.println("{\"errors\":" + Error.FIELD_BADTYPE.json(F, fname, ftype) + "}");
+    response.setStatus(Error.FIELD_NOTFOUND.status());
+    org.apache.lucene.index.FieldInfos fieldInfos = org.apache.lucene.index.FieldInfos.getMergedFieldInfos(alix.reader());
+    org.apache.lucene.index.FieldInfo info = fieldInfos.fieldInfo(fname);
+    out.println("indexOptions="+info.getIndexOptions());
+    out.println("docValues="+info.getDocValuesType());
+    return;
+}
+
+// get a field by type
+FieldText ftext = null;
+FieldFacet facet = null;
+if (Names.TEXT.equals(ftype)) {
+    ftext = alix.fieldText(fname);
+}
+else if (Names.FACET.equals(ftype)) {
+    facet = alix.fieldFacet(fname, null);
+}
+
 // field from which to buil a query filter
 Query qFilter = query(alix, tools, GRAPH_PARS);
 BitSet filter = filter(alix, qFilter);
@@ -61,9 +77,7 @@ if (".js".equals(ext) || ".json".equals(ext)) {
     out.print("{");
     out.println("  \"data\": [");
 }
-int limit = tools.getInt("limit", 20);
 Pattern hi = null; // hilite 
-String glob = tools.getString("glob", null);
 if (glob != null) {
     glob = Char.toLowASCII(glob);
     Matcher m = QSPLIT.matcher(glob);
@@ -94,9 +108,18 @@ if (glob != null) {
     }
 }
 
-final FieldFacet facet = alix.fieldFacet(field);
-FormEnum results = facet.forms(filter);
-if (filter != null) {
+FormEnum results = null;
+if (facet != null) {
+    results = facet.forms(filter);
+}
+else if (ftext != null) {
+    results = ftext.forms(filter);
+}
+// better sort order ?
+if (ftext != null) {
+    results.sort(FormEnum.Order.FREQ);
+}
+else if (filter != null) {
     results.sort(FormEnum.Order.HITS);
 }
 else {
@@ -107,11 +130,12 @@ boolean first = true;
 // final Chain form = new Chain();
 final Chain copy = new Chain();
 final StringBuilder hilited = new StringBuilder();
-int n = 1;
+int rank = 1;
 while (results.hasNext()) {
     results.next();
     final int formId = results.formId();
-    if (idSet.contains(formId)) continue;
+    // filter values ?
+    // if (idSet.contains(formId)) continue;
     final String form = results.form();
     
     // filter by regex
@@ -146,24 +170,21 @@ while (results.hasNext()) {
         out.println();
     }
     out.print("    {");
-    out.print("\"n\":" + n);
+    out.print("\"rank\":" + rank);
+    out.print(", \"text\":" + JSONWriter.valueToString(form));
     out.print(", \"id\":" + results.formId());
-    out.print(", \"hits\":");
-    if (filter != null) {
-        out.print(results.hits());
-    }
-    else {
-        out.print(results.docs());
-    }
-    out.print(", " + "\"text\":" + JSONWriter.valueToString(form));
+    out.print(", \"occs\":" + results.occs());
+    out.print(", \"freq\":" + results.freq());
+    out.print(", \"docs\":" + results.docs());
+    out.print(", \"hits\":" + results.hits());
     if (hi != null) {
         out.print(", " + "\"html\":" + JSONWriter.valueToString(hilited.toString()));
     }
     out.print("}");
-    if (--limit < 0) {
+    if (--limit <= 0) {
         break;
     }
-    n++;
+    rank++;
 }
 
 // get terms for doc filter
@@ -173,9 +194,16 @@ while (results.hasNext()) {
 if (".js".equals(ext) || ".json".equals(ext)) {
     out.print("\n], \"meta\": {");
     out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
-    out.print(", \"query\": " + JSONWriter.valueToString(qFilter));
+    if (qFilter != null) {
+        out.print(", \"filter\": " + JSONWriter.valueToString(qFilter));
+    }
+    out.print(", \"field\":" +  JSONWriter.valueToString(results.name));
+    out.print(", \"type\":" +  JSONWriter.valueToString(ftype));
+    out.print(", \"docsAll\":" + results.docs);
+    out.print(", \"occsAll\":" + results.occs);
+    out.print(", \"values\":" + results.maxForm);
     if (hi != null) {
-        out.print(", \"hi\": " + JSONWriter.valueToString(hi.pattern()));
+        out.print(", \"hi\":" + JSONWriter.valueToString(hi.pattern()));
     }
     out.print("}");
     out.println("}");

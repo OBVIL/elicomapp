@@ -19,15 +19,15 @@ long time = System.nanoTime();
 JspTools tools = new JspTools(pageContext);
 Alix alix = alix(tools, null); //get an alix instance, output errors
 if (alix == null) return;
-String ext = tools.getStringInList("ext", Arrays.asList(new String[]{""}), "");
+String ext = tools.getStringOf("ext", Set.of(""), "");
 //-----------
-
+// parameters
 Pars pars = new Pars();
 pars.href = "doc.jsp?"; //TODO, centralize nav
 pars.left = 50; // left context, chars
 request.setAttribute("left", pars.left + 10);
 pars.right = 70; // right context, chars
-pars.f = tools.getStringInList("f", Arrays.asList(new String[]{"text", "text_orth"}), "text"); // 
+pars.f = tools.getStringOf("f", Set.of("text", "text_orth"), "text"); // 
 pars.limit = 200;
 pars.q = request.getParameter("q");
 pars.start = tools.getInt("start", 1);
