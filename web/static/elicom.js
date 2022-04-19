@@ -241,7 +241,11 @@ const Elicom = function() {
         // if query, what should I do ?
         if (formData.get('q')) {
             var url = 'data/cooc.json' + "?" + pars;
-        } else {
+        }
+        else if (formData.get('senderid') || formData.get('receiverid')) {
+            var url = 'data/correswords.json' + "?" + pars;
+        }
+        else {
             var url = 'data/wordnet.json' + "?" + pars;
         }
         loadJson(url, function(json) {

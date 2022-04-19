@@ -2,6 +2,118 @@
 (function(undefined) {
     'use strict';
 
+  sigma.utils.pkg('sigma.canvas.edges');
+  /**
+   * This edge renderer will display edges as arrows going from the source node
+   *
+   * @param  {object}                   edge         The edge object.
+   * @param  {object}                   source node  The edge source node.
+   * @param  {object}                   target node  The edge target node.
+   * @param  {CanvasRenderingContext2D} context      The canvas context.
+   * @param  {configurable}             settings     The settings function.
+   */
+  sigma.canvas.edges.receiver = function(edge, source, target, context, settings) {
+    // var color = edge.color;
+    var color = 'rgba(255, 192, 192, 0.5)';
+    var prefix = settings('prefix') || '',
+        edgeColor = settings('edgeColor'),
+        defaultNodeColor = settings('defaultNodeColor'),
+        defaultEdgeColor = settings('defaultEdgeColor'),
+        cp = {},
+        size = Math.max(edge[prefix + 'size']),
+        sX = source[prefix + 'x'],
+        sY = source[prefix + 'y'],
+        tX = target[prefix + 'x'],
+        tY = target[prefix + 'y'],
+        aSize = Math.max(size * 2.5, settings('minArrowSize')),
+        d,
+        oX,
+        oY,
+        aX,
+        aY,
+        vX,
+        vY
+    ;
+    size= Math.max(size - 5, 0)  ;
+    var scale = (settings('scale'))?settings('scale'):1;
+    // calculate a size relative to global canvas
+    size = size * scale * 1.5;
+    if (!color)
+      switch (edgeColor) {
+        case 'source':
+          color = source.color || defaultNodeColor;
+          break;
+        case 'target':
+          color = target.color || defaultNodeColor;
+          break;
+        default:
+          color = defaultEdgeColor;
+          break;
+      }
+
+    // self loop, no arrow needed
+    if (source.id === target.id) {
+      if (settings('bw')) context.strokeStyle = settings('defaultEdgeColor');
+      else context.strokeStyle = color;
+      context.lineWidth = size;
+      context.beginPath();
+      context.moveTo(sX, sY);
+      cp = sigma.utils.dramaSelf(sX, sY, size);
+      context.bezierCurveTo(cp.x1, cp.y1, cp.x2, cp.y2, tX, tY);
+      context.stroke();
+    }
+    // target edge, arrow
+    else {
+
+      /*
+              1---2
+                   \
+        source      3 target
+                   /
+              5---4
+      */
+
+      // distance from center of source to target
+      var d = Math.sqrt(Math.pow(tX - sX, 2) + Math.pow(tY - sY, 2)) ;
+      // source and target size
+      var sSize = source[prefix + 'size'] * scale ;
+      var tSize = target[prefix + 'size'] * scale ;
+      context.beginPath();
+      context.globalCompositeOperation='destination-over';
+      // start arrow outside the circle
+      var dX = (tY - sY) * (size/2) / d;
+      var dY = -(tX - sX) * (size/2) / d;
+      context.moveTo(sX + dX, sY + dY); // 1
+      var bX = sX + (tX - sX) * (d - tSize - d*0.07 - size*0.5) / d;
+      var bY = sY + (tY - sY) * (d - tSize - d*0.07 - size*0.5) / d;
+      context.lineTo(bX + dX, bY + dY); // 2
+      var aX = sX + (tX - sX) * ( d - tSize - d*0.07 ) / d ;
+      var aY = sY + (tY - sY) * ( d - tSize - d*0.07 ) / d ;
+      context.lineTo(aX , aY ); // 4
+      context.lineTo(bX - dX, bY - dY); // 6
+      context.lineTo(sX - dX, sY - dY ); // 5
+      context.lineWidth = 0.5;
+      context.strokeStyle = '#999';
+      context.stroke();
+      context.closePath();
+      if (settings('bw')) context.fillStyle = settings('defaultEdgeColor');
+      else context.fillStyle = color;
+      context.fill();
+
+      context.globalCompositeOperation='source-over';
+      context.beginPath();
+      context.lineWidth = 4;
+      context.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+      context.moveTo(bX + dX, bY + dY); // 2
+      context.lineTo(aX , aY ); // 4
+      context.lineTo(bX - dX, bY - dY); // 6
+      context.stroke();
+      context.closePath();
+
+    }
+  };
+
+
 
     sigma.utils.pkg('sigma.canvas.labels');
 
@@ -414,11 +526,11 @@
             // scale : 0.9, // effect of global size on graph objects
             // sideMargin: 1,
 
-            defaultNodeColor: "rgba(0, 255, 0, 0.5)",
-            defaultEdgeColor: 'rgba(245, 245, 245, 0.6)',
+            defaultNodeColor: "rgba(0, 0, 0, 1)",
+            defaultEdgeColor: 'rgba(192, 192, 255, 0.3)',
             edgeColor: "default",
             drawLabels: true,
-            defaultLabelSize: 15,
+            defaultLabelSize: 5,
             defaultLabelColor: "rgba( 0, 0, 0, 0.8)",
             // labelStrokeStyle: "rgba(255, 255, 255, 0.7)",
             labelThreshold: 0,
@@ -427,7 +539,7 @@
             labelAlignment: 'center', // specific
             labelColor: "node",
             font: '"Fira Sans", "Open Sans", "Roboto", sans-serif', // after fontSize
-            fontStyle: 'bold', // before fontSize
+            fontStyle: '', // before fontSize
 
             minNodeSize: 8,
             maxNodeSize: maxNodeSize,

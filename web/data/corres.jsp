@@ -3,7 +3,6 @@
 final static Pattern QSPLIT = Pattern.compile("[\\?\\*\\p{L}]+");
 %>
 <%
-p
 
 
 // -----------
@@ -100,7 +99,7 @@ if (filter != null) {
     results.sort(FormEnum.Order.HITS);
 }
 else {
-    results.sort(FormEnum.Order.docs);
+    results.sort(FormEnum.Order.DOCS);
 }
 boolean first = true;
 

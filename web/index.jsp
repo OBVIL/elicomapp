@@ -130,8 +130,8 @@ div.line {
             <!--
             <button class="colors but" type="button" title="Gris ou couleurs">◐</button>
             <button class="but restore" type="button" title="Recharger">O</button>
-            <button class="FR but" type="button" title="Spacialisation Fruchterman Reingold">☆</button>
            -->
+            <button class="FR but" type="button" title="Spacialisation Fruchterman Reingold">☆</button>
             <button class="mix but" type="button" title="Mélanger le graphe">♻</button>
             <button class="atlas2 but" type="button" title="Démarrer ou arrêter la gravité atlas 2">▶</button>
              <!--
