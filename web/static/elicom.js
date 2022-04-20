@@ -7,6 +7,10 @@ const Elicom = function() {
     form: null;
     /** Sigma instance for this form */
     mysig: null;
+    /** {HTMLDivElement} where to send concordance */
+    table: null;
+
+    const EOF = '\u000A';
 
     function loadJson(url, callback) {
         var xhr = new XMLHttpRequest();
@@ -47,6 +51,8 @@ const Elicom = function() {
             xhr.onload = function() {
                 let part = xhr.response.slice(start);
                 if (part.trim()) callback(part);
+                // last, send a message to callback
+                callback(EOF);
                 resolve();
             };
 
@@ -64,8 +70,20 @@ const Elicom = function() {
      * Append a record to conc
      * @param {*} e 
      */
-    function concRes(result) {
-        conc.insertAdjacentHTML('beforeend', result);
+    function concAppend(html) {
+        if (html == EOF) {
+            conc.loading = false;
+            return;
+        }
+        conc.insertAdjacentHTML('beforeend', html);
+    }
+
+    function tableAppend(html) {
+        if (html == EOF) {
+            table.loading = false;
+            return;
+        }
+        table.insertAdjacentHTML('beforeend', html);
     }
 
     /**
@@ -73,7 +91,7 @@ const Elicom = function() {
      * @param {HTMLDivElement} suggest block where to append suggestions 
      * @param {*} line 
      */
-    function corres(suggest, json) {
+    function corresAppend(suggest, json) {
         if (!json.trim()) { // sometimes empty
             return;
         }
@@ -103,7 +121,7 @@ const Elicom = function() {
      * Start population of corres suggestion 
      * @param {Event} e 
      */
-    function corresFetch(e) {
+    function corresUp(e) {
         const input = e.currentTarget;
         const suggest = input.suggest;
         // get forms params
@@ -115,7 +133,7 @@ const Elicom = function() {
         const url = input.dataset.url + "?" + pars;
         suggest.innerText = '';
         loadLines(url, function(json) {
-            corres(suggest, json);
+            corresAppend(suggest, json);
         });
     }
 
@@ -123,26 +141,50 @@ const Elicom = function() {
      * Send query to populate concordance
      * @param {boolean} append 
      */
-    function concFetch(append = false, pushState = true) {
+    function concUp(append = false) {
+        if (!conc) return;
         if (!append) {
             conc.innerText = '';
         }
+        let url = conc.dataset.url + "?" + pars();
+        loadLines(url, concAppend, '&#10;');
+    }
+
+    function tableUp() {
+        if (!table) return;
+        if (table.loading) return;
+        table.loading = true;
+        table.innerText = '';
+        let url = table.dataset.url + "?" + pars();
+        loadLines(url, tableAppend, '&#10;');
+    }
+
+    /**
+     * Get form values as url pars
+     */
+    function pars() {
         const formData = new FormData(Elicom.form);
-        // deletion will modify iterator
+        // delete empty values, be careful, deletion will modify iterator
         const keys = Array.from(formData.keys());
         for (const key of keys) {
             if (!formData.get(key)) formData.delete(key);
         }
+        return new URLSearchParams(formData);
+    }
 
-        const pars = new URLSearchParams(formData);
-        // send query of concordance population
-        let url = conc.dataset.url + "?" + pars;
-        loadLines(url, concRes, '&#10;');
-        graph();
-        if (!pushState) return;
-        // update history
-        url = new URL(window.location);
-        url.search = pars;
+    /**
+     * Update interface with data
+     */
+    function update(pushState = false) {
+        concUp();
+        graphUp();
+        tableUp();
+        if (pushState) urlUp();
+    }
+
+    function urlUp() {
+        const url = new URL(window.location);
+        url.search = pars();
         window.history.pushState({}, '', url);
     }
 
@@ -153,7 +195,7 @@ const Elicom = function() {
     function inputDel(e) {
         const label = e.currentTarget.parentNode;
         label.parentNode.removeChild(label);
-        Elicom.concFetch();
+        Elicom.update(true);
     }
 
     /**
@@ -179,7 +221,7 @@ const Elicom = function() {
         corres.input.parentNode.insertBefore(label, corres.input);
         corres.input.focus();
         corres.input.suggest.hide();
-        concFetch(); // refresh concordance
+        update(true); // update interface
     }
 
     /**
@@ -206,6 +248,23 @@ const Elicom = function() {
     }
 
     /**
+     * 
+     * @param {*} form 
+     * @returns 
+     */
+    function init(form) {
+        if (!form) {
+            console.log('[Elicom] No <form name="elicom"> found to pass params');
+            return;
+        }
+        Elicom.form = form;
+        Elicom.form.addEventListener('submit', (e) => {
+            update(true);
+            e.preventDefault();
+        });
+    }
+
+    /**
      * Initialize the destination for concordance
      * @param {HTMLDivElement} div 
      */
@@ -213,17 +272,33 @@ const Elicom = function() {
         if (!div) { // no pb, it’s another kind of page
             return;
         }
+        if (!div.dataset.url) {
+            console.log('[Elicom] @data-url required <div data-url="data/conc">');
+        }
         Elicom.conc = div;
-        Elicom.form = document.forms['elicom'];
-        if (!Elicom.form) {
-            console.log('[Elicom] No <form name="elicom"> found to pass params');
+    }
+
+    /**
+     *
+     */
+    function tableInit(div) {
+        if (!div) { // no pb, it’s another kind of page
             return;
         }
-        Elicom.form.addEventListener('submit', (e) => {
-            concFetch();
-            e.preventDefault();
-        });
-        concFetch(false, false); // do not change history on first load
+        if (!div.dataset.url) {
+            console.log('[Elicom] table, @data-url required for data source <div data-url="???">');
+        }
+        Elicom.table = div;
+    }
+
+
+
+    /**
+     *
+     */
+    function graphInit(div) {
+        if (!div) return;
+        Elicom.mysig = Sigmot.sigma(div); // name of graph
     }
 
     /**
@@ -231,21 +306,17 @@ const Elicom = function() {
      * @param {*} input 
      * @returns 
      */
-    function graph() {
-        // instantiate a graph of words
-        if (!Elicom.mysig) {
-            Elicom.mysig = Sigmot.sigma('graph'); // name of graph
-        }
+    function graphUp() {
+        // populate a graph of words
+        if (!Elicom.mysig) return;
         const formData = new FormData(Elicom.form);
         const pars = new URLSearchParams(formData);
         // if query, what should I do ?
         if (formData.get('q')) {
             var url = 'data/cooc.json' + "?" + pars;
-        }
-        else if (formData.get('senderid') || formData.get('receiverid')) {
+        } else if (formData.get('senderid') || formData.get('receiverid')) {
             var url = 'data/correswords.json' + "?" + pars;
-        }
-        else {
+        } else {
             var url = 'data/wordnet.json' + "?" + pars;
         }
         loadJson(url, function(json) {
@@ -311,8 +382,8 @@ const Elicom = function() {
             }
         });
 
-        input.addEventListener('click', corresFetch);
-        input.addEventListener('input', corresFetch);
+        input.addEventListener('click', corresUp);
+        input.addEventListener('input', corresUp);
         input.addEventListener('input', function(e) { suggest.show(); });
 
         suggest.addEventListener("touchstart", function(e) {
@@ -336,19 +407,47 @@ const Elicom = function() {
     }
 
     return {
-        suggestInit: suggestInit,
         concInit: concInit,
-        concFetch: concFetch,
+        concUp: concUp,
+        graphInit: graphInit,
+        graphUp: graphUp,
+        init: init,
         inputDel: inputDel,
+        tableInit: tableInit,
+        tableUp: tableUp,
+        update: update,
+        urlUp: urlUp,
+        suggestInit: suggestInit,
     }
 }();
 
-const inputs = document.querySelectorAll("input.multiple[data-url]");
-for (let i = 0; i < inputs.length; i++) {
-    Elicom.suggestInit(inputs[i]);
-}
-Elicom.concInit(document.getElementById('conc'));
-// corres fields to animate
-for (var item of document.querySelectorAll("a.inputDel")) {
-    item.addEventListener('click', Elicom.inputDel);
-}
+// update specific to this interface
+(function() {
+    // bottom script
+    const form = document.forms['elicom'];
+    Elicom.init(form); // form is required
+    Elicom.concInit(document.getElementById('conc'));
+    Elicom.graphInit(document.getElementById('graph'));
+    Elicom.tableInit(document.getElementById('table'));
+    const inputs = document.querySelectorAll("input.multiple[data-url]");
+    for (let i = 0; i < inputs.length; i++) {
+        Elicom.suggestInit(inputs[i]);
+    }
+    // corres fields to animate
+    for (var item of document.querySelectorAll("a.inputDel")) {
+        item.addEventListener('click', Elicom.inputDel);
+    }
+    if (form.hstop) {
+        form.hstop.addEventListener('change', Elicom.tableUp);
+        form.hstop.addEventListener('change', Elicom.urlUp);
+    }
+    if (form.cat) {
+        form.cat.addEventListener('change', Elicom.tableUp);
+        form.cat.addEventListener('change', Elicom.urlUp);
+    }
+    if (form.distrib) {
+        form.distrib.addEventListener('change', Elicom.tableUp);
+        form.distrib.addEventListener('change', Elicom.urlUp);
+    }
+    Elicom.update();
+})();

@@ -54,6 +54,12 @@ form.elicom input[type=text] {
     width: 100%;
 }
 
+div.filters label {
+    width: 40ex;
+    padding: 0 1rem;
+    text-align: center;
+}
+
 form.elicom input.date {
     display: inline;
     width: 13ex;
@@ -98,4 +104,48 @@ fieldset.multiple label a:hover {
 #graph {
     height: 50vh;
     background-color: var(--bghi);
+}
+
+.relation h5 {
+    margin: 0;
+    text-align: center;
+}
+
+.relation .flex {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+}
+
+.relation .flex div {
+    padding: 1px 1ex;
+}
+
+.relation .flex .receiver,
+.relation .flex .sender {
+    flex-shrink: 0;
+    width: 8rem;
+    align-self: center;
+}
+
+.relation .flex .sender {
+    text-align: right;
+}
+
+.relation .flex .receiver {
+    text-align: left;
+}
+
+.relation .flex .words {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.relation .words a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.relation .words a small {
+    color: var(--textlo);
 }

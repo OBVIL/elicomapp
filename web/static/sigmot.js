@@ -503,10 +503,9 @@
      * @param {String} id 
      * @param {*} maxNodeSize 
      */
-    Sigmot.sigma = function(id, maxNodeSize) {
-        const div = document.getElementById(id);
+    Sigmot.sigma = function(div, maxNodeSize) {
         if (!div) {
-            console.log("[Sigmot] graphe not found id=" + id);
+            console.log("[Sigmot] graphe not found");
             // graph not found, let it go ?
             return null;
         }
