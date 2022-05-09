@@ -101,6 +101,11 @@ const Elicom = function() {
             console.log(Error('parsing: "' + json + "\"\n" + err));
             return;
         }
+        // maybe meta
+        if (!data.text || !data.id) {
+            return;
+        }
+        
         let corres = document.createElement('div');
         corres.className = "corres";
         const hits = (data.hits) ? " (" + data.hits + ")" : "";
@@ -425,6 +430,7 @@ const Elicom = function() {
 (function() {
     // bottom script
     const form = document.forms['elicom'];
+    if (!form) return;
     Elicom.init(form); // form is required
     Elicom.concInit(document.getElementById('conc'));
     Elicom.graphInit(document.getElementById('graph'));

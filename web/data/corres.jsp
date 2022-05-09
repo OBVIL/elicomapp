@@ -169,14 +169,19 @@ while (results.hasNext()) {
 
 
 // last line
+out.println("");
 if (".js".equals(ext) || ".json".equals(ext)) {
-    out.print("\n], \"meta\": {");
-    out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
-    out.print(", \"query\": " + JSONWriter.valueToString(qFilter));
-    if (hi != null) {
-        out.print(", \"hi\": " + JSONWriter.valueToString(hi.pattern()));
-    }
-    out.print("}");
+    out.print("], \"meta\": ");
+}
+out.print("{");
+out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
+out.print(", \"query\": " + JSONWriter.valueToString(qFilter));
+out.print(", \"cardinality\": " + results.cardinality());
+if (hi != null) {
+    out.print(", \"hi\": " + JSONWriter.valueToString(hi.pattern()));
+}
+out.print("}");
+if (".js".equals(ext) || ".json".equals(ext)) {
     out.println("}");
 }
 

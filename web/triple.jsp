@@ -1,0 +1,119 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
+<%
+JspTools tools = new JspTools(pageContext);
+Alix alix = alix(tools, null);
+request.setAttribute(Q, JspTools.escape(request.getParameter(Q)));
+// request.setAttribute(Q, JspTools.escape(request.getParameter(Q)));
+
+// populate form with senders and receivers
+for (String field: new String[]{SENDER, RECEIVER}) {
+    String[] ids = request.getParameterValues(field+"id");
+    if (ids == null) continue;
+    StringBuilder sb = new StringBuilder();
+    TreeSet<Integer> idSet = new TreeSet<Integer>();
+    final FieldFacet facet = alix.fieldFacet(field);
+    String form = null;
+    for (String id: ids) {
+        int formId = -1;
+        try {
+            formId = Integer.parseInt(id);
+        }
+        catch (Exception e) {
+            continue;
+        }
+        form = facet.form(formId);
+        if (form == null) continue;
+        if (idSet.contains(formId)) continue;
+        idSet.add(formId);
+        sb.append("<label class=\"corres\"><a class=\"inputDel\">🞭</a> <input type=\"hidden\" name=\"" + field +"id\" value=\"" + id + "\"/>" + form +"</label>");
+    }
+    if (form != null) {
+        request.setAttribute(field, sb);
+    }
+}
+OptionCat cat = (OptionCat) tools.getEnum("cat", OptionCat.ALL);
+request.setAttribute("cats", cat.options("ALL, NOSTOP, SUB, NAME, VERB, ADJ, ADV"));
+OptionDistrib distrib = (OptionDistrib) tools.getEnum("distrib", OptionDistrib.BM25);
+request.setAttribute("distribs", distrib.options("OCCS, BM25, TFIDF"));
+request.setAttribute("hstop", tools.getInt("hstop", 0));
+
+FieldInt fdate = alix.fieldInt(DATE);
+request.setAttribute("datemin", FieldInt.int2date(fdate.min()));
+request.setAttribute("datemax", FieldInt.int2date(fdate.max()));
+int date1 = FieldInt.date2int(request.getParameter(DATE1));
+if (date1 > Integer.MIN_VALUE) {
+    if (date1 < fdate.min()) date1 = fdate.min();
+    request.setAttribute(DATE1, FieldInt.int2date(date1));
+}
+int date2 = FieldInt.date2int(request.getParameter(DATE2));
+if (date2 > Integer.MIN_VALUE) {
+    if (date2 > fdate.max()) date1 = fdate.max();
+    if (date2 > date1) request.setAttribute(DATE2, FieldInt.int2date(date2));
+}
+
+
+%>
+<t:elicom>
+    <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
+    <jsp:attribute name="head">
+    <style>
+span.left {
+    display: inline-block;
+    text-align: right;
+    width: 50ex;
+}
+span.right {
+    display: inline-block;
+    width: 70ex;
+    text-align: left;
+}
+div.line {
+    width: 120ex;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+    </style>
+    </jsp:attribute>
+    <jsp:body>
+        <form class="elicom" name="elicom" action="" autocomplete="off">
+            <div>
+                <small class="hint">Dates au format AAAA-MM-JJ (mois et jour sont optionnels)</small>
+            Entre
+                <input type="text" class="date" placeholder="Début" minlength="4" maxlength="10" size="10" name="date1" value="${date1}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
+                et
+                <input type="text" class="date" placeholder="Fin" minlength="4" maxlength="10" size="10" name="date2" value="${date2}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
+            </div>
+            <div class="row">
+                <fieldset class="multiple left">
+                    <input type="text" class="multiple" data-url="data/sender.ndjson" data-name="senderid"/>
+                </fieldset>
+                <div ></div>
+                <fieldset class="multiple right">
+                    <legend>Destinataire(s)</legend>
+                    ${receiver}
+                    <input type="text" class="multiple" data-url="data/receiver.ndjson" data-name="receiverid"/>
+                </fieldset>
+            </div>
+            <div class="row filters">
+                <label>Supprimer les <output name="hval">${hstop}</output> mots les plus fréquents<br/>
+                    <input type="range" id="hstop" value="${hstop}" name="hstop" min="0" max="250" oninput="this.form.hval.value = this.value;"/>
+                </label>
+                <label>Afficher uniquement les<br/>
+                    <select name="cat">
+                        ${cats}
+                    </select>
+                </label>
+                <label>Ordonner selon<br/>
+                    <select name="distrib">
+                        ${distribs}
+                    </select>
+                </label>
+            </div>
+        </form>
+        <div id="table" data-url="data/correstable">
+        </div>
+        <div id="conc" data-url="data/conc">
+        </div>
+    </jsp:body>
+</t:elicom>
