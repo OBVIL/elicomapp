@@ -11,7 +11,7 @@ JspTools tools = new JspTools(pageContext);
 String ext = tools.getStringOf("ext", Set.of(".ndjson", ".js", ".json"), ".js");
 String mime = pageContext.getServletContext().getMimeType("a" + ext);
 if (mime != null) response.setContentType(mime);
-//get an alix instance, errors will be outputes
+// get an alix instance, errors will be outputed
 Alix alix = alix(tools, null); 
 if (alix == null) {
     return;
@@ -68,9 +68,10 @@ else if (Names.FACET.equals(ftype)) {
     facet = alix.fieldFacet(fname, null);
 }
 
-// field from which to buil a query filter
-Query qFilter = query(alix, tools, GRAPH_PARS);
-BitSet filter = filter(alix, qFilter);
+BitSet filter = null;
+// A generic way for filtering ?
+// Query qFilter = query(alix, tools, GRAPH_PARS);
+// BitSet filter = filter(alix, qFilter);
 
 // first line
 if (".js".equals(ext) || ".json".equals(ext)) {
@@ -86,14 +87,14 @@ if (glob != null) {
     int parts = 0;
     while (m.find()) {
         if (first) {
-    first = false;
+            first = false;
         }
         else {
-    sb.append("|");
+            sb.append("|");
         }
         String group = m.group();
         if (group.length() <= 3) {
-    sb.append("\\b");
+            sb.append("\\b");
         }
         sb.append(group);
         parts++;
@@ -102,7 +103,7 @@ if (glob != null) {
         String re = sb.toString();
         re = re.replaceAll("\\?", "\\\\p{L}").replaceAll("\\*", "\\\\p{L}*");
         try {
-    hi = Pattern.compile(re);
+            hi = Pattern.compile(re);
         }
         finally{}
     }
@@ -123,7 +124,7 @@ else if (filter != null) {
     results.sort(FormEnum.Order.HITS);
 }
 else {
-    results.sort(FormEnum.Order.docs);
+    results.sort(FormEnum.Order.DOCS);
 }
 boolean first = true;
 
@@ -147,11 +148,11 @@ while (results.hasNext()) {
         int lastEnd = 0;
         hilited.setLength(0);
         while (matcher.find()) {
-    hilited.append(copy.subSequence(lastEnd, matcher.start()));
-    hilited.append("<mark>");
-    hilited.append(copy.subSequence(matcher.start(), matcher.end()));
-    hilited.append("</mark>");
-    lastEnd = matcher.end();
+            hilited.append(copy.subSequence(lastEnd, matcher.start()));
+            hilited.append("<mark>");
+            hilited.append(copy.subSequence(matcher.start(), matcher.end()));
+            hilited.append("</mark>");
+            lastEnd = matcher.end();
         }
         if (lastEnd == 0) { // nothing found
     continue;
@@ -194,9 +195,11 @@ while (results.hasNext()) {
 if (".js".equals(ext) || ".json".equals(ext)) {
     out.print("\n], \"meta\": {");
     out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
+    /*
     if (qFilter != null) {
         out.print(", \"filter\": " + JSONWriter.valueToString(qFilter));
     }
+    */
     out.print(", \"field\":" +  JSONWriter.valueToString(results.name));
     out.print(", \"type\":" +  JSONWriter.valueToString(ftype));
     out.print(", \"docsAll\":" + results.docs);

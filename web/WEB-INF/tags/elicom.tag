@@ -83,11 +83,7 @@ String hrefHome = (String)request.getAttribute("hrefHome");
             <jsp:doBody/>
         </main>
         <footer id="footer">
-            <nav>
-                <a>Contact</a>
-                <a>Crédits</a>
-                <a>Principe de transciption</a>
-                <a>©</a>
+            <nav>———
             </nav>
         </footer>
         <script src="${hrefHome}static/elicom.js">//</script>

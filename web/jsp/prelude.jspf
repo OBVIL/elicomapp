@@ -34,6 +34,12 @@ static {
         Webinf.bases();
     }
 }
+/** field name for a letter actor */
+final static String CORRES = "corres";
+/** Corres from one side*/
+final static String CORRES1 = "corres1";
+/** Corres from other side*/
+final static String CORRES2 = "corres2";
 
 /** Name of int field for date */
 final static String DATE = "date";
@@ -41,6 +47,7 @@ final static String DATE = "date";
 final static String DATE1 = "date1";
 /** http param for second date of a date query */
 final static String DATE2 = "date2";
+
 /** http param for a field */
 final static String F = "f";
 /** http param word query */
@@ -51,8 +58,12 @@ final static String RECEIVER = "receiver";
 final static String SENDER = "sender";
 /** field name for text content */
 final String TEXT = "text";
-/** Set of http param from which build a query for graphs */
-final static Set<String> GRAPH_PARS = Set.of(SENDER, RECEIVER, DATE);
+/** Name of int field for date */
+final static String YEAR = "year";
+/** http param for first date of a date query */
+final static String YEAR1 = "year1";
+/** http param for second date of a date query */
+final static String YEAR2 = "year2";
 
 /**
  * For graphs, color of words
@@ -71,6 +82,19 @@ public String color(int tag)
 }
  
 
+/**
+ * Optimize Boolean Query
+ */
+public Query rewrite(BooleanQuery query)
+{
+    if (query.clauses().size() < 1) {
+        return null;
+    }
+    else if (query.clauses().size() == 1) {
+        return query.clauses().get(0).getQuery();
+    }
+    return query;
+}
 
 /**
  * 
@@ -89,7 +113,21 @@ public Query dateQuery(String field, String date1, String date2)
     }
     return IntPoint.newRangeQuery(field, d1, FieldInt.yearCeil(d2));
 }
- 
+
+public Query yearQuery(Alix alix, JspTools tools) throws IOException
+{
+    int year1 = tools.getInt(YEAR1, Integer.MIN_VALUE);
+    int year2 = tools.getInt(YEAR2, Integer.MIN_VALUE);
+    if (year1 == Integer.MIN_VALUE && year2 == Integer.MIN_VALUE) return null;
+    else if (year1 == Integer.MIN_VALUE) year1 = year2;
+    else if (year2 == Integer.MIN_VALUE) year2 = year1;
+
+    FieldInt fyear = alix.fieldInt(YEAR);
+    if (year1 < fyear.min()) year1 = fyear.min();
+    if (year2 > fyear.max()) year2 = fyear.max();
+    if (year2 < year1) year2 = year1;
+    return IntPoint.newRangeQuery(YEAR, year1, year2);
+}
  /**
  * Centralized build of a query fron request params
  */
@@ -100,11 +138,14 @@ public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOExcepti
     int clauses = 0;
     BooleanQuery.Builder qbuild = new BooleanQuery.Builder();
 
-    for (String field: new String[]{SENDER, RECEIVER}) {
-        if (!pars.contains(field)) continue;
-        final Set<Integer> idSet = tools.getIntSet(field+"id");
+    for (String par: new String[]{CORRES, CORRES1, CORRES2, RECEIVER, SENDER}) {
+        if (!pars.contains(par)) continue;
+        final Set<Integer> idSet = tools.getIntSet(par);
         if (idSet.size() < 1) continue;
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
+        String field = par;
+        if (CORRES1.equals(par) || CORRES2.equals(par)) field = CORRES;
+        
         final FieldFacet facet = alix.fieldFacet(field);
         for (int i: idSet) {
             String form = facet.form(i);
@@ -128,6 +169,12 @@ public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOExcepti
         if (query != null) qbuild.add(query, Occur.MUST);
     }
     
+    // years
+    if (pars.contains(YEAR1) && pars.contains(YEAR2)) {
+        Query query = yearQuery(alix, tools);
+        if (query != null) qbuild.add(query, Occur.MUST);
+    }
+    
     // query words
     if (pars.contains(Q)) {
         Query qword = alix.query( "text", tools.request().getParameter(Q));
@@ -136,13 +183,7 @@ public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOExcepti
         }
     }
     // TODO date ?
-    Query query = qbuild.build();
-    if (((BooleanQuery)query).clauses().size() < 1) {
-        query = null;
-    }
-    else if (((BooleanQuery)query).clauses().size() == 1) {
-        query = ((BooleanQuery)query).clauses().get(0).getQuery();
-    }
+    Query query = rewrite(qbuild.build());
     return query;
 }
 

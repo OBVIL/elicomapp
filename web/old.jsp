@@ -7,7 +7,7 @@ request.setAttribute(Q, JspTools.escape(request.getParameter(Q)));
 
 // populate form with senders and receivers
 for (String field: new String[]{SENDER, RECEIVER}) {
-    String[] ids = request.getParameterValues(field+"id");
+    String[] ids = request.getParameterValues(field);
     if (ids == null) continue;
     StringBuilder sb = new StringBuilder();
     TreeSet<Integer> idSet = new TreeSet<Integer>();
@@ -25,7 +25,7 @@ for (String field: new String[]{SENDER, RECEIVER}) {
         if (form == null) continue;
         if (idSet.contains(formId)) continue;
         idSet.add(formId);
-        sb.append("<label class=\"corres\"><a class=\"inputDel\">🞭</a> <input type=\"hidden\" name=\"" + field +"id\" value=\"" + id + "\"/>" + form +"</label>");
+        sb.append("<label class=\"corres\"><a class=\"inputDel\">🞭</a> <input type=\"hidden\" name=\"" + field +"\" value=\"" + id + "\"/>" + form +"</label>");
     }
     if (form != null) {
         request.setAttribute(field, sb);
@@ -51,11 +51,44 @@ if (date2 > Integer.MIN_VALUE) {
     if (date2 > date1) request.setAttribute(DATE2, FieldInt.int2date(date2));
 }
 
+/*
+        <div id="graph" class="graph" oncontextmenu="return false">
+        </div>
+        <div class="butbar">
+            <button class="turnleft but" type="button" title="Rotation vers la gauche">↶</button>
+            <button class="turnright but" type="button" title="Rotation vers la droite">↷</button>
+            <button class="noverlap but" type="button" title="Écarter les étiquettes">↭</button>
+            <button class="zoomout but" type="button" title="Diminuer">–</button>
+            <button class="zoomin but" type="button" title="Grossir">+</button>
+            <button class="fontdown but" type="button" title="Diminuer le texte">S↓</button>
+            <button class="fontup but" type="button" title="Grossir le texte">S↑</button>
+            <button class="shot but" type="button" title="Prendre une photo">📷</button>
+            <!--
+            <button class="colors but" type="button" title="Gris ou couleurs">◐</button>
+            <button class="but restore" type="button" title="Recharger">O</button>
+            <button class="FR but" type="button" title="Spacialisation Fruchterman Reingold">☆</button>
+           -->
+            <button class="mix but" type="button" title="Mélanger le graphe">♻</button>
+            <button class="atlas2 but" type="button" title="Démarrer ou arrêter la gravité atlas 2">▶</button>
+             <!--
+             <span class="resize interface" style="cursor: se-resize; font-size: 1.3em; " title="Redimensionner la feuille">⬊</span>
+             -->
+        </div>
+
+*/
 
 %>
 <t:elicom>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
     <jsp:attribute name="head">
+    <script src="${hrefHome}vendor/sigma/sigma.min.js">//</script>
+    <script src="${hrefHome}vendor/sigma/sigma.plugins.dragNodes.js">//</script>
+    <script src="${hrefHome}vendor/sigma/sigma.exporters.image.js">//</script>
+    <script src="${hrefHome}vendor/sigma/sigma.plugins.animate.js">//</script>
+    <script src="${hrefHome}vendor/sigma/sigma.layout.fruchtermanReingold.js">//</script>
+    <script src="${hrefHome}vendor/sigma/sigma.layout.forceAtlas2.js">//</script>
+    <script src="${hrefHome}vendor/sigma/sigma.layout.noverlap.js">//</script>
+    <script src="${hrefHome}static/sigmot.js">//</script>
     <style>
 span.left {
     display: inline-block;
@@ -77,22 +110,28 @@ div.line {
     </jsp:attribute>
     <jsp:body>
         <form class="elicom" name="elicom" action="" autocomplete="off">
-            <div>
-                <small class="hint">Dates au format AAAA-MM-JJ (mois et jour sont optionnels)</small>
-            Entre
-                <input type="text" class="date" placeholder="Début" minlength="4" maxlength="10" size="10" name="date1" value="${date1}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
-                et
-                <input type="text" class="date" placeholder="Fin" minlength="4" maxlength="10" size="10" name="date2" value="${date2}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
-            </div>
             <div class="row">
                 <fieldset class="multiple left">
-                    <input type="text" class="multiple" data-url="data/sender.ndjson" data-name="senderid"/>
+                    <legend>Expéditeur(s)</legend>
+                    ${sender}
+                    <input type="text" class="multiple" data-url="data/sender.ndjson" data-name="sender"/>
                 </fieldset>
-                <div ></div>
+                <fieldset class="center">
+                    <legend><button type="submit">Rechercher</button></legend>
+                    <div>
+                        <small class="hint">Dates au format AAAA-MM-JJ (mois et jour sont optionnels)</small>
+                    Entre
+                        <input type="text" class="date" placeholder="Début" minlength="4" maxlength="10" size="10" name="date1" value="${date1}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
+                        et
+                        <input type="text" class="date" placeholder="Fin" minlength="4" maxlength="10" size="10" name="date2" value="${date2}" pattern="\d\d\d\d(-\d\d)?(-\d\d)?" min="${datemin}" max="${datemax}"/>
+                    </div>
+                    <input type="text" name="q" autocomplete="off" placeholder="Mots clés" value="${q}"/>
+                    
+                </fieldset>
                 <fieldset class="multiple right">
                     <legend>Destinataire(s)</legend>
                     ${receiver}
-                    <input type="text" class="multiple" data-url="data/receiver.ndjson" data-name="receiverid"/>
+                    <input type="text" class="multiple" data-url="data/receiver.ndjson" data-name="receiver"/>
                 </fieldset>
             </div>
             <div class="row filters">

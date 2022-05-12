@@ -96,11 +96,6 @@ body::-webkit-scrollbar-thumb {
     /* creates padding around scroll thumb */
 }
 
-input[type="range"]::-moz-range-track {
-    padding: 0 10px;
-    background: repeating-linear-gradient(to right, #ccc, #ccc 10%, #000 10%, #000 11%, #ccc 11%, #ccc 20%);
-}
-
 body {
     background-color: var(--bglo);
     color: var(--textlo);
@@ -324,11 +319,17 @@ select {
     outline: none;
     border-radius: 3px;
     border: 1px solid var(--borderlo);
+    vertical-align: middle;
     /*
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
   */
+}
+
+fieldset {
+    border: var(--borderlo) 1px solid;
+    border-radius: 0.5rem;
 }
 
 input[type="text"] {
@@ -343,6 +344,127 @@ form.search select {
     color: var(--texthi);
     border-color: var(--bg);
 }
+
+
+/*
+input[type="range"]::-moz-range-track {
+    padding: 0 10px;
+    background: repeating-linear-gradient(to right, #ccc, #ccc 10%, #000 10%, #000 11%, #ccc 11%, #ccc 20%);
+}
+*/
+
+.bislide {
+    display: inline-block;
+    position: relative;
+    text-align: center;
+}
+
+.bislide input[type="range"] {
+    width: 200px;
+    /* Specific width is required for Firefox. */
+    height: 1.5rem;
+    /* Hides the slider */
+    -webkit-appearance: none;
+    /* Otherwise white in Chrome */
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    /* no global pointer events */
+    pointer-events: none;
+    overflow: hidden;
+    outline: none;
+}
+
+input[type=range]:focus {
+    outline: none;
+    /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+
+input[type=range]::-ms-track {
+    /* Hides the slider so custom styles can be added */
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+.bislide input[type="range"]+input[type="range"] {
+    margin-left: -204px;
+    border: 1px solid transparent;
+}
+
+
+/* Special styling for WebKit/Blink */
+
+input[type=range]::-webkit-slider-thumb {
+    pointer-events: all;
+    -webkit-appearance: none;
+    border: 1px solid var(--textlo);
+    width: 16px;
+    border-radius: 3px;
+    background: var(--borderlo);
+    cursor: pointer;
+    /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+}
+
+
+/* All the same stuff for Firefox */
+
+input[type=range]::-moz-range-thumb {
+    pointer-events: all;
+    border: 1px solid var(--textlo);
+    width: 16px;
+    border-radius: 3px;
+    background: var(--borderlo);
+    cursor: pointer;
+}
+
+
+/* All the same stuff for IE */
+
+input[type=range]::-ms-thumb {
+    pointer-events: all;
+    border: 1px solid var(--textlo);
+    width: 16px;
+    border-radius: 3px;
+    background: var(--borderlo);
+    cursor: pointer;
+}
+
+.bislide input::-moz-range-track {
+    /* -moz-appearance: none; */
+    /*
+    background-color: transparent;
+    border: 0; 
+    */
+}
+
+
+/*
+.bislide input::-webkit-slider-thumb {
+    pointer-events: all;
+    position: relative;
+    z-index: 10;
+    outline: 0;
+    width: 5px;
+}
+
+.bislide input::-moz-range-thumb {
+    pointer-events: all;
+    position: relative;
+    z-index: 10;
+    -moz-appearance: none;
+    width: 5px;
+}
+
+
+
+
+.bislide input[type=range]::-moz-focus-outer {
+    -moz-appearance: none;
+    background: none transparent;
+    border: 0;
+}
+*/
 
 input.q {
     font-weight: bold;
@@ -957,16 +1079,26 @@ details {
 
 article.kwic {
     text-align: center;
+    margin: 0 1rem;
 }
 
 article.kwic header {
     color: var(--textlo);
     border-bottom: 1px solid var(--textlo);
     text-align: left;
-    margin: 1rem 0 0.2rem 0;
+    margin: 0;
     line-height: 120%;
     padding: 1px 1rem;
     font-weight: 400;
+}
+
+article.kwic div.lines {
+    margin-bottom: 1rem;
+}
+
+article.kwic div.words {
+    text-align: left;
+    margin-bottom: 1rem;
 }
 
 article.kwic header a {

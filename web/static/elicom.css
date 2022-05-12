@@ -11,9 +11,23 @@ form.elicom {
     margin-top: 1rem;
 }
 
-form.elicom>* {
-    flex-grow: 1;
-    flex-basis: 0;
+form h5 {
+    margin: 0 0 0.5em 0;
+}
+
+form.elicom .arelation {
+    margin: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+#relwords {
+    margin: 0 1rem 0 1rem;
+    display: flex;
+}
+
+#relwords a {
+    cursor: pointer;
 }
 
 form.elicom fieldset {
@@ -33,8 +47,8 @@ fieldset.right {
     text-align: right;
 }
 
-form.elicom input[type=text],
 form.elicom fieldset {
+    min-width: 20%;
     padding-inline-start: 0.75em;
     padding-inline-end: 0.75em;
 }
@@ -49,7 +63,7 @@ form.elicom .suggest {
 }
 
 form.elicom label,
-form.elicom input[type=text] {
+form.elicom fieldset input[type=text] {
     display: block;
     width: 100%;
 }
@@ -78,6 +92,12 @@ fieldset.multiple label a {
 
 fieldset.multiple label a:hover {
     color: #800;
+}
+
+label.corres {
+    font-size: 105%;
+    font-weight: bold;
+    color: var(--text);
 }
 
 .suggest .corres {

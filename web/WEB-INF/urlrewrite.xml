@@ -14,20 +14,13 @@
         <to last="true">-</to>
     </rule>
 
-    <rule>
-        <name>Data, sender</name>
-        <condition type="request-filename" operator="notfile"/>
-        <from>^/data/sender(\.ndjson|\.js|\.json)?$</from>
-        <set name="path">$0</set>
-        <to last="true">/data/corres.jsp?ext=$1&amp;f=sender</to>
-    </rule>
 
     <rule>
-        <name>Data, receivers</name>
+        <name>Data, correspondents suggestion</name>
         <condition type="request-filename" operator="notfile"/>
-        <from>^/data/receiver(\.ndjson|\.js|\.json)?$</from>
+        <from>^/data/(corres1|corres2|receiver|sender)(\.ndjson|\.js|\.json)?$</from>
         <set name="path">$0</set>
-        <to last="true">/data/corres.jsp?ext=$1&amp;f=receiver</to>
+        <to last="true">/data/corres.jsp?f=$1&amp;ext=$2</to>
     </rule>
 
 

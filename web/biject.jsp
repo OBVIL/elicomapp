@@ -3,6 +3,7 @@
 
 %>
 <%
+boolean first = true;
 JspTools tools = new JspTools(pageContext);
 Alix alix = alix(tools, null); 
 // list all senders
@@ -11,8 +12,10 @@ FieldFacet senderField = alix.fieldFacet(SENDER);
 FormEnum forms = senderField.forms();
 forms.sort(FormEnum.Order.DOCS);
 int n = 1;
+int s1 = -1;
 while (forms.hasNext()) {
     forms.next();
+    if (s1 < 0) s1 = forms.formId();
     senders.append("<div");
     senders.append(" id=\"s" + forms.formId() + "\"");
     senders.append(">");
@@ -25,8 +28,10 @@ StringBuilder receivers = new StringBuilder();
 FieldFacet receiverField = alix.fieldFacet(RECEIVER);
 forms = receiverField.forms();
 forms.sort(FormEnum.Order.DOCS);
+int r1 = -1;
 while (forms.hasNext()) {
     forms.next();
+    if (r1 < 0) r1 = forms.formId();
     receivers.append("<div");
     receivers.append(" id=\"r" + forms.formId() + "\"");
     receivers.append(">— ");
@@ -34,6 +39,8 @@ while (forms.hasNext()) {
     receivers.append("</div>\n");
 }
 request.setAttribute("receivers", receivers);
+
+int indies = 0;
 
 // build edges
 EdgeQueue edges = new EdgeQueue(true);
@@ -43,16 +50,21 @@ for (int docId = 0, max = alix.reader().maxDoc(); docId < max ; docId++) {
     if (senderIds == null) continue;
     int[] receiverIds = receiverField.formIds(docId);
     if (receiverIds == null) continue;
+    boolean indie = false;
     for (int sid: senderIds) {
         for (int rid: receiverIds) {
+            if (sid != s1 && rid != r1) indie = true;
             edges.push(sid, rid);
         }
     }
+    if (indie) indies++;
 }
+// Voltaire, 2624 letters indies
+
 
 StringBuilder rels = new StringBuilder();
 rels.append("[\n");
-boolean first = true;
+first = true;
 int limit = -1;
 for (Edge edge: edges) {
     if (limit-- == 0) break;

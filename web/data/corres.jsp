@@ -1,6 +1,12 @@
 <%@ page language="java" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%!
 final static Pattern QSPLIT = Pattern.compile("[\\?\\*\\p{L}]+");
+/** Set of http param from which build a query */
+final static Set<String> PARS_SENDER = Set.of(DATE, SENDER);
+final static Set<String> PARS_RECEIVER = Set.of(DATE, RECEIVER);
+final static Set<String> PARS_CORRES1 = Set.of(DATE, CORRES1);
+final static Set<String> PARS_CORRES2 = Set.of(DATE, CORRES2);
+
 %>
 <%
 
@@ -22,21 +28,38 @@ if (mime != null) response.setContentType(mime);
 
 // the field to get a list from
 final String F = "f";
-String field = tools.getStringOf(F, Set.of(SENDER, RECEIVER), null);
-if (field == null) {
+String fpar = tools.getStringOf(F, Set.of(CORRES1, CORRES2, RECEIVER, SENDER), null);
+
+
+if (fpar == null) {
     out.println("{\"errors\":" + Error.FIELD_NOTFOUND.json(F, request.getParameter(F)) + "}");
     response.setStatus(Error.FIELD_NOTFOUND.status());
     return;
 }
-String fieldFilter = RECEIVER;
-if (RECEIVER.equals(field)) {
-    fieldFilter = SENDER;
+String fname = fpar;
+Set<Integer> idHide = tools.getIntSet(fpar); // ids to not display
+Set<String> qpars = null;
+if (RECEIVER.equals(fpar)) {
+    idHide = tools.getIntSet(fpar);
+    qpars = PARS_SENDER;
 }
-// ids to filter
-TreeSet<Integer> idSet = tools.getIntSet(field);
-
-
-
+else if (SENDER.equals(fpar)) {
+    qpars = PARS_RECEIVER;
+    idHide = tools.getIntSet(fpar);
+}
+else if (CORRES1.equals(fpar)) {
+    fname = CORRES;
+    qpars = PARS_CORRES2;
+    idHide = tools.getIntSet(CORRES1);
+    idHide.addAll(tools.getIntSet(CORRES2));
+}
+else if (CORRES2.equals(fpar)) {
+    fname = CORRES;
+    qpars = PARS_CORRES1;
+    idHide = tools.getIntSet(fpar);
+    idHide = tools.getIntSet(CORRES1);
+    idHide.addAll(tools.getIntSet(CORRES2));
+}
 
 
 String callback = tools.getString("callback", null);
@@ -51,8 +74,8 @@ if (callback != null) {
     }
     out.print(JspTools.escape(callback) +"(");
 }
-// field from which to buil a query filter
-Query qFilter = query(alix, tools, GRAPH_PARS);
+// field from which to build a query filter
+Query qFilter = query(alix, tools, qpars);
 BitSet filter = filter(alix, qFilter);
 
 // first line
@@ -71,14 +94,14 @@ if (glob != null) {
     int parts = 0;
     while (m.find()) {
         if (first) {
-    first = false;
+            first = false;
         }
         else {
-    sb.append("|");
+            sb.append("|");
         }
         String group = m.group();
         if (group.length() <= 3) {
-    sb.append("\\b");
+            sb.append("\\b");
         }
         sb.append(group);
         parts++;
@@ -87,19 +110,19 @@ if (glob != null) {
         String re = sb.toString();
         re = re.replaceAll("\\?", "\\\\p{L}").replaceAll("\\*", "\\\\p{L}*");
         try {
-    hi = Pattern.compile(re);
+            hi = Pattern.compile(re);
         }
         finally{}
     }
 }
 
-final FieldFacet facet = alix.fieldFacet(field);
-FormEnum results = facet.forms(filter);
+final FieldFacet facet = alix.fieldFacet(fname);
+FormEnum forms = facet.forms(filter);
 if (filter != null) {
-    results.sort(FormEnum.Order.HITS);
+    forms.sort(FormEnum.Order.HITS);
 }
 else {
-    results.sort(FormEnum.Order.DOCS);
+    forms.sort(FormEnum.Order.DOCS);
 }
 boolean first = true;
 
@@ -107,11 +130,16 @@ boolean first = true;
 final Chain copy = new Chain();
 final StringBuilder hilited = new StringBuilder();
 int n = 1;
-while (results.hasNext()) {
-    results.next();
-    final int formId = results.formId();
-    if (idSet.contains(formId)) continue;
-    final String form = results.form();
+while (forms.hasNext()) {
+    forms.next();
+    final int formId = forms.formId();
+    if (idHide.contains(formId)) continue;
+    final String form = forms.form();
+    
+    // zero score
+    if (filter != null && forms.hits() < 1) {
+        break;
+    }
     
     // filter by regex
     if (hi != null) {
@@ -122,17 +150,17 @@ while (results.hasNext()) {
         int lastEnd = 0;
         hilited.setLength(0);
         while (matcher.find()) {
-    hilited.append(copy.subSequence(lastEnd, matcher.start()));
-    hilited.append("<mark>");
-    hilited.append(copy.subSequence(matcher.start(), matcher.end()));
-    hilited.append("</mark>");
-    lastEnd = matcher.end();
+            hilited.append(copy.subSequence(lastEnd, matcher.start()));
+            hilited.append("<mark>");
+            hilited.append(copy.subSequence(matcher.start(), matcher.end()));
+            hilited.append("</mark>");
+            lastEnd = matcher.end();
         }
         if (lastEnd == 0) { // nothing found
-    continue;
+            continue;
         }
         else if (lastEnd < copy.length()) {
-    hilited.append(copy.subSequence(lastEnd, form.length()));
+            hilited.append(copy.subSequence(lastEnd, form.length()));
         }
     }
     if (first) {
@@ -146,13 +174,13 @@ while (results.hasNext()) {
     }
     out.print("    {");
     out.print("\"n\":" + n);
-    out.print(", \"id\":" + results.formId());
+    out.print(", \"id\":" + forms.formId());
     out.print(", \"hits\":");
     if (filter != null) {
-        out.print(results.hits());
+        out.print(forms.hits());
     }
     else {
-        out.print(results.docs());
+        out.print(forms.docs());
     }
     out.print(", " + "\"text\":" + JSONWriter.valueToString(form));
     if (hi != null) {
@@ -176,7 +204,7 @@ if (".js".equals(ext) || ".json".equals(ext)) {
 out.print("{");
 out.print("\"time\": \"" + ( (System.nanoTime() - time) / 1000000) + "ms\"");
 out.print(", \"query\": " + JSONWriter.valueToString(qFilter));
-out.print(", \"cardinality\": " + results.cardinality());
+out.print(", \"cardinality\": " + forms.cardinality());
 if (hi != null) {
     out.print(", \"hi\": " + JSONWriter.valueToString(hi.pattern()));
 }

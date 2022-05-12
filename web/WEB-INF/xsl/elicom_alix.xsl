@@ -141,6 +141,7 @@ Reçoit une lettre en un seul fichier
     <xsl:if test="normalize-space($value) != ''">
       <xsl:text>&#10;  </xsl:text>
       <alix:field type="facet" name="sender" value="{normalize-space($value)}"/>
+      <alix:field type="facet" name="corres" value="{normalize-space($value)}"/>
     </xsl:if>
   </xsl:template>
 
@@ -152,6 +153,7 @@ Reçoit une lettre en un seul fichier
     <xsl:if test="normalize-space($value) != ''">
       <xsl:text>&#10;  </xsl:text>
       <alix:field type="facet" name="receiver" value="{normalize-space($value)}"/>
+      <alix:field type="facet" name="corres" value="{normalize-space($value)}"/>
     </xsl:if>
   </xsl:template>
 
@@ -338,54 +340,98 @@ Reçoit une lettre en un seul fichier
   <xsl:template match="tei:note" mode="value"/>
   
   <xsl:template match="tei:correspAction[@type='sent']/tei:date" mode="alix">
-    <xsl:variable name="value">
-      <xsl:call-template name="alix:date"/>
+    <xsl:variable name="date">
+      <xsl:call-template name="date"/>
     </xsl:variable>
     <!-- if more than one, let it cry ? -->
-    <xsl:if test="normalize-space($value) != '' and not(preceding-sibling::tei:date)">
+    <xsl:if test="normalize-space($date) != '' and not(preceding-sibling::tei:date)">
       <xsl:text>&#10;  </xsl:text>
-      <alix:field type="int" name="date" value="{normalize-space($value)}"/>
+      <alix:field type="int" name="date">
+        <xsl:attribute name="value">
+          <xsl:call-template name="date-int">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
+      <alix:field type="int" name="year">
+        <xsl:attribute name="value">
+          <xsl:call-template name="year">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="tei:correspAction[@type='received']/tei:date" mode="alix">
-    <xsl:variable name="value">
-      <xsl:call-template name="alix:date"/>
+    <xsl:variable name="date">
+      <xsl:call-template name="date"/>
     </xsl:variable>
     <!-- if more than one, let it cry ? -->
-    <xsl:if test="normalize-space($value) != ''  and not(preceding-sibling::tei:date)">
+    <xsl:if test="normalize-space($date) != ''  and not(preceding-sibling::tei:date)">
       <xsl:text>&#10;  </xsl:text>
-      <alix:field type="int" name="dateReceived" value="{normalize-space($value)}"/>
+      <alix:field type="int" name="dateReceived">
+        <xsl:attribute name="value">
+          <xsl:call-template name="date-int">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
+      <alix:field type="int" name="yearReceived">
+        <xsl:attribute name="value">
+          <xsl:call-template name="year">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
     </xsl:if>
   </xsl:template>
-  
-  <!-- Get a date from as an int -->
-  <xsl:template name="alix:date">
+
+  <!-- Get xml date from an element -->
+  <xsl:template name="date">
     <xsl:choose>
       <xsl:when test="@when">
-        <xsl:apply-templates select="@when" mode="date-int"/>
+        <xsl:value-of select="@when"/>
       </xsl:when>
       <xsl:when test="@from">
-        <xsl:apply-templates select="@from" mode="date-int"/>
+        <xsl:value-of select="@from"/>
       </xsl:when>
       <xsl:when test="@notBefore">
-        <xsl:apply-templates select="@notBefore" mode="date-int"/>
+        <xsl:value-of select="@notBefore"/>
       </xsl:when>
       <xsl:when test="@to">
-        <xsl:apply-templates select="@to" mode="date-int"/>
+        <xsl:value-of select="@to"/>
       </xsl:when>
       <xsl:when test="@notAfter">
-        <xsl:apply-templates select="@notAfter" mode="date-int"/>
+        <xsl:value-of select="@noAfter"/>
       </xsl:when>
     </xsl:choose>
   </xsl:template>
+
+  <xsl:template name="year" match="@*" mode="year">
+    <!-- TODO negative years -->
+    <xsl:param name="date" select="."/>
+    <xsl:variable name="int" select="substring(normalize-space($date), 1, 4)"/>
+    <xsl:if test="string(number($int)) != 'NaN'">
+      <xsl:value-of select="$int"/>
+    </xsl:if>
+  </xsl:template>
+  
   
   <xsl:template name="date-int" match="@*" mode="date-int">
     <!-- TODO negative years -->
-    <xsl:param name="value" select="."/>
+    <xsl:param name="date" select="."/>
     <xsl:variable name="int" select="
         translate(
-          substring($value, 1, 10),
+          substring(normalize-space($date), 1, 10),
           '-',
           ''
         )

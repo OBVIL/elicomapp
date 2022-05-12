@@ -1,15 +1,12 @@
 'use strict';
 
 const Elicom = function() {
-    /** {HTMLDivElement} where to send concordance */
-    conc: null;
     /** {HTMLFormElement} form with params to send for queries like conc */
-    form: null;
+    var form = false;
+    /** array of {HTMLDivElement} with html updates */
+    var divs = {};
     /** Sigma instance for this form */
-    mysig: null;
-    /** {HTMLDivElement} where to send concordance */
-    table: null;
-
+    var mysig = false;
     const EOF = '\u000A';
 
     function loadJson(url, callback) {
@@ -67,26 +64,6 @@ const Elicom = function() {
     }
 
     /**
-     * Append a record to conc
-     * @param {*} e 
-     */
-    function concAppend(html) {
-        if (html == EOF) {
-            conc.loading = false;
-            return;
-        }
-        conc.insertAdjacentHTML('beforeend', html);
-    }
-
-    function tableAppend(html) {
-        if (html == EOF) {
-            table.loading = false;
-            return;
-        }
-        table.insertAdjacentHTML('beforeend', html);
-    }
-
-    /**
      * Append a corres record to suggestions
      * @param {HTMLDivElement} suggest block where to append suggestions 
      * @param {*} line 
@@ -105,7 +82,7 @@ const Elicom = function() {
         if (!data.text || !data.id) {
             return;
         }
-        
+
         let corres = document.createElement('div');
         corres.className = "corres";
         const hits = (data.hits) ? " (" + data.hits + ")" : "";
@@ -143,32 +120,10 @@ const Elicom = function() {
     }
 
     /**
-     * Send query to populate concordance
-     * @param {boolean} append 
-     */
-    function concUp(append = false) {
-        if (!conc) return;
-        if (!append) {
-            conc.innerText = '';
-        }
-        let url = conc.dataset.url + "?" + pars();
-        loadLines(url, concAppend, '&#10;');
-    }
-
-    function tableUp() {
-        if (!table) return;
-        if (table.loading) return;
-        table.loading = true;
-        table.innerText = '';
-        let url = table.dataset.url + "?" + pars();
-        loadLines(url, tableAppend, '&#10;');
-    }
-
-    /**
      * Get form values as url pars
      */
     function pars() {
-        const formData = new FormData(Elicom.form);
+        const formData = new FormData(form);
         // delete empty values, be careful, deletion will modify iterator
         const keys = Array.from(formData.keys());
         for (const key of keys) {
@@ -181,9 +136,8 @@ const Elicom = function() {
      * Update interface with data
      */
     function update(pushState = false) {
-        concUp();
+        for (let key in divs) upDiv(key);
         graphUp();
-        tableUp();
         if (pushState) urlUp();
     }
 
@@ -200,7 +154,7 @@ const Elicom = function() {
     function inputDel(e) {
         const label = e.currentTarget.parentNode;
         label.parentNode.removeChild(label);
-        Elicom.update(true);
+        update(true);
     }
 
     /**
@@ -257,53 +211,87 @@ const Elicom = function() {
      * @param {*} form 
      * @returns 
      */
-    function init(form) {
-        if (!form) {
+    function init(el) {
+        if (!el) {
             console.log('[Elicom] No <form name="elicom"> found to pass params');
             return;
         }
-        Elicom.form = form;
-        Elicom.form.addEventListener('submit', (e) => {
+        form = el;
+        form.addEventListener('submit', (e) => {
             update(true);
             e.preventDefault();
         });
     }
 
+    function words(links, conc) {
+        const div = document.getElementById(links);
+        if (!div) return;
+        if (!form.q) return;
+        div.addEventListener('click', function(event) {
+            const src = event.target || event.srcElement;
+            if (src.tagName.toLowerCase() != 'a') return;
+            form.q.value = src.innerText;
+            upDiv(conc);
+        });
+    }
+
     /**
-     * Initialize the destination for concordance
-     * @param {HTMLDivElement} div 
+     * Record a div to be updated by an url
+     * @param {*} div 
+     * @returns 
      */
-    function concInit(div) {
+    function divSetup(id) {
+        const div = document.getElementById(id);
         if (!div) { // no pb, it’s another kind of page
             return;
         }
         if (!div.dataset.url) {
             console.log('[Elicom] @data-url required <div data-url="data/conc">');
         }
-        Elicom.conc = div;
+        divs[id] = div;
     }
 
     /**
-     *
+     * Send query to populate concordance
+     * @param {boolean} append 
      */
-    function tableInit(div) {
-        if (!div) { // no pb, it’s another kind of page
-            return;
+    function upDiv(key, append = false) {
+        let div = divs[key];
+        if (!div) return; // disappeared ?
+        if (div.loading) return; // still loading
+        div.loading = true;
+        if (!append) {
+            div.innerText = '';
         }
-        if (!div.dataset.url) {
-            console.log('[Elicom] table, @data-url required for data source <div data-url="???">');
-        }
-        Elicom.table = div;
+        let url = div.dataset.url + "?" + pars();
+        loadLines(url, function(html) {
+            insLine(div, html);
+        }, '&#10;');
     }
 
-
+    /**
+     * Append a record to a div
+     * @param {*} html 
+     * @returns 
+     */
+    function insLine(div, html) {
+        if (!div) { // what ?
+            return false;
+        }
+        // last line, liberate div for next load
+        if (html == EOF) {
+            div.loading = false;
+            return;
+        }
+        div.insertAdjacentHTML('beforeend', html);
+    }
 
     /**
      *
      */
     function graphInit(div) {
         if (!div) return;
-        Elicom.mysig = Sigmot.sigma(div); // name of graph
+        mysig = Sigmot.sigma(div); // name of graph
     }
 
     /**
@@ -313,8 +301,8 @@ const Elicom = function() {
      */
     function graphUp() {
         // populate a graph of words
-        if (!Elicom.mysig) return;
-        const formData = new FormData(Elicom.form);
+        if (!mysig) return;
+        const formData = new FormData(form);
         const pars = new URLSearchParams(formData);
         // if query, what should I do ?
         if (formData.get('q')) {
@@ -333,12 +321,14 @@ const Elicom = function() {
                 console.log("[Elicom] grap load error\n" + json)
                 return;
             }
-            Elicom.mysig.graph.clear();
-            Elicom.mysig.graph.read(json.data);
-            Elicom.mysig.startForce();
-            Elicom.mysig.refresh();
+            mysig.graph.clear();
+            mysig.graph.read(json.data);
+            mysig.startForce();
+            mysig.refresh();
         });
     }
+
+
 
     /**
      * Intitialize an input with suggest
@@ -412,29 +402,86 @@ const Elicom = function() {
     }
 
     return {
-        concInit: concInit,
-        concUp: concUp,
         graphInit: graphInit,
         graphUp: graphUp,
+        words: words,
         init: init,
         inputDel: inputDel,
-        tableInit: tableInit,
-        tableUp: tableUp,
+        divSetup: divSetup,
         update: update,
         urlUp: urlUp,
         suggestInit: suggestInit,
     }
 }();
 
+const Bislide = function() {
+    function init() {
+        // Initialize Sliders
+        let els = document.getElementsByClassName("bislide");
+        for (let x = 0; x < els.length; x++) {
+            let sliders = els[x].getElementsByTagName("input");
+            let slider1;
+            let slider2;
+            for (let y = 0; y < sliders.length; y++) {
+                if (sliders[y].type !== "range") continue;
+                if (!slider1) {
+                    slider1 = sliders[y];
+                    continue;
+                }
+                slider2 = sliders[y];
+                break;
+            }
+            if (!slider2) continue;
+            els[x].values = els[x].getElementsByClassName("values")[0];
+            els[x].slider1 = slider1;
+            els[x].slider1.oninput = Bislide.input;
+            els[x].slider1.onchange = Bislide.change;
+            els[x].slider2 = slider2;
+            els[x].slider2.oninput = Bislide.input;
+            els[x].slider2.onchange = Bislide.change;
+            slider2.oninput();
+        }
+    }
+
+    function change() {
+
+        Elicom.update(true);
+    }
+
+    function input() {
+        // Get slider values
+        var parent = this.parentNode;
+        var val1 = parseFloat(parent.slider1.value);
+        var val2 = parseFloat(parent.slider2.value);
+        // swap value if needed 
+        if (val1 > val2) {
+            parent.slider1.value = val2;
+            parent.slider2.value = val1;
+        }
+        // display
+        if (!parent.values) return;
+        parent.values.innerHTML = parent.slider1.value + " – " + parent.slider2.value;
+    }
+    return {
+        init: init,
+        input: input,
+        change: change,
+    }
+}();
+
+
 // update specific to this interface
 (function() {
     // bottom script
+    Bislide.init();
     const form = document.forms['elicom'];
     if (!form) return;
     Elicom.init(form); // form is required
-    Elicom.concInit(document.getElementById('conc'));
-    Elicom.graphInit(document.getElementById('graph'));
-    Elicom.tableInit(document.getElementById('table'));
+    Elicom.divSetup('relwords');
+    Elicom.divSetup('conc');
+    Elicom.words('relwords', 'conc');
+    // Elicom.pushdiv(document.getElementById('table'));
+    // Elicom.graphInit(document.getElementById('graph'));
     const inputs = document.querySelectorAll("input.multiple[data-url]");
     for (let i = 0; i < inputs.length; i++) {
         Elicom.suggestInit(inputs[i]);

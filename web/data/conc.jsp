@@ -20,6 +20,7 @@ JspTools tools = new JspTools(pageContext);
 Alix alix = alix(tools, null); //get an alix instance, output errors
 if (alix == null) return;
 String ext = tools.getStringOf("ext", Set.of(""), "");
+boolean first;
 //-----------
 // parameters
 Pars pars = new Pars();
@@ -31,14 +32,17 @@ pars.f = tools.getStringOf("f", Set.of("text", "text_orth"), "text"); //
 pars.limit = 200;
 pars.q = request.getParameter("q");
 pars.start = tools.getInt("start", 1);
+final int wc = 20;
 
 
 // build the query from request params
 BooleanQuery.Builder builder = new BooleanQuery.Builder();
-Query qFilter = query(alix, tools, Set.of(SENDER, RECEIVER, DATE));
+Query qFilter = query(alix, tools, Set.of(CORRES, CORRES1, CORRES2, SENDER, RECEIVER, DATE, YEAR1, YEAR2));
 if (qFilter != null) {
     builder.add(qFilter, Occur.FILTER);
 }
+
+
 if (pars.q != null) {
     Query qWords = alix.query(pars.f, pars.q);
     if (qWords != null) builder.add(qWords, Occur.MUST);
@@ -119,9 +123,28 @@ while (i < max) {
     out.println("</a>");
     out.println("  </header>");
     if (lines != null) {
+        out.println("  <div class=\"lines\">");
         for (String l: lines) {
-    out.println("  <div class=\"line\"><small>"+ ++occ +"</small>"+l+"</div>");
+            out.println("    <div class=\"line\"><small>"+ ++occ +"</small>"+l+"</div>");
         }
+        out.println("  </div>");
+    }
+    // list of words
+    else {
+        out.println("  <div class=\"words\">");
+        FormEnum docForms = doc.forms(TEXT, OptionDistrib.CHI2, null);
+        docForms.sort(FormEnum.Order.SCORE);
+        first = true;
+        int n = wc;
+        while (docForms.hasNext()) {
+            if (n-- == 0) break;
+            docForms.next();
+            if (first) first = false;
+            else out.println(", ");
+            out.print(docForms.form());
+        }
+        out.println("  </div>");
+        
     }
     
     out.println("</article>");
