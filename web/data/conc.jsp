@@ -104,6 +104,7 @@ while (i < max) {
     String type = doc.doc().get(Names.ALIX_TYPE);
     if (type.equals(Names.BOOK)) continue;
     // if (doc.doc().get(pars.field.name()) == null) continue; // not a good test, field may be indexed but not store
+    
     String href = pars.href + "&amp;q=" + JspTools.escUrl(pars.q) + "&amp;id=" + doc.id() + "&amp;start=" + i + "&amp;sort=" + pars.sort.name();
     
     // if search key words 
@@ -139,6 +140,7 @@ while (i < max) {
         while (docForms.hasNext()) {
             if (n-- == 0) break;
             docForms.next();
+            if (docForms.freq() < 1) break;
             if (first) first = false;
             else out.println(", ");
             out.print(docForms.form());

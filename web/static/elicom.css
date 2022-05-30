@@ -169,3 +169,8 @@ label.corres {
 .relation .words a small {
     color: var(--textlo);
 }
+
+header .sender,
+header .receiver {
+    font-weight: bold;
+}

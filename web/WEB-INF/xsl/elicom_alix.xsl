@@ -62,16 +62,16 @@ Reçoit une lettre en un seul fichier
               <xsl:text>, </xsl:text>
             </xsl:if>
             <xsl:for-each select="(tei:correspAction[@type='sent']/tei:persName)[1]">
-              <span class="sender">
-                <xsl:text>de </xsl:text>
+              <xsl:text>de </xsl:text>
+              <b class="sender">
                 <xsl:call-template name="key"/>
-              </span>
+              </b>
             </xsl:for-each>
             <xsl:for-each select="(tei:correspAction[@type='received']/tei:persName)[1]">
-              <span class="receiver">
-                <xsl:text> à </xsl:text>
+              <xsl:text> à </xsl:text>
+              <b class="receiver">
                 <xsl:call-template name="key"/>
-              </span>
+              </b>
             </xsl:for-each>
           </alix:field>
         </xsl:for-each>

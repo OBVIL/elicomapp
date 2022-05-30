@@ -10,5 +10,8 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="lib" path="ext/jsp-api_tomcat7.jar"/>
 	<classpathentry kind="lib" path="ext/servlet-api_tomcat7.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/lucene-analysis-common-9.2.0.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/lucene-core-9.2.0.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/lucene-highlighter-9.2.0.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

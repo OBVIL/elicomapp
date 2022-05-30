@@ -140,6 +140,7 @@ while (forms.hasNext()) {
 
 out.println("</div>");
 
+/*
 // center
 out.println("<div class=\"center\" style=\"text-align: center\">");
 out.print("<h5>Mots partagés</h5>");
@@ -163,6 +164,7 @@ for (IdScore rec: top) {
     
 }
 out.println("</div>");
+*/
 
 // right
 out.println("<div class=\"right\" style=\"text-align: right\">");
