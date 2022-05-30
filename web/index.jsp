@@ -98,6 +98,14 @@ div.line {
                 </fieldset>
             </div>
         </form>
+        <div id="biject">
+            <div class="senders">
+            </div>
+            <svg class="relations" xmlns="http://www.w3.org/2000/svg">
+            </svg>
+            <div class="receivers">
+            </div>
+        </div>
         <div id="conc" data-url="data/conc">
         </div>
     </jsp:body>

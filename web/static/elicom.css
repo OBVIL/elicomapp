@@ -24,6 +24,8 @@ form.elicom .arelation {
 #relwords {
     margin: 0 1rem 0 1rem;
     display: flex;
+    height: 10rem;
+    overflow: hidden;
 }
 
 #relwords a {
@@ -173,4 +175,77 @@ label.corres {
 header .sender,
 header .receiver {
     font-weight: bold;
+}
+
+
+/** biject graph of correspondant */
+
+#biject {
+    position: relative;
+    display: flex;
+    margin-bottom: 2rem;
+}
+
+#biject .relations {
+    position: relative;
+    flex-grow: 4;
+    min-width: 100px;
+    background-color: #fff;
+}
+
+#biject .senders,
+#biject .receivers {
+    white-space: nowrap;
+    flex: 0 0 40%;
+}
+
+#biject .senders {
+    text-align: right;
+}
+
+#biject .receivers {
+    text-align: left;
+}
+
+#biject .senders>*,
+#biject .receivers>* {
+    overflow: hidden;
+    border-bottom: 1px var(--border) solid;
+    padding: 0 0.5rem;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    box-sizing: content-box;
+}
+
+#biject .senders header {
+    font-weight: bold;
+    justify-content: left;
+}
+
+#biject .receivers header {
+    font-weight: bold;
+    justify-content: right;
+}
+
+#biject .senders .more {
+    border: none;
+    justify-content: right;
+}
+
+#biject .receivers .more {
+    border: none;
+    justify-content: right;
+}
+
+#biject .senders>* {
+    justify-content: right;
+}
+
+#biject .receivers>* {
+    justify-content: left;
+}
+
+#biject .relations polygon {
+    fill: rgba(0, 0, 0, 0.2);
 }

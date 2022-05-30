@@ -158,9 +158,7 @@ nav.tabs form.base {
  * Global HTML
  */
 
-*,
-*::before,
-*::after {
+* {
     box-sizing: border-box;
 }
 
@@ -1088,7 +1086,7 @@ article.kwic header {
     text-align: left;
     margin: 0;
     line-height: 120%;
-    padding: 1px 1rem;
+    padding: 1px 0;
     font-weight: 400;
 }
 
@@ -1107,7 +1105,7 @@ article.kwic header a {
 
 article.kwic header b,
 article.kwic header small {
-    float: left;
+    font-weight: bold;
     color: var(--bg2);
     margin: 0.3ex 1ex 0 0;
 }
@@ -1153,7 +1151,7 @@ article.kwic mark {
 
 div.line small {
     display: inline-block;
-    text-align: left;
+    text-align: right;
     width: 2rem;
 }
 

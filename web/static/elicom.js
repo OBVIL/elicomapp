@@ -138,6 +138,7 @@ const Elicom = function() {
     function update(pushState = false) {
         for (let key in divs) upDiv(key);
         graphUp();
+        biject();
         if (pushState) urlUp();
     }
 
@@ -328,6 +329,131 @@ const Elicom = function() {
         });
     }
 
+    /**
+     * Draw a biject graph, according to form param
+     */
+    function biject(id = 'biject') {
+
+        console.log("Biject ?");
+
+        const cont = document.getElementById(id);
+        if (!cont) return;
+        let els;
+        els = cont.getElementsByClassName("senders");
+        if (els.length != 1) return;
+        const senders = els[0];
+        els = cont.getElementsByClassName("receivers");
+        if (els.length != 1) return;
+        const receivers = els[0];
+        els = cont.getElementsByClassName("relations");
+        if (els.length != 1) return;
+        const svg = els[0];
+        // get data
+        const formData = new FormData(form);
+        const pars = new URLSearchParams(formData);
+        var url = 'data/biject.json' + "?" + pars;
+        const hmin = 18;
+        const hmax = 100;
+        loadJson(url, function(json) {
+            if (!json) {
+                console.log("[Elicom] biject load error url=" + url)
+                return;
+            }
+            if (!json.data) {
+                console.log("[Elicom] grap load error\n" + json)
+                return;
+            }
+            const min = json.meta.min;
+            const max = json.meta.max;
+            senders.innerHTML = '<header>Expéditeurs</header>';
+            corrs(senders, json.data.senders, min, max);
+            let more = json.meta.senders;
+            more = more - json.data.senders.length;
+            if (more > 0) {
+                const el = document.createElement('div');
+                el.className = 'more';
+                el.innerText = "et " + more + " autres…";
+                senders.appendChild(el);
+            }
+            receivers.innerHTML = '<header>Destinataires</header>';
+            corrs(receivers, json.data.receivers, min, max);
+            more = json.meta.receivers;
+            more = more - json.data.receivers.length;
+            if (more > 0) {
+                const el = document.createElement('div');
+                el.className = 'more';
+                el.innerText = "et " + more + " autres…";
+                receivers.appendChild(el);
+            }
+            edges(svg, json.data.edges, max);
+        });
+
+        function edges(svg, arr, max) {
+            svg.innerHTML = "";
+            const ns = svg.namespaceURI;
+            const x1 = 0;
+            const x2 = svg.getBoundingClientRect().width;
+            for (let i = 0, length = arr.length; i < length; i++) {
+                const edge = arr[i];
+                let height = hmax * (edge.count / max);
+                let points = '';
+                const sender = document.getElementById(edge['sender']);
+                if (sender.dataset.rels < 2) {
+                    var y1 = sender.offsetTop + sender.offsetHeight / 2;
+                    points += x1 + "," + (y1 - height / 2) + " " + x1 + "," + (y1 + height / 2);
+                } else {
+                    let old = Number(sender.dataset.height);
+                    if (isNaN(old)) old = 0;
+                    var y1 = sender.offsetTop + old + 2 + height / 2;
+                    var y = sender.offsetTop + old + 2;
+                    sender.dataset.height = old + height;
+                    points += x1 + "," + y + " " + x1 + "," + (y + height);
+                    // points += 0 + "," + 0;
+                }
+                const receiver = document.getElementById(edge['receiver']);
+                if (receiver.dataset.rels < 2) {
+                    var y2 = receiver.offsetTop + receiver.offsetHeight / 2;
+                    points += " " + x2 + "," + (y2 + height / 2) + " " + x2 + "," + (y2 - height / 2);
+                } else {
+                    let old = Number(receiver.dataset.height);
+                    if (isNaN(old)) old = 0;
+                    var y2 = receiver.offsetTop + 2 + old + height / 2;
+                    var y = receiver.offsetTop + old + 2;
+                    points += " " + x2 + "," + (y + height) + " " + x2 + "," + y;
+                    receiver.dataset.height = old + height;
+                }
+                const polygon = document.createElementNS(ns, 'polygon');
+                polygon.setAttribute("points", points);
+                svg.appendChild(polygon);
+
+                /*
+                const line = document.createElementNS(ns, 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+
+
+                line.style.strokeWidth = height + 'px';
+                svg.appendChild(line);
+                */
+            }
+        }
+
+        function corrs(div, arr, min, max) {
+            for (let i = 0, length = arr.length; i < length; i++) {
+                const corr = arr[i];
+                const el = document.createElement('div');
+                el.id = corr.id;
+                el.innerHTML = '<span>' + corr.label + '</span>';
+                let height = hmax * (corr.count / max) + 4;
+                if (height < hmin) height = hmin;
+                el.style.height = height + 'px';
+                el.dataset.rels = corr.rels;
+                div.appendChild(el);
+            }
+        }
+    }
 
 
     /**
@@ -411,6 +537,7 @@ const Elicom = function() {
         update: update,
         urlUp: urlUp,
         suggestInit: suggestInit,
+        biject: biject,
     }
 }();
 
@@ -472,6 +599,7 @@ const Bislide = function() {
 
 // update specific to this interface
 (function() {
+    window.addEventListener('resize', Elicom.biject);
     // bottom script
     Bislide.init();
     const form = document.forms['elicom'];

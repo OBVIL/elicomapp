@@ -117,16 +117,16 @@ while (i < max) {
     // show simple metadata
     out.println("<article class=\"kwic\">");
     out.println("  <header>");
-    out.print("    <small>"+(i)+".</small>");
     out.println(" <!-- docId=" + docId + " -->");
     out.print("    <a href=\"" + href + "\">");
+    out.print("    <b class=\"n\">"+(i)+")</b>");
     out.print(doc.get("bibl"));
     out.println("</a>");
     out.println("  </header>");
     if (lines != null) {
         out.println("  <div class=\"lines\">");
         for (String l: lines) {
-            out.println("    <div class=\"line\"><small>"+ ++occ +"</small>"+l+"</div>");
+            out.println("    <div class=\"line\"><small>"+ ++occ +".</small>"+l+"</div>");
         }
         out.println("  </div>");
     }
