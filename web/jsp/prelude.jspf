@@ -14,6 +14,7 @@
 <%@ page import="org.apache.lucene.search.*"%>
 <%@ page import="org.apache.lucene.search.BooleanClause.Occur"%>
 <%@ page import="org.apache.lucene.util.BitSet"%>
+<%@ page import="org.apache.lucene.util.FixedBitSet"%>
 
 <%@ page import="org.json.*" %>
 
