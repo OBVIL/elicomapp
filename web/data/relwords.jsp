@@ -35,6 +35,8 @@ OptionMI mi = (OptionMI) tools.getEnum("mi", OptionMI.JACCARD);
 //-----------
 // check parameters
 //-----------
+int wc;
+boolean first;
 
 final FieldText ftext = alix.fieldText(field);
 final FieldInt fyear = alix.fieldInt(YEAR);
@@ -42,6 +44,22 @@ final FieldInt fyear = alix.fieldInt(YEAR);
 final Set<Integer> corres1 = tools.getIntSet("corres1");
 final Set<Integer> corres2 = tools.getIntSet("corres2");
 if (corres1.size() < 1 && corres2.size() < 1) {
+    out.println("<div class=\"center\">");
+    // mots
+    FormEnum forms = ftext.forms(null, tags, OptionDistrib.TFIDF);
+    forms.sort(FormEnum.Order.SCORE);
+    wc = wordCount * 2;
+    first = true;
+    while (forms.hasNext()) {
+        forms.next();
+        if (--wc < 0) break;
+        int formId = forms.formId();
+        if (first) first = false;
+        else out.println(", ");
+        out.print("<a class=\"w\" title=\"fréquence : " + forms.freq() + ", score : " + forms.score() +", rang : " + formId +"\">" + forms.form() + "</a>");
+    }
+    out.println("</div>");
+    
     return;
 }
 
@@ -67,7 +85,6 @@ Query qYear = yearQuery(alix, tools);
 BooleanQuery.Builder builder;
 BooleanQuery.Builder b;
 Query q;
-boolean first;
 
 // build left query
 
@@ -104,7 +121,6 @@ Query rightQuery = rewrite(builder.build());
 
 
 int[] minmax;
-int wc;
 FormEnum forms;
 
 

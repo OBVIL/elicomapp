@@ -253,6 +253,8 @@ const Elicom = function() {
             if (src.tagName.toLowerCase() != 'a') return;
             form.q.value = src.innerText;
             upDiv(conc);
+            biject();
+            urlUp(); // p
         });
     }
 
