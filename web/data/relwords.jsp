@@ -41,12 +41,16 @@ boolean first;
 final FieldText ftext = alix.fieldText(field);
 final FieldInt fyear = alix.fieldInt(YEAR);
 
+Query qYear = qYear(alix, tools);
 final Set<Integer> corres1 = tools.getIntSet("corres1");
 final Set<Integer> corres2 = tools.getIntSet("corres2");
 if (corres1.size() < 1 && corres2.size() < 1) {
     out.println("<div class=\"center\">");
+    
+    BitSet filter = null;
+    if (qYear != null) filter = filter(alix, qYear);
     // mots
-    FormEnum forms = ftext.forms(null, tags, OptionDistrib.TFIDF);
+    FormEnum forms = ftext.forms(filter, tags, OptionDistrib.TFIDF);
     forms.sort(FormEnum.Order.SCORE);
     wc = wordCount * 2;
     first = true;
@@ -79,7 +83,6 @@ for (int formId: corres2) {
 final FieldFacet senderFacet = alix.fieldFacet(SENDER);
 final FieldFacet receiverFacet = alix.fieldFacet(RECEIVER);
 
-Query qYear = yearQuery(alix, tools);
 
 
 BooleanQuery.Builder builder;
