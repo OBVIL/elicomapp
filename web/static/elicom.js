@@ -464,9 +464,9 @@ const Elicom = function() {
                 el.className = "corr";
                 el.id = corr.id;
                 let html = '<span>';
-                if (!right) html += 'de ';
+                // if (!right) html += 'de ';
                 // if (right) html += '<small class="count">(' + corr.count + ') </small>';
-                if (right) html += 'à ';
+                // if (right) html += 'à ';
                 html += corr.label;
                 // if (!right) html += ' <small class="count">(' + corr.count + ')</small>';
                 html += '</span>';
