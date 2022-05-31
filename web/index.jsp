@@ -81,7 +81,7 @@ div.line {
                     <input name="year1" step="1" value="${year1}" min="${yearmin}" max="${yearmax}" type="range"/>
                     <input name="year2" step="1" value="${year2}" min="${yearmin}" max="${yearmax}" type="range"/>
                     <span class="values"></span>
-                    <button type="submit" onclick="this.form.q.value=''">🞭</button>
+                    <button type="button" onclick="this.form.q.value=''; this.form.submit();">🞭</button>
                     <input name="q" value="${q}" type="text" placeholder="Mot ?"/>
                     <button type="submit">▶</button>
                 </div>
