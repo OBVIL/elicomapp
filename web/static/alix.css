@@ -625,6 +625,7 @@ main {
 
 article.text,
 div.text {
+    margin-top: 2rem;
     font-size: 19px;
     width: 50rem;
     padding: 2rem;

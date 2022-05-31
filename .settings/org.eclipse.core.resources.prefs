@@ -1,2 +1,5 @@
 eclipse.preferences.version=1
+encoding//web/*.html=UTF-8
+encoding//web/aide.html=UTF-8
+encoding//web/apropos.html=UTF-8
 encoding/<project>=UTF-8

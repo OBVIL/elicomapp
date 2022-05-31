@@ -7,8 +7,21 @@ html {
     position: relative;
 }
 
+nav.tabs a,
+nav.tabs {
+    background-color: var(--bghi);
+    color: var(--bglo);
+}
+
+nav.tabs a.selected,
+nav.tabs a:hover {
+    border-bottom: 1px solid var(--bglo);
+    background-color: var(--bglo);
+    color: var(--text);
+}
+
 form.elicom {
-    margin-top: 1rem;
+    margin: 1rem 0;
 }
 
 form h5 {
@@ -16,9 +29,17 @@ form h5 {
 }
 
 form.elicom .arelation {
-    margin: 1rem;
+    margin: 0.2rem 1rem;
     display: flex;
     justify-content: space-between;
+}
+
+form.elicom input[name=q] {
+    width: 25rem;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0 1rem;
 }
 
 #relwords {
