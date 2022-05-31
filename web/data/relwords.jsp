@@ -107,34 +107,29 @@ int[] minmax;
 int wc;
 FormEnum forms;
 
-BitSet leftFilter = filter(alix, leftQuery);
-FormEnum leftForms = ftext.forms(leftFilter, tags, distrib);
-leftForms.sort(FormEnum.Order.SCORE);
-BitSet rightFilter = filter(alix, rightQuery);
-FormEnum rightForms = ftext.forms(rightFilter, tags, distrib);
-rightForms.sort(FormEnum.Order.SCORE);
 
 
 // left
+BitSet leftFilter = filter(alix, leftQuery);
+FormEnum leftForms = ftext.forms(leftFilter, tags, distrib);
 out.println("<div class=\"left\" style=\"text-align: left\">");
-
-
 out.print("<h5 title=\"" + leftQuery +"\">" + leftFilter.cardinality() + " lettres ");
 minmax = fyear.minmax(leftFilter);
-out.print( minmax[0] + "–" + minmax[1]);
+out.print( ((minmax[0]==Integer.MAX_VALUE)?"":minmax[0]) + "–" + ((minmax[1]==Integer.MIN_VALUE)?"":minmax[1]));
 out.println("</h5>");
-
-
-wc = wordCount;
-first = true;
-forms = leftForms;
-while (forms.hasNext()) {
-    forms.next();
-    if (--wc < 0) break;
-    int formId = forms.formId();
-    if (first) first = false;
-    else out.println(", ");
-    out.print("<a class=\"w\" title=\"fréquence : " + forms.freq() + ", score : " + forms.score() +", rang : " + formId +"\">" + forms.form() + "</a>");
+if (leftFilter.cardinality() > 0) {
+    leftForms.sort(FormEnum.Order.SCORE);
+    wc = wordCount;
+    first = true;
+    forms = leftForms;
+    while (forms.hasNext()) {
+        forms.next();
+        if (--wc < 0) break;
+        int formId = forms.formId();
+        if (first) first = false;
+        else out.println(", ");
+        out.print("<a class=\"w\" title=\"fréquence : " + forms.freq() + ", score : " + forms.score() +", rang : " + formId +"\">" + forms.form() + "</a>");
+    }
 }
 
 
@@ -168,21 +163,28 @@ out.println("</div>");
 
 // right
 out.println("<div class=\"right\" style=\"text-align: right\">");
+BitSet rightFilter = filter(alix, rightQuery);
 out.print("<h5 title=\"" + rightQuery +"\">" + rightFilter.cardinality() + " lettres ");
 minmax = fyear.minmax(rightFilter);
-out.print(minmax[0] + "–" + minmax[1]);
+out.print( ((minmax[0]==Integer.MAX_VALUE)?"":minmax[0]) + "–" + ((minmax[1]==Integer.MIN_VALUE)?"":minmax[1]));
 out.println("</h5>");
 
-wc = wordCount;
-first = true;
-forms = rightForms;
-while (forms.hasNext()) {
-    forms.next();
-    int formId = forms.formId();
-    if (--wc < 0) break;
-    if (first) first = false;
-    else out.println(", ");
-    out.print("<a class=\"w\" title=\"fréquence : " + forms.freq() + ", score : " + forms.score() +", rang : " + formId +"\">" + forms.form() + "</a>");
+if (rightFilter.cardinality() > 0) {
+    FormEnum rightForms = ftext.forms(rightFilter, tags, distrib);
+    rightForms.sort(FormEnum.Order.SCORE);
+
+    wc = wordCount;
+    first = true;
+    forms = rightForms;
+    while (forms.hasNext()) {
+        forms.next();
+        int formId = forms.formId();
+        if (--wc < 0) break;
+        if (first) first = false;
+        else out.println(", ");
+        out.print("<a class=\"w\" title=\"fréquence : " + forms.freq() + ", score : " + forms.score() +", rang : " + formId +"\">" + forms.form() + "</a>");
+    }
+    
 }
 out.println("</div>");
 

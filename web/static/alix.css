@@ -11,7 +11,8 @@
     --borderlo: #fff;
     --textinv: #000;
     --link: #404080;
-    --bg2: #608060;
+    --bghover: rgba(255, 255, 255, 0.3);
+    --bg2: #404080;
     --text2: #000;
     --texthi2: #fff;
     --textinv2: #fff;
@@ -558,6 +559,8 @@ button[type="submit"].right {
     float: right;
 }
 
+button[type="button"],
+button[type="reset"],
 button[type="submit"] {
     background: transparent;
     color: var(--text);
@@ -572,6 +575,8 @@ button[type="submit"] {
   */
 }
 
+button[type="button"]:hover,
+button[type="reset"]:hover,
 button[type="submit"]:hover {
     background: var(--text);
     color: var(--bg);

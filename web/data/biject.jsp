@@ -28,7 +28,14 @@ IndexSearcher searcher = alix.searcher();
 CollectorBits colBits = new CollectorBits(searcher);
 searcher.search(q, colBits);
 final BitSet bits = colBits.bits();
+
+if (bits.cardinality() < 1) {
+    out.println("NO DOCS FOUND !");
+    return;
+}
+
 // loop on relevant docs to get edges
+FieldFacet corresField = alix.fieldFacet(CORRES);
 FieldFacet senderField = alix.fieldFacet(SENDER);
 BitSet senderBits = new FixedBitSet(senderField.size()); // to count senders
 FieldFacet receiverField = alix.fieldFacet(RECEIVER);
@@ -102,7 +109,9 @@ List<Map.Entry<Integer, Long>> list = new ArrayList<>(sendersCount.entrySet());
 Collections.sort(list, new Comparator<Map.Entry<Integer, Long>>() {
     @Override
     public int compare(Map.Entry<Integer, Long> a, Map.Entry<Integer, Long> b) {
-        return b.getValue().compareTo(a.getValue());
+        int ret = b.getValue().compareTo(a.getValue());
+        if (ret != 0) return ret;
+        return a.getKey().compareTo(b.getKey());
     }
 });
 n = 1;
@@ -115,11 +124,13 @@ for (Map.Entry<Integer, Long> entry : list) {
     if (count > max) max = count;
     if (first) first = false;
     else out.append(",\n");
+    String form = senderField.form(id);
     out.print("    {\"n\": " + n
         + ", \"id\": \"s" + id + "\""
-        + ", \"label\": " + JSONWriter.valueToString(senderField.form(id))
+        + ", \"label\": " + JSONWriter.valueToString(form)
         + ", \"count\": " + count
         + ", \"rels\": " + sendersRels.get(id)
+        + ", \"corres\": " + corresField.formId(form)
         + "}");
     n++;
 }
@@ -131,7 +142,9 @@ list = new ArrayList<>(receiversCount.entrySet());
 Collections.sort(list, new Comparator<Map.Entry<Integer, Long>>() {
     @Override
     public int compare(Map.Entry<Integer, Long> a, Map.Entry<Integer, Long> b) {
-        return b.getValue().compareTo(a.getValue());
+        int ret = b.getValue().compareTo(a.getValue());
+        if (ret != 0) return ret;
+        return a.getKey().compareTo(b.getKey());
     }
 });
 n = 1;
@@ -144,11 +157,13 @@ for (Map.Entry<Integer, Long> entry : list) {
     if (count > max) max = count;
     if (first) first = false;
     else out.append(",\n");
+    final String form = receiverField.form(id);
     out.print("    {\"n\": " + n
         + ", \"id\": \"r" + id + "\""
-        + ", \"label\": " + JSONWriter.valueToString(receiverField.form(id))
+        + ", \"label\": " + JSONWriter.valueToString(form)
         + ", \"count\": " + count
         + ", \"rels\": " + receiversRels.get(id)
+        + ", \"corres\": " + corresField.formId(form)
         + "}");
     n++;
 }

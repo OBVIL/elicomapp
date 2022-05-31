@@ -93,7 +93,7 @@ const Elicom = function() {
         } else { // ?? bad !
             corres.innerHTML = data.id + hits;
         }
-        corres.dataset.id = data.id;
+        corres.dataset.value = data.id;
         corres.addEventListener('click', corresPush);
         corres.input = suggest.input;
         suggest.appendChild(corres);
@@ -164,23 +164,43 @@ const Elicom = function() {
      */
     function corresPush(e) {
         const corres = e.currentTarget;
-        const label = document.createElement("label");
-        label.className = 'corres';
+        const name = corres.input.id;
+        const value = corres.dataset.value;
+        const label = corres.textContent.replace(/ *\(\d+\) *$/, '');
+        corresIns(name, value, label);
+        corres.input.focus();
+        corres.input.suggest.hide();
+    }
+
+    /**
+     * Insert a corres field
+     * @param {*} name 
+     * @param {*} id 
+     * @param {*} label 
+     * @param {*} point 
+     */
+    function corresIns(name, value, label) {
+        // point from where insert before the field
+        const point = document.getElementById(name);
+        if (!point) {
+            console.log("[Elicom] suggest insert, source input not found for @id=" + name);
+            return;
+        }
+
+        const el = document.createElement("label");
+        el.className = 'corres';
         const a = document.createElement("a");
         a.innerText = '🞭';
         a.className = 'inputDel';
         a.addEventListener('click', inputDel);
-        label.appendChild(a);
+        el.appendChild(a);
         const input = document.createElement("input");
-        input.name = corres.input.dataset.name;
+        input.name = name;
         input.type = 'hidden';
-        input.value = corres.dataset.id;
-        label.appendChild(input);
-        const text = document.createTextNode(corres.textContent.replace(/ *\(\d+\) *$/, ''));
-        label.appendChild(text);
-        corres.input.parentNode.insertBefore(label, corres.input);
-        corres.input.focus();
-        corres.input.suggest.hide();
+        input.value = value;
+        el.appendChild(input);
+        el.appendChild(document.createTextNode(label));
+        point.parentNode.insertBefore(el, point);
         update(true); // update interface
     }
 
@@ -333,9 +353,6 @@ const Elicom = function() {
      * Draw a biject graph, according to form param
      */
     function biject(id = 'biject') {
-
-        console.log("Biject ?");
-
         const cont = document.getElementById(id);
         if (!cont) return;
         let els;
@@ -366,7 +383,7 @@ const Elicom = function() {
             const min = json.meta.min;
             const max = json.meta.max;
             senders.innerHTML = '<header>Expéditeurs</header>';
-            corrs(senders, json.data.senders, min, max);
+            corrs(senders, json.data.senders, max);
             let more = json.meta.senders;
             more = more - json.data.senders.length;
             if (more > 0) {
@@ -376,7 +393,7 @@ const Elicom = function() {
                 senders.appendChild(el);
             }
             receivers.innerHTML = '<header>Destinataires</header>';
-            corrs(receivers, json.data.receivers, min, max);
+            corrs(receivers, json.data.receivers, max, true);
             more = json.meta.receivers;
             more = more - json.data.receivers.length;
             if (more > 0) {
@@ -440,18 +457,36 @@ const Elicom = function() {
             }
         }
 
-        function corrs(div, arr, min, max) {
+        function corrs(div, arr, max, right = false) {
             for (let i = 0, length = arr.length; i < length; i++) {
                 const corr = arr[i];
                 const el = document.createElement('div');
+                el.className = "corr";
                 el.id = corr.id;
-                el.innerHTML = '<span>' + corr.label + '</span>';
+                let html = '<span>';
+                if (right) html += '<small class="count">(' + corr.count + ') </small>';
+                html += corr.label;
+                if (!right) html += ' <small class="count">(' + corr.count + ')</small>';
+                html += '</span>';
+                el.innerHTML = html;
                 let height = hmax * (corr.count / max) + 4;
                 if (height < hmin) height = hmin;
                 el.style.height = height + 'px';
                 el.dataset.rels = corr.rels;
+                el.addEventListener('click', corrIns);
+                el.dataset.corres = corr.corres;
+                if (right) el.dataset.name = 'corres2';
+                else el.dataset.name = 'corres1';
                 div.appendChild(el);
             }
+        }
+
+        function corrIns(e) {
+            const div = e.currentTarget;
+            const name = div.dataset.name;
+            const value = div.dataset.corres;
+            const label = div.textContent.replace(/ *\(\d+\) */, '');
+            corresIns(name, value, label);
         }
     }
 
@@ -473,14 +508,14 @@ const Elicom = function() {
             console.log("[Elicom] No @data-url to get data from\n" + input);
             return;
         }
-        if (!input.dataset.name) {
-            console.log("[Elicom] No @data-name to create params\n" + input);
+        if (!input.id) {
+            console.log("[Elicom] No @id, required to create params\n" + input);
             return;
         }
         input.autocomplete = 'off';
         // create suggest
         const suggest = document.createElement("div");
-        suggest.className = "suggest " + input.dataset.name;
+        suggest.className = "suggest " + input.id;
         input.parentNode.insertBefore(suggest, input.nextSibling);
         input.suggest = suggest;
         suggest.input = input;
@@ -528,16 +563,16 @@ const Elicom = function() {
     }
 
     return {
+        biject: biject,
+        divSetup: divSetup,
         graphInit: graphInit,
         graphUp: graphUp,
-        words: words,
         init: init,
         inputDel: inputDel,
-        divSetup: divSetup,
         update: update,
         urlUp: urlUp,
         suggestInit: suggestInit,
-        biject: biject,
+        words: words,
     }
 }();
 
@@ -599,7 +634,9 @@ const Bislide = function() {
 
 // update specific to this interface
 (function() {
-    window.addEventListener('resize', Elicom.biject);
+    window.addEventListener('resize', function(e) {
+        Elicom.biject();
+    });
     // bottom script
     Bislide.init();
     const form = document.forms['elicom'];

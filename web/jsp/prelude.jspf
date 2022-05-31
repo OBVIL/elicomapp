@@ -129,6 +129,59 @@ public Query yearQuery(Alix alix, JspTools tools) throws IOException
     if (year2 < year1) year2 = year1;
     return IntPoint.newRangeQuery(YEAR, year1, year2);
 }
+
+public Query corresQuery(Alix alix, JspTools tools) throws IOException
+{
+    final Set<Integer> corres1 = tools.getIntSet(CORRES1);
+    final Set<Integer> corres2 = tools.getIntSet(CORRES2);
+    if (corres1.size() < 1 && corres2.size() < 1) {
+        return null;
+    }
+    final FieldFacet corresFacet = alix.fieldFacet(CORRES);
+    BooleanQuery.Builder corrBuilder = new BooleanQuery.Builder();
+    final List<String> c1Forms = new ArrayList<>(corres1.size());
+    for (int formId: corres1) {
+        String form = corresFacet.form(formId);
+        if (form == null) continue;
+        c1Forms.add(form);
+    }
+    final List<String> c2Forms = new ArrayList<>(corres2.size());
+    for (int formId: corres2) {
+        String form = corresFacet.form(formId);
+        if (form == null) continue;
+        c2Forms.add(form);
+    }
+    BooleanQuery.Builder builder = new BooleanQuery.Builder();
+    
+    Query q;
+    BooleanQuery.Builder b;
+    
+    b = new BooleanQuery.Builder();
+    q = orQ(SENDER, c1Forms);
+    if (q != null) b.add(q, Occur.MUST);
+    q = orQ(RECEIVER, c2Forms);
+    if (q != null) b.add(q, Occur.MUST);
+    q = rewrite(b.build());
+    if (q != null) builder.add(q, Occur.SHOULD);
+    
+    b = new BooleanQuery.Builder();
+    q = orQ(RECEIVER, c1Forms);
+    if (q != null) b.add(q, Occur.MUST);
+    q = orQ(SENDER, c2Forms);
+    if (q != null) b.add(q, Occur.MUST);
+    q = rewrite(b.build());
+    if (q != null) builder.add(q, Occur.SHOULD);
+
+    return rewrite(builder.build());
+}
+
+private Query orQ(String field, List<String> values) {
+    BooleanQuery.Builder b = new BooleanQuery.Builder();
+    for (String form: values) b.add(new TermQuery(new Term(field, form)), Occur.SHOULD);
+    Query q = rewrite(b.build());
+    return q;
+}
+
  /**
  * Centralized build of a query fron request params
  */
@@ -139,7 +192,15 @@ public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOExcepti
     int clauses = 0;
     BooleanQuery.Builder qbuild = new BooleanQuery.Builder();
 
-    for (String par: new String[]{CORRES, CORRES1, CORRES2, RECEIVER, SENDER}) {
+    
+    
+    if (pars.contains(CORRES1) && pars.contains(CORRES2)) {
+        Query q = corresQuery(alix, tools);
+        if (q != null) qbuild.add(q, Occur.MUST);
+    }
+    
+    /*
+    for (String par: new String[]{RECEIVER, SENDER}) {
         if (!pars.contains(par)) continue;
         final Set<Integer> idSet = tools.getIntSet(par);
         if (idSet.size() < 1) continue;
@@ -163,6 +224,7 @@ public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOExcepti
             qbuild.add(query, Occur.MUST);
         }
     }
+    */
     
     // dates
     if (pars.contains(DATE) || pars.contains(DATE1) || pars.contains(DATE2)) {

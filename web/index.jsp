@@ -81,6 +81,7 @@ div.line {
                     <input name="year1" step="1" value="${year1}" min="${yearmin}" max="${yearmax}" type="range"/>
                     <input name="year2" step="1" value="${year2}" min="${yearmin}" max="${yearmax}" type="range"/>
                     <span class="values"></span>
+                    <button type="submit" onclick="this.form.q.value=''">🞭</button>
                     <input name="q" value="${q}" type="text" placeholder="Mot ?"/>
                     <button type="submit">▶</button>
                 </div>
@@ -88,13 +89,13 @@ div.line {
             <div class="arelation">
                 <fieldset class="multiple left">
                     ${corres1}
-                    <input placeholder="Correspondant ?" type="text" class="multiple" data-url="data/corres1.ndjson" data-name="corres1"/>
+                    <input placeholder="Correspondant ?" type="text" class="multiple" data-url="data/corres1.ndjson" id="corres1" data-name="corres1"/>
                 </fieldset>
                 <div id="relwords" data-url="data/relwords">
                 </div>
                 <fieldset class="multiple right">
                     ${corres2}
-                    <input placeholder="Correspondant ?" type="text" class="multiple" data-url="data/corres2.ndjson" data-name="corres2"/>
+                    <input placeholder="Correspondant ?" type="text" class="multiple" data-url="data/corres2.ndjson" id="corres2" data-name="corres2"/>
                 </fieldset>
             </div>
         </form>

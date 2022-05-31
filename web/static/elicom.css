@@ -249,3 +249,13 @@ header .receiver {
 #biject .relations polygon {
     fill: rgba(0, 0, 0, 0.2);
 }
+
+#biject .corr {
+    cursor: pointer;
+}
+
+#biject .corr:hover {
+    cursor: pointer;
+    background-color: var(--bghover);
+    color: var(--text);
+}
