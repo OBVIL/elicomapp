@@ -211,7 +211,10 @@ header .receiver {
     position: relative;
     flex-grow: 4;
     min-width: 100px;
-    background-color: #fff;
+}
+
+#biject .relations polygon {
+    fill: rgba(0, 0, 0, 0.3);
 }
 
 #biject .senders,
@@ -265,10 +268,6 @@ header .receiver {
 
 #biject .receivers>* {
     justify-content: left;
-}
-
-#biject .relations polygon {
-    fill: rgba(0, 0, 0, 0.2);
 }
 
 #biject .corr {

@@ -50,7 +50,7 @@ if (corres1.size() < 1 && corres2.size() < 1) {
     BitSet filter = null;
     if (qYear != null) filter = filter(alix, qYear);
     // mots
-    FormEnum forms = ftext.forms(filter, tags, OptionDistrib.TFIDF);
+    FormEnum forms = ftext.forms(filter, OptionCat.NOSTOP.tags().clearGroup(Tag.VERB), OptionDistrib.TFIDF);
     forms.sort(FormEnum.Order.SCORE);
     wc = wordCount * 2;
     first = true;
