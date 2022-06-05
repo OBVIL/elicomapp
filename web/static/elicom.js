@@ -1,14 +1,52 @@
 'use strict';
 
-const Elicom = function() {
-    /** {HTMLFormElement} form with params to send for queries like conc */
-    var form = false;
-    /** array of {HTMLDivElement} with html updates */
-    var divs = {};
-    /** Sigma instance for this form */
-    var mysig = false;
+/**
+ * Toolkit for some ajax hacks
+ */
+const Ajix = function() {
     const EOF = '\u000A';
+    /**
+     * Get URL and send line by line to a callback function.
+     * “Line” separator could be configured with any string,
+     * this allow to load multiline html chunks 
+     * 
+     * @param {String} url 
+     * @param {function} callback 
+     * @returns 
+     */
+    function loadLines(url, callback, sep = '\n') {
+        return new Promise(function(resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            var start = 0;
+            xhr.onprogress = function() {
+                // loop on separator
+                var end;
+                while ((end = xhr.response.indexOf(sep, start)) >= 0) {
+                    callback(xhr.response.slice(start, end));
+                    start = end + sep.length;
+                }
+            };
+            xhr.onload = function() {
+                let part = xhr.response.slice(start);
+                if (part.trim()) callback(part);
+                // last, send a message to callback
+                callback(EOF);
+                resolve();
+            };
+            xhr.onerror = function() {
+                reject(Error('Connection failed'));
+            };
+            xhr.responseType = 'text';
+            xhr.open('GET', url);
+            xhr.send();
+        });
+    }
 
+    /**
+     * 
+     * @param {*} url 
+     * @param {*} callback 
+     */
     function loadJson(url, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -25,43 +63,126 @@ const Elicom = function() {
     }
 
     /**
-     * Get URL and send line by line to a callback function
-     * @param {String} url 
-     * @param {function} callback 
+     * Append a record to a div
+     * @param {*} html 
      * @returns 
      */
-    function loadLines(url, callback, sep = '\n') {
-        return new Promise(function(resolve, reject) {
-            var xhr = new XMLHttpRequest();
-
-            var start = 0;
-
-            xhr.onprogress = function() {
-                // loop on separator
-                var end;
-                while ((end = xhr.response.indexOf(sep, start)) >= 0) {
-                    callback(xhr.response.slice(start, end));
-                    start = end + sep.length;
-                }
-            };
-
-            xhr.onload = function() {
-                let part = xhr.response.slice(start);
-                if (part.trim()) callback(part);
-                // last, send a message to callback
-                callback(EOF);
-                resolve();
-            };
-
-            xhr.onerror = function() {
-                reject(Error('Connection failed'));
-            };
-
-            xhr.responseType = 'text';
-            xhr.open('GET', url);
-            xhr.send();
-        });
+    function insLine(div, html) {
+        if (!div) { // what ?
+            return false;
+        }
+        // last line, liberate div for next load
+        if (html == EOF) {
+            div.loading = false;
+            return;
+        }
+        div.insertAdjacentHTML('beforeend', html);
     }
+
+    /**
+     * Send query to populate concordance
+     * @param {*} id 
+     * @param {*} form 
+     * @param {*} url 
+     * @param {*} append 
+     * @returns 
+     */
+    function divLoad(id, form, url = null, append = false) {
+        const div = document.getElementById(id);
+        if (!div) { // no pb, it’s another kind of page
+            return;
+        }
+        if (div.loading) return; // still loading
+        if (!url && !div.dataset.url) {
+            console.log('[Elicom] @data-url required <div id="' + id + '" data-url="data/conc">');
+        }
+        if (!url) url = div.dataset.url;
+        if (form) url += "?" + pars(form);
+        div.loading = true;
+        if (!append) {
+            div.innerText = '';
+        }
+        Ajix.loadLines(url, function(html) {
+            insLine(div, html);
+        }, '&#10;');
+    }
+
+    /**
+     * Get form values as url pars
+     */
+    function pars(id, ...include) {
+        let form = document.forms[id];
+        if (!form) form = document.getElementById(id);
+        if (!form) return;
+        const formData = new FormData(form);
+        // delete empty values, be careful, deletion will modify iterator
+        const keys = Array.from(formData.keys());
+        for (const key of keys) {
+            if (include.length > 0 && !include.find(k => k === key)) {
+                formData.delete(key);
+            }
+            if (!formData.get(key)) {
+                formData.delete(key);
+            }
+        }
+        return new URLSearchParams(formData);
+    }
+
+    /**
+     * Check if at least on par is not empty
+     * @param {*} id 
+     * @param  {...any} include 
+     * @returns 
+     */
+    function hasPar(id, ...include) {
+        let form = document.forms[id];
+        if (!form) form = document.getElementById(id);
+        if (!form) return null;
+        if (include.length < 1) return null;
+        const formData = new FormData(form);
+        for (const name of include) {
+            for (const value of formData.getAll(name)) {
+                if (value) return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * For event.target, get first element of name
+     * @param {*} el 
+     * @param {*} name 
+     * @returns 
+     */
+    function selfOrAncestor(el, name) {
+        while (el.tagName.toLowerCase() != name) {
+            el = el.parentNode;
+            if (!el) return false;
+            let tag = el.tagName.toLowerCase();
+            if (tag == 'div' || tag == 'nav' || tag == 'body') return false;
+        }
+        return el;
+    }
+
+    return {
+        divLoad: divLoad,
+        hasPar: hasPar,
+        insLine: insLine,
+        loadLines: loadLines,
+        loadJson: loadJson,
+        pars: pars,
+        selfOrAncestor: selfOrAncestor,
+    }
+
+}();
+
+const Elicom = function() {
+    /** Id of a form with params to send for queries like conc */
+    var form = false;
+    /** Sigma instance for this form */
+    var mysig = false;
+    const EOF = '\u000A';
+
+
 
     /**
      * Append a corres record to suggestions
@@ -114,29 +235,94 @@ const Elicom = function() {
         // search form sender and receiver
         const url = input.dataset.url + "?" + pars;
         suggest.innerText = '';
-        loadLines(url, function(json) {
+        Ajix.loadLines(url, function(json) {
             corresAppend(suggest, json);
         });
     }
 
-    /**
-     * Get form values as url pars
-     */
-    function pars() {
-        const formData = new FormData(form);
-        // delete empty values, be careful, deletion will modify iterator
-        const keys = Array.from(formData.keys());
-        for (const key of keys) {
-            if (!formData.get(key)) formData.delete(key);
-        }
-        return new URLSearchParams(formData);
+    function chronograph(id) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        // clean
+        const ctx = canvas.getContext('2d');
+
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+        const url = canvas.dataset.url + "?" + Ajix.pars(form);
+        let max;
+        let min;
+        let hits;
+        let span;
+        let n = -1;
+        Ajix.loadLines(url, function(line) {
+            if (!line) return;
+            if (!line.trim()) return;
+            n++;
+            if (n == 0) {
+                min = date2float(line);
+                return;
+            }
+            if (n == 1) {
+                max = date2float(line);
+                span = max - min;
+                return;
+            }
+            if (n == 2) {
+                hits = parseInt(line);
+                if (hits > 10000) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.1)';
+                    ctx.lineWidth = 0.5;
+                } else if (hits > 1000) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.2)';
+                    ctx.lineWidth = 1;
+                } else if (hits > 100) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.5)';
+                    ctx.lineWidth = 1;
+                } else {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 1)';
+                    ctx.lineWidth = 2;
+                }
+                const meta = document.querySelector("#navres .meta");
+                if (!meta) return;
+                meta.innerHTML = hits + " lettres ";
+                return;
+            }
+            let x = width * (date2float(line) - min) / span;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.closePath();
+            ctx.stroke();
+
+        });
+
+    }
+
+    function date2float(date) {
+        const months = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let year = parseInt(date.substr(0, 4), 10);
+        let days = 0;
+        let m = parseInt(date.substr(4, 2), 10);
+        if (!m) return year;
+        days = months[m] + parseInt(date.substr(6, 2), 10);
+        return year + (days / 365);
     }
 
     /**
      * Update interface with data
      */
     function update(pushState = false) {
-        for (let key in divs) upDiv(key);
+        Ajix.divLoad('conc', form);
+        // if corres, load relword
+        if (Ajix.hasPar(form, 'corres1', 'corres2')) {
+            Ajix.divLoad('relwords', form);
+        } else {
+            Ajix.divLoad('relwords', form, 'data/chrononymes');
+        }
+        chronograph('chronograph');
         graphUp();
         biject();
         if (pushState) urlUp();
@@ -144,7 +330,7 @@ const Elicom = function() {
 
     function urlUp() {
         const url = new URL(window.location);
-        url.search = pars();
+        url.search = Ajix.pars(form);
         window.history.pushState({}, '', url);
     }
 
@@ -232,82 +418,125 @@ const Elicom = function() {
      * @param {*} form 
      * @returns 
      */
-    function init(el) {
-        if (!el) {
-            console.log('[Elicom] No <form name="elicom"> found to pass params');
-            return;
-        }
-        form = el;
-        form.addEventListener('submit', (e) => {
+    function init(id) {
+        const _form = document.forms[id];
+        if (!_form) _form = document.getElementById(id);
+        if (!_form) return;
+        form = id;
+        _form.addEventListener('submit', (e) => {
             update(true);
             e.preventDefault();
         });
+        if (_form.clear) {
+            _form.clear.addEventListener('click', (e) => {
+                _form.q.value = '';
+                update(true);
+                e.preventDefault();
+            });
+        }
+        // click on timeline to navigate in results
+        const chronograph = document.getElementById('chronograph');
+        if (chronograph) {
+            const min = parseInt(chronograph.dataset.min);
+            const max = parseInt(chronograph.dataset.max);
+            const span = max - min;
+            const width = chronograph.offsetWidth;
+            const tooltip = document.createElement("div");
+            tooltip.classList.add('tooltip');
+            tooltip.style.position = 'absolute';
+            tooltip.style.display = 'none';
+            chronograph.parentElement.insertBefore(tooltip, chronograph);
+
+            const conc = document.getElementById('conc');
+            chronograph.addEventListener('mouseover', (e) => {
+                const x = e.offsetX;
+                const year = min + Math.floor(span * x / width);
+                tooltip.innerHTML = year;
+                tooltip.style.display = 'block';
+
+                if (width - x > tooltip.offsetWidth * 1.2) {
+                    tooltip.classList.remove('right');
+                    tooltip.style.right = '';
+                    tooltip.style.left = x + 'px';
+                } else {
+                    tooltip.classList.add('right');
+                    tooltip.style.left = '';
+                    tooltip.style.right = (width - x) + 'px';
+                }
+
+            });
+            chronograph.addEventListener('mousemove', (e) => {
+                const x = e.offsetX;
+                const year = min + Math.floor(span * x / width);
+                tooltip.innerHTML = year;
+
+                if (width - x > tooltip.offsetWidth * 1.2) {
+                    tooltip.classList.remove('right');
+                    tooltip.style.right = '';
+                    tooltip.style.left = x + 'px';
+                } else {
+                    tooltip.classList.add('right');
+                    tooltip.style.left = '';
+                    tooltip.style.right = (width - x) + 'px';
+                }
+            });
+            chronograph.addEventListener('mouseout', (e) => {
+                tooltip.style.display = 'none';
+            });
+            chronograph.addEventListener('click', (e) => {
+                const x = e.offsetX;
+                const year = min + Math.floor(span * x / width);
+                const formData = new FormData(_form);
+                formData.set('year1', year);
+                if (conc.loading) return;
+                conc.loading = true;
+                conc.innerText = '';
+                const url = conc.dataset.url + '?' + new URLSearchParams(formData);
+                Ajix.loadLines(url, function(html) {
+                    Ajix.insLine(conc, html);
+                }, '&#10;');
+                conc.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        }
+    }
+
+    function scrollToView(element) {
+        var offset = element.offset().top;
+        if (!element.is(":visible")) {
+            element.css({ "visibility": "hidden" }).show();
+            var offset = element.offset().top;
+            element.css({ "visibility": "", "display": "" });
+        }
+
+        var visible_area_start = $(window).scrollTop();
+        var visible_area_end = visible_area_start + window.innerHeight;
+
+        if (offset < visible_area_start || offset > visible_area_end) {
+            // Not in view so scroll to it
+            $('html,body').animate({ scrollTop: offset - window.innerHeight / 3 }, 1000);
+            return false;
+        }
+        return true;
     }
 
     function words(links, conc) {
         const div = document.getElementById(links);
         if (!div) return;
-        if (!form.q) return;
-        div.addEventListener('click', function(event) {
-            const src = event.target || event.srcElement;
-            if (src.tagName.toLowerCase() != 'a') return;
-            form.q.value = src.innerText;
-            upDiv(conc);
+        div.addEventListener('click', function(e) {
+            let a = Ajix.selfOrAncestor(e.target, 'a');
+            if (!a) return;
+            document.forms[form].q.value = a.innerText;
+            Ajix.divLoad(conc, form);
+            chronograph('chronograph');
             biject();
             urlUp(); // p
         });
     }
 
-    /**
-     * Record a div to be updated by an url
-     * @param {*} div 
-     * @returns 
-     */
-    function divSetup(id) {
-        const div = document.getElementById(id);
-        if (!div) { // no pb, it’s another kind of page
-            return;
-        }
-        if (!div.dataset.url) {
-            console.log('[Elicom] @data-url required <div data-url="data/conc">');
-        }
-        divs[id] = div;
-    }
 
-    /**
-     * Send query to populate concordance
-     * @param {boolean} append 
-     */
-    function upDiv(key, append = false) {
-        let div = divs[key];
-        if (!div) return; // disappeared ?
-        if (div.loading) return; // still loading
-        div.loading = true;
-        if (!append) {
-            div.innerText = '';
-        }
-        let url = div.dataset.url + "?" + pars();
-        loadLines(url, function(html) {
-            insLine(div, html);
-        }, '&#10;');
-    }
 
-    /**
-     * Append a record to a div
-     * @param {*} html 
-     * @returns 
-     */
-    function insLine(div, html) {
-        if (!div) { // what ?
-            return false;
-        }
-        // last line, liberate div for next load
-        if (html == EOF) {
-            div.loading = false;
-            return;
-        }
-        div.insertAdjacentHTML('beforeend', html);
-    }
+
+
 
     /**
      *
@@ -325,8 +554,7 @@ const Elicom = function() {
     function graphUp() {
         // populate a graph of words
         if (!mysig) return;
-        const formData = new FormData(form);
-        const pars = new URLSearchParams(formData);
+        const pars = Ajix.pars(form);
         // if query, what should I do ?
         if (formData.get('q')) {
             var url = 'data/cooc.json' + "?" + pars;
@@ -368,18 +596,15 @@ const Elicom = function() {
         if (els.length != 1) return;
         const svg = els[0];
         // get data
-        const formData = new FormData(form);
-        const pars = new URLSearchParams(formData);
+        const pars = Ajix.pars(form);
         var url = 'data/biject.json' + "?" + pars;
         const hmin = 18;
         const hmax = 100;
-        loadJson(url, function(json) {
-            if (!json) {
-                console.log("[Elicom] biject load error url=" + url)
-                return;
-            }
-            if (!json.data) {
-                console.log("[Elicom] grap load error\n" + json)
+        Ajix.loadJson(url, function(json) {
+            if (!json || !json.data) { // 404
+                svg.innerHTML = "";
+                senders.innerText = "";
+                receivers.innerText = "";
                 return;
             }
             const min = json.meta.min;
@@ -414,7 +639,7 @@ const Elicom = function() {
             const x2 = svg.getBoundingClientRect().width;
             for (let i = 0, length = arr.length; i < length; i++) {
                 const edge = arr[i];
-                let height = hmax * (edge.count / max);
+                let height = 0.5 + (hmax - 0.5) * (edge.count / max);
                 let points = '';
                 const sender = document.getElementById(edge['sender']);
                 if (sender.dataset.rels < 2) {
@@ -568,7 +793,6 @@ const Elicom = function() {
 
     return {
         biject: biject,
-        divSetup: divSetup,
         graphInit: graphInit,
         graphUp: graphUp,
         init: init,
@@ -643,11 +867,7 @@ const Bislide = function() {
     });
     // bottom script
     Bislide.init();
-    const form = document.forms['elicom'];
-    if (!form) return;
-    Elicom.init(form); // form is required
-    Elicom.divSetup('relwords');
-    Elicom.divSetup('conc');
+    Elicom.init('elicom'); // form is required
     Elicom.words('relwords', 'conc');
     // Elicom.pushdiv(document.getElementById('table'));
     // Elicom.graphInit(document.getElementById('graph'));
@@ -658,18 +878,6 @@ const Bislide = function() {
     // corres fields to animate
     for (var item of document.querySelectorAll("a.inputDel")) {
         item.addEventListener('click', Elicom.inputDel);
-    }
-    if (form.hstop) {
-        form.hstop.addEventListener('change', Elicom.tableUp);
-        form.hstop.addEventListener('change', Elicom.urlUp);
-    }
-    if (form.cat) {
-        form.cat.addEventListener('change', Elicom.tableUp);
-        form.cat.addEventListener('change', Elicom.urlUp);
-    }
-    if (form.distrib) {
-        form.distrib.addEventListener('change', Elicom.tableUp);
-        form.distrib.addEventListener('change', Elicom.urlUp);
     }
     Elicom.update();
 })();

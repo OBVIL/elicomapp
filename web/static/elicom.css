@@ -22,10 +22,7 @@ nav.tabs a:hover {
 
 form.elicom {
     margin: 1rem 0;
-}
-
-form h5 {
-    margin: 0 0 0.5em 0;
+    position: relative;
 }
 
 form.elicom .arelation {
@@ -35,22 +32,127 @@ form.elicom .arelation {
 }
 
 form.elicom input[name=q] {
-    width: 25rem;
-    text-align: center;
+    width: 15rem;
     font-weight: bold;
     font-size: 1.2rem;
     padding: 0 1rem;
 }
 
+#fields {
+    display: flex;
+    justify-content: space-between;
+}
+
 #relwords {
     margin: 0 1rem 0 1rem;
     display: flex;
-    height: 10rem;
-    overflow: hidden;
+    min-height: 5rem;
+    overflow: auto;
+    width: 100%;
+    flex-grow: 2;
+    justify-content: center;
+    column-gap: 0.5rem;
 }
 
 #relwords a {
     cursor: pointer;
+}
+
+.colchron header {
+    white-space: nowrap;
+}
+
+#relwords .colchron a {
+    display: block;
+    white-space: nowrap;
+    max-width: 15ex;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#conc {
+    min-height: 200vh;
+    padding-top: 5rem;
+}
+
+#navres {
+    display: flex;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    background-color: var(--bglo);
+    padding: 5px 0 5px 1rem;
+    height: 3.5rem;
+    box-shadow: 0px 10px 25px var(--bg);
+}
+
+#navres .tooltip,
+#navres .meta,
+#navres .ticks {
+    font-size: 85%;
+    line-height: 1em;
+    height: 1rem;
+}
+
+#navres .meta {
+    font-weight: bold;
+    color: #000;
+}
+
+.qline {
+    display: flex;
+}
+
+#timeplot {
+    flex-grow: 2;
+    position: relative;
+}
+
+#navres .tooltip {
+    background-color: #fff;
+    top: 0;
+    color: #000;
+    border-left: 1px solid #000;
+    padding: 0 1ex;
+    font-weight: bold;
+}
+
+#navres .tooltip.right {
+    border-left: none;
+    border-right: 1px solid #000;
+}
+
+#chronograph {
+    cursor: pointer;
+    width: 100%;
+    position: relative;
+    height: 1.7rem;
+    border: 1px solid var(--borderlo);
+}
+
+#timeplot .ticks {
+    width: 100%;
+    position: relative;
+}
+
+#timeplot .ticks div {
+    display: inline;
+    color: var(--textlo);
+    position: absolute;
+    padding-left: 0.5ex;
+    border-left: 1px solid var(--borderlo);
+    bottom: 0;
+}
+
+#timeplot .ticks div.first {
+    position: static;
+}
+
+#timeplot .ticks div.last {
+    padding-left: 0;
+    border-left: none;
+    padding-right: 0.5ex;
+    border-right: 1px solid var(--borderlo);
 }
 
 form.elicom fieldset {
@@ -117,6 +219,7 @@ fieldset.multiple label a:hover {
     color: #800;
 }
 
+.values,
 label.corres {
     font-size: 105%;
     font-weight: bold;

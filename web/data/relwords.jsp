@@ -1,13 +1,13 @@
 <%@ page language="java" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@ page import="alix.util.Edge" %>
 <%@ page import="alix.util.EdgeSquare" %>
-
-<%!
-
-
-
-%>
 <%
+
+/**
+ * Words by corres
+ */
+
+
 //-----------
 //data common prelude
 response.setHeader("Access-Control-Allow-Origin", "*"); // cross domain fo browsers
@@ -31,7 +31,7 @@ if (cat != null) tags = cat.tags();
 final int wordCount = tools.getInt("words", 50);
 final int hstop = tools.getInt("hstop", -1);
 OptionDistrib distrib = (OptionDistrib) tools.getEnum("distrib", OptionDistrib.TFIDF);
-OptionMI mi = (OptionMI) tools.getEnum("mi", OptionMI.JACCARD);
+
 //-----------
 // check parameters
 //-----------
@@ -130,17 +130,20 @@ FormEnum forms;
 
 // left
 BitSet leftFilter = filter(alix, leftQuery);
-FormEnum leftForms = ftext.forms(leftFilter, tags, distrib);
 out.println("<div class=\"left\" style=\"text-align: left\">");
-out.print("<h5 title=\"" + leftQuery +"\">" + leftFilter.cardinality() + " lettres ");
+out.print("<header title=\"" + leftQuery +"\">" + leftFilter.cardinality() + " lettres ");
 minmax = fyear.minmax(leftFilter);
 out.print( ((minmax[0]==Integer.MAX_VALUE)?"":minmax[0]) + "–" + ((minmax[1]==Integer.MIN_VALUE)?"":minmax[1]));
-out.println("</h5>");
+out.println("</header>");
+
+
+
 if (leftFilter.cardinality() > 0) {
-    leftForms.sort(FormEnum.Order.SCORE);
+    forms = ftext.forms(leftFilter, tags, distrib);
+    // forms.score(OptionDistrib.BM25);
+    forms.sort(FormEnum.Order.SCORE);
     wc = wordCount;
     first = true;
-    forms = leftForms;
     while (forms.hasNext()) {
         forms.next();
         if (--wc < 0) break;
@@ -183,18 +186,18 @@ out.println("</div>");
 // right
 out.println("<div class=\"right\" style=\"text-align: right\">");
 BitSet rightFilter = filter(alix, rightQuery);
-out.print("<h5 title=\"" + rightQuery +"\">" + rightFilter.cardinality() + " lettres ");
+out.print("<header title=\"" + rightQuery +"\">" + rightFilter.cardinality() + " lettres ");
 minmax = fyear.minmax(rightFilter);
 out.print( ((minmax[0]==Integer.MAX_VALUE)?"":minmax[0]) + "–" + ((minmax[1]==Integer.MIN_VALUE)?"":minmax[1]));
-out.println("</h5>");
+out.println("</header>");
 
 if (rightFilter.cardinality() > 0) {
-    FormEnum rightForms = ftext.forms(rightFilter, tags, distrib);
-    rightForms.sort(FormEnum.Order.SCORE);
+    forms = ftext.forms(rightFilter, tags, distrib);
+    // forms.score(OptionDistrib.BM25);
+    forms.sort(FormEnum.Order.SCORE);
 
     wc = wordCount;
     first = true;
-    forms = rightForms;
     while (forms.hasNext()) {
         forms.next();
         int formId = forms.formId();

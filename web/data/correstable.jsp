@@ -2,22 +2,12 @@
 <%@ page import="alix.util.Edge" %>
 <%@ page import="alix.util.EdgeSquare" %>
 
-<%!
-static final String PERS = "pers";
-static final String WORD = "word";
-
-static class Node {
-    final String id;
-    final String label;
-    final String type;
-    public Node(final String id, final String label, final String type) {
-        this.id = id;
-        this.label = label;
-        this.type = type;
-    }
-}
-%>
 <%
+/**
+ * Words by sender / receiver, not used
+ */
+
+
 //-----------
 //data common prelude
 response.setHeader("Access-Control-Allow-Origin", "*"); // cross domain fo browsers

@@ -27,7 +27,7 @@
     <rule>
         <name>Data multi formats</name>
         <condition type="request-filename" operator="notfile"/>
-        <from>^/data/([^\./]+)(\.ndjson|\.js|\.json)?$</from>
+        <from>^/data/([^\./]+)(\.csv|\.js|\.json|\.ndjson|\.tsv|\.txt)?$</from>
         <set name="path">$0</set>
         <to last="true">/data/$1.jsp?ext=$2</to>
     </rule>

@@ -85,16 +85,20 @@ html {
     scrollbar-color: var(--textlo) var(--bglo);
 }
 
-body::-webkit-scrollbar {
+::-webkit-scrollbar {
     background: var(--bglo);
 }
 
-body::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background: var(--textlo);
     border-radius: 20px;
     /* roundness of the scroll thumb */
     border: 3px solid transparent;
     /* creates padding around scroll thumb */
+}
+
+div::-webkit-scrollbar-thumb {
+    background: var(--bg);
 }
 
 body {
@@ -359,8 +363,8 @@ input[type="range"]::-moz-range-track {
 }
 
 .bislide input[type="range"] {
-    width: 200px;
     /* Specific width is required for Firefox. */
+    width: 200px;
     height: 1.5rem;
     /* Hides the slider */
     -webkit-appearance: none;
@@ -399,6 +403,7 @@ input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     border: 1px solid var(--textlo);
     width: 16px;
+    height: 1.5rem;
     border-radius: 3px;
     background: var(--borderlo);
     cursor: pointer;

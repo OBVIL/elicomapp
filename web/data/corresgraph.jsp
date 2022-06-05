@@ -3,6 +3,10 @@
 <%@ page import="alix.util.EdgeSquare" %>
 
 <%!
+/**
+ * Obsolete code of a failed experiment of graph
+ */
+
 static final String PERS = "pers";
 static final String WORD = "word";
 
