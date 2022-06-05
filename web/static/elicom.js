@@ -419,7 +419,7 @@ const Elicom = function() {
      * @returns 
      */
     function init(id) {
-        const _form = document.forms[id];
+        let _form = document.forms[id];
         if (!_form) _form = document.getElementById(id);
         if (!_form) return;
         form = id;
@@ -598,7 +598,7 @@ const Elicom = function() {
         // get data
         const pars = Ajix.pars(form);
         var url = 'data/biject.json' + "?" + pars;
-        const hmin = 18;
+        const hmin = 16;
         const hmax = 100;
         Ajix.loadJson(url, function(json) {
             if (!json || !json.data) { // 404
@@ -699,8 +699,9 @@ const Elicom = function() {
                 html += '</span>';
                 el.innerHTML = html;
                 let height = hmax * (corr.count / max) + 4;
-                if (height < hmin) height = hmin;
-                el.style.height = height + 'px';
+                if (height > hmin) {
+                    el.style.height = height + 'px';
+                }
                 el.dataset.rels = corr.rels;
                 el.addEventListener('click', corrIns);
                 el.dataset.corres = corr.corres;

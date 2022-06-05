@@ -113,14 +113,6 @@ div.line {
                 <div id="relwords" data-url="data/relwords">
                 </div>
             </div>
-            <div id="biject">
-                <div class="senders">
-                </div>
-                <svg class="relations" xmlns="http://www.w3.org/2000/svg">
-                </svg>
-                <div class="receivers">
-                </div>
-            </div>
             <div id="navres">
                 <div>
                     <div class="meta"> </div>
@@ -134,6 +126,14 @@ div.line {
                     ${scale}
                     <canvas id="chronograph" data-url="data/chronograph.txt" width="2000" height="100" data-min="${yearmin}" data-max="${yearmax}">
                     </canvas>
+                </div>
+            </div>
+            <div id="biject">
+                <div class="senders">
+                </div>
+                <svg class="relations" xmlns="http://www.w3.org/2000/svg">
+                </svg>
+                <div class="receivers">
                 </div>
             </div>
             <div id="conc" data-url="data/conc">

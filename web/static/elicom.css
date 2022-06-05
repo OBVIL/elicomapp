@@ -32,10 +32,11 @@ form.elicom .arelation {
 }
 
 form.elicom input[name=q] {
-    width: 15rem;
+    width: 25rem;
     font-weight: bold;
-    font-size: 1.2rem;
-    padding: 0 1rem;
+    font-size: 1.5rem;
+    line-height: 100%;
+    padding: 0 0.5rem;
 }
 
 #fields {
@@ -71,14 +72,15 @@ form.elicom input[name=q] {
 }
 
 #conc {
+    scroll-margin: 5rem;
     min-height: 200vh;
-    padding-top: 5rem;
 }
 
 #navres {
     display: flex;
     gap: 1rem;
     position: sticky;
+    z-index: 5;
     top: 0;
     background-color: var(--bglo);
     padding: 5px 0 5px 1rem;
@@ -91,7 +93,7 @@ form.elicom input[name=q] {
 #navres .ticks {
     font-size: 85%;
     line-height: 1em;
-    height: 1rem;
+    height: 0.9rem;
 }
 
 #navres .meta {
@@ -126,7 +128,7 @@ form.elicom input[name=q] {
     cursor: pointer;
     width: 100%;
     position: relative;
-    height: 1.7rem;
+    height: 1.9rem;
     border: 1px solid var(--borderlo);
 }
 
@@ -307,7 +309,7 @@ header .receiver {
 #biject {
     position: relative;
     display: flex;
-    margin-bottom: 2rem;
+    margin: 1rem 0 1rem 0;
 }
 
 #biject .relations {
@@ -374,6 +376,7 @@ header .receiver {
 }
 
 #biject .corr {
+    font-size: 85%;
     cursor: pointer;
 }
 
