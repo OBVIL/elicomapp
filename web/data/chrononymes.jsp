@@ -23,9 +23,7 @@ if (mime != null) response.setContentType(mime);
 //-----------
 // parameters
 String field = tools.getString("f", TEXT);
-TagFilter tags = null;
-OptionCat cat = (OptionCat) tools.getEnum("cat", OptionCat.NOSTOP);
-if (cat != null) tags = cat.tags();
+TagFilter tags = OptionCat.NOSTOP.tags().clear(0);
 int rows = tools.getInt("rows", 5, 100, 10);
 int cols = tools.getInt("cols", 1, 50, 15);
 OptionDistrib distrib = OptionDistrib.BM25;
@@ -89,7 +87,7 @@ for (int n = 0; n < hits; n++) {
 }
 
 // get dics from the classifier
-FormEnum[] dics = ftext.forms(cols, classifier, OptionCat.NOSTOP.tags(), null); // 200 ms
+FormEnum[] dics = ftext.forms(cols, classifier, tags, OptionDistrib.TFIDF); // 200 ms
 
 
 // loop on all call
@@ -100,14 +98,14 @@ for(col = 0; col < cols; col++) {
     else if (col == cols-1) out.println("<header class=\"last\">…" + header[col] + "</header>");
     else out.println("<header>" + header[col] + "…</header>");
     FormEnum forms = dics[col];
-    forms.score(OptionDistrib.BM25);
+    // forms.score(OptionDistrib.BM25);
     forms.sort(FormEnum.Order.SCORE, rows); // limit rows is nmore efficient
     int wc = rows;
     while (forms.hasNext()) {
         forms.next();
         if (--wc < 0) break;
         int formId = forms.formId();
-        out.print("<a class=\"w\" title=\"fréquence : " + forms.freq() + ", score : " + forms.score() +", rang : " + formId +"\">" + forms.form() + "</a> ");
+        out.print("<a class=\"w\" title=\"fréquence : " + forms.freq() + ", score : " + forms.score() +", rang : " + formId +", tag :" + Tag.label(forms.tag()) +"\">" + forms.form() + "</a> ");
     }
     out.println("</div>");
     out.flush();
