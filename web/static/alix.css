@@ -318,7 +318,6 @@ button,
 select {
     background: var(--bg);
     color: var(--text);
-    margin: 1px;
     outline: none;
     border-radius: 3px;
     border: 1px solid var(--borderlo);

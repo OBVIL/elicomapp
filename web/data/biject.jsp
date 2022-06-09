@@ -19,7 +19,7 @@ if (mime != null) response.setContentType(mime);
 final int edgesLimit = 20;
 
 // Get a a BitSet of relevant docs
-Query q = query(alix, tools, Set.of(CORRES, CORRES1, CORRES2, DATE, SENDER, Q, RECEIVER, YEAR1, YEAR2));
+Query q = query(alix, tools, Set.of(SENDER, Q, RECEIVER, YEAR1, YEAR2));
 if (q == null) q = new MatchAllDocsQuery(); // if no query, get all docs
 
 

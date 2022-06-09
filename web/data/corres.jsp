@@ -1,11 +1,6 @@
 <%@ page language="java" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%!
 final static Pattern QSPLIT = Pattern.compile("[\\?\\*\\p{L}]+");
-/** Set of http param from which build a query */
-final static Set<String> PARS_SENDER = Set.of(DATE, SENDER);
-final static Set<String> PARS_RECEIVER = Set.of(DATE, RECEIVER);
-final static Set<String> PARS_CORRES1 = Set.of(DATE, CORRES1);
-final static Set<String> PARS_CORRES2 = Set.of(DATE, CORRES2);
 
 %>
 <%
@@ -41,21 +36,21 @@ Set<Integer> idHide = tools.getIntSet(fpar); // ids to not display
 Set<String> qpars = null;
 if (RECEIVER.equals(fpar)) {
     idHide = tools.getIntSet(fpar);
-    qpars = PARS_SENDER;
+    qpars = Set.of(Q, SENDER, YEAR1, YEAR2);
 }
 else if (SENDER.equals(fpar)) {
-    qpars = PARS_RECEIVER;
+    qpars = Set.of(Q, RECEIVER, YEAR1, YEAR2);
     idHide = tools.getIntSet(fpar);
 }
 else if (CORRES1.equals(fpar)) {
     fname = CORRES;
-    qpars = PARS_CORRES2;
+    qpars = Set.of(Q, CORRES2, YEAR1, YEAR2);
     idHide = tools.getIntSet(CORRES1);
     idHide.addAll(tools.getIntSet(CORRES2));
 }
 else if (CORRES2.equals(fpar)) {
     fname = CORRES;
-    qpars = PARS_CORRES1;
+    qpars = Set.of(Q, CORRES1, YEAR1, YEAR2);
     idHide = tools.getIntSet(fpar);
     idHide = tools.getIntSet(CORRES1);
     idHide.addAll(tools.getIntSet(CORRES2));

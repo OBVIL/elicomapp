@@ -31,11 +31,14 @@ form.elicom .arelation {
     justify-content: space-between;
 }
 
+.field {
+    font-size: 25px;
+    font-weight: bold;
+    line-height: 100%;
+}
+
 form.elicom input[name=q] {
     width: 25rem;
-    font-weight: bold;
-    font-size: 1.5rem;
-    line-height: 100%;
     padding: 0 0.5rem;
 }
 
@@ -72,13 +75,14 @@ form.elicom input[name=q] {
 }
 
 #conc {
+    margin-top: 2rem;
     scroll-margin: 5rem;
     min-height: 200vh;
 }
 
+
+/*
 #navres {
-    display: flex;
-    gap: 1rem;
     position: sticky;
     z-index: 5;
     top: 0;
@@ -87,14 +91,7 @@ form.elicom input[name=q] {
     height: 3.5rem;
     box-shadow: 0px 10px 25px var(--bg);
 }
-
-#navres .tooltip,
-#navres .meta,
-#navres .ticks {
-    font-size: 85%;
-    line-height: 1em;
-    height: 0.9rem;
-}
+*/
 
 #navres .meta {
     font-weight: bold;
@@ -103,58 +100,7 @@ form.elicom input[name=q] {
 
 .qline {
     display: flex;
-}
-
-#timeplot {
-    flex-grow: 2;
-    position: relative;
-}
-
-#navres .tooltip {
-    background-color: #fff;
-    top: 0;
-    color: #000;
-    border-left: 1px solid #000;
-    padding: 0 1ex;
-    font-weight: bold;
-}
-
-#navres .tooltip.right {
-    border-left: none;
-    border-right: 1px solid #000;
-}
-
-#chronograph {
-    cursor: pointer;
-    width: 100%;
-    position: relative;
-    height: 1.9rem;
-    border: 1px solid var(--borderlo);
-}
-
-#timeplot .ticks {
-    width: 100%;
-    position: relative;
-}
-
-#timeplot .ticks div {
-    display: inline;
-    color: var(--textlo);
-    position: absolute;
-    padding-left: 0.5ex;
-    border-left: 1px solid var(--borderlo);
-    bottom: 0;
-}
-
-#timeplot .ticks div.first {
-    position: static;
-}
-
-#timeplot .ticks div.last {
-    padding-left: 0;
-    border-left: none;
-    padding-right: 0.5ex;
-    border-right: 1px solid var(--borderlo);
+    align-items: center;
 }
 
 form.elicom fieldset {
@@ -187,6 +133,7 @@ form.elicom .suggest {
     padding-right: 0;
     border-left: none;
     border-right: none;
+    z-index: 100;
 }
 
 form.elicom label,
@@ -309,7 +256,8 @@ header .receiver {
 #biject {
     position: relative;
     display: flex;
-    margin: 1rem 0 1rem 0;
+    margin: 1rem 0 0 0;
+    height: 23rem;
 }
 
 #biject .relations {
@@ -354,7 +302,7 @@ header .receiver {
 
 #biject .receivers header {
     font-weight: bold;
-    justify-content: right;
+    justify-content: rig ht;
 }
 
 #biject .senders .more {
@@ -364,7 +312,6 @@ header .receiver {
 
 #biject .receivers .more {
     border: none;
-    justify-content: right;
 }
 
 #biject .senders>* {
@@ -377,11 +324,152 @@ header .receiver {
 
 #biject .corr {
     font-size: 85%;
-    cursor: pointer;
 }
 
+
+/*
 #biject .corr:hover {
     cursor: pointer;
     background-color: var(--bghover);
     color: var(--text);
+}
+*/
+
+
+/** The timeplot sliders */
+
+.timeplot {
+    --time-height: 28px;
+    --cursor-width: 4.8rem;
+    --cursor-pos: -4.8rem;
+    position: relative;
+    margin: 0 5.1rem 1rem 5.1rem;
+    line-height: 100%;
+}
+
+.timeplot canvas {
+    cursor: pointer;
+    width: 100%;
+    position: relative;
+    height: var(--time-height);
+    border: 1px solid var(--borderlo);
+}
+
+.timeplot .cursor {
+    padding: 0;
+    /** needed */
+    width: var(--cursor-width);
+    background-color: var(--bglo);
+    cursor: col-resize;
+    top: 0;
+    position: absolute;
+    color: #fff;
+}
+
+.timeplot .cursor span {
+    display: block;
+    padding: 0 0.5ex 0px 0.5ex;
+}
+
+.timeplot .cursor input {
+    display: block;
+    border-radius: 0;
+    border: none;
+    text-align: center;
+    height: var(--time-height);
+    padding: 0;
+    width: calc(var(--cursor-width) - 2px);
+}
+
+.timeplot .cursor.left {
+    left: var(--cursor-pos);
+    border-right: solid 3px #fff;
+    text-align: right;
+}
+
+.timeplot .cursor.right {
+    right: var(--cursor-pos);
+    border-left: solid 3px #fff;
+}
+
+.timeplot .ticks {
+    width: 100%;
+    position: relative;
+}
+
+.timeplot .ticks div {
+    display: inline;
+    color: var(--textlo);
+    position: absolute;
+    padding-left: 0.5ex;
+    border-left: 1px solid var(--borderlo);
+    bottom: 0;
+}
+
+.timeplot .ticks div.first {
+    position: static;
+}
+
+.timeplot .ticks div.last {
+    padding-left: 0;
+    border-left: none;
+    padding-right: 0.5ex;
+    border-right: 1px solid var(--borderlo);
+}
+
+.cursor span,
+.timeplot .tooltip,
+.timeplot .ticks {
+    font-size: 85%;
+    line-height: 1em;
+}
+
+.timeplot .tooltip {
+    background-color: #fff;
+    top: 0;
+    color: #000;
+    border-left: 1px solid #000;
+    padding: 0 1ex;
+    font-weight: bold;
+}
+
+.timeplot .tooltip.right {
+    border-left: none;
+    border-right: 1px solid #000;
+}
+
+article.kwic div.line {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 1ex;
+}
+
+article.kwic div.line>* {
+    display: inline-block;
+    text-align: left;
+}
+
+article.kwic div.line .date {
+    flex-basis: 10ex;
+}
+
+article.kwic div.line .left {
+    display: inline-block;
+    flex-basis: 50ex;
+    text-align: right;
+}
+
+form .meta {
+    font-weight: bold;
+    padding: 0 1rem;
+}
+
+article.kwic div.line .sender,
+article.kwic div.line .receiver {
+    flex-basis: 15ex;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }

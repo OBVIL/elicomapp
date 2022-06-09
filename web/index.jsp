@@ -9,13 +9,12 @@ request.setAttribute("q", JspTools.escape(request.getParameter(Q)));
 // request.setAttribute(Q, JspTools.escape(request.getParameter(Q)));
 
 // populate form with senders and receivers
-for (String fpar: new String[]{"corres1", "corres2"}) {
-    final String fname = CORRES;
+for (String fpar: new String[]{SENDER, RECEIVER}) {
     String[] ids = request.getParameterValues(fpar);
     if (ids == null) continue;
     StringBuilder sb = new StringBuilder();
     TreeSet<Integer> idSet = new TreeSet<Integer>();
-    final FieldFacet facet = alix.fieldFacet(fname);
+    final FieldFacet facet = alix.fieldFacet(fpar);
     String form = null;
     for (String id: ids) {
         int formId = -1;
@@ -54,7 +53,6 @@ request.setAttribute(YEAR2, year2);
 // produce a year scale
 
 StringBuilder sb = new StringBuilder();
-sb.append("<div class=\"ticks\">\n");
 sb.append("<div class=\"first\" style=\"left: 0%\">" + min + "</div>");
 // loop in years
 final int mod = 10;
@@ -66,67 +64,40 @@ for (; year < (max - mod /2); year += mod) {
 }
 
 sb.append("<div class=\"last\" style=\"right: 0%\">" + max + "</div>");
-sb.append("</div>\n");
 request.setAttribute("scale", sb);
 %>
 <t:elicom>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
     <jsp:attribute name="head">
-    <style>
-span.left {
-    display: inline-block;
-    text-align: right;
-    width: 50ex;
-}
-span.right {
-    display: inline-block;
-    width: 70ex;
-    text-align: left;
-}
-div.line {
-    width: 120ex;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-    </style>
     </jsp:attribute>
     <jsp:body>
         <form class="elicom" name="elicom" action="" autocomplete="off">
-            <div id="fields" class="center">
-                <fieldset class="multiple left">
-                    ${corres1}
-                    <input placeholder="Correspondant ?" type="text" class="multiple" data-url="data/corres1.ndjson" id="corres1" data-name="corres1"/>
-                </fieldset>
-                <div class="bislide">
-                    Dates :
-                    <input name="year1" step="1" value="${year1}" min="${yearmin}" max="${yearmax}" type="range"/>
-                    <input name="year2" step="1" value="${year2}" min="${yearmin}" max="${yearmax}" type="range"/>
-                    <span class="values"></span>
-                </div>
-                <fieldset class="multiple right">
-                    ${corres2}
-                    <input placeholder="Correspondant ?" type="text" class="multiple" data-url="data/corres2.ndjson" id="corres2" data-name="corres2"/>
-                </fieldset>
-            </div>
-            <div class="arelation">
-                <div id="relwords" data-url="data/relwords">
-                </div>
-            </div>
             <div id="navres">
-                <div>
-                    <div class="meta"> </div>
-                    <div class="qline">
-                        <button type="button" name="clear">🞭</button>
-                        <input name="q" value="${q}" type="text" placeholder="Mot ?"/>
-                        <button type="submit">▶</button>
+                <div data-min="${yearmin}" data-max="${yearmax}" id="timeplot" class="timeplot">
+                    <div class="ticks">${scale}</div>
+                    <canvas id="chronograph" data-url="data/chronograph.txt" width="2000" height="100">
+                    </canvas>
+                    <div class="cursor left">
+                        <span>◀ ▶</span>
+                        <input name="year1" class="field" value="${year1}" type="text" />
+                    </div>
+                    <div class="cursor right">
+                        <span>◀ ▶</span>
+                        <input name="year2" class="field" value="${year2}" type="text" />
                     </div>
                 </div>
-                <div id="timeplot">
-                    ${scale}
-                    <canvas id="chronograph" data-url="data/chronograph.txt" width="2000" height="100" data-min="${yearmin}" data-max="${yearmax}">
-                    </canvas>
-                </div>
+            </div>
+            <div id="fields" class="center">
+                <fieldset class="multiple left">
+                <input placeholder="Expéditeur(s)" type="text" class="multiple" data-url="data/sender.ndjson" id="sender" data-name="sender"/>
+                                    
+                    ${sender}
+
+                </fieldset>
+                <fieldset class="multiple right">
+                    ${receiver}
+                    <input placeholder="Destinataires(s)" type="text" class="multiple" data-url="data/receiver.ndjson" id="receiver" data-name="receiver"/>
+                </fieldset>
             </div>
             <div id="biject">
                 <div class="senders">
@@ -134,6 +105,17 @@ div.line {
                 <svg class="relations" xmlns="http://www.w3.org/2000/svg">
                 </svg>
                 <div class="receivers">
+                </div>
+            </div>
+            <div>
+            <!-- 
+                <div class="meta"> </div>
+             -->
+                <div class="qline">
+                    <span class="meta"></span>
+                    <button type="button" name="clear">🞭</button>
+                    <input name="q" class="field" value="${q}" type="text" placeholder="Mot ?"/>
+                    <button type="submit">▶</button>
                 </div>
             </div>
             <div id="conc" data-url="data/conc">

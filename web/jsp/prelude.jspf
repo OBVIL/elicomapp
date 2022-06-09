@@ -175,6 +175,57 @@ public Query corresQuery(Alix alix, JspTools tools) throws IOException
     return rewrite(builder.build());
 }
 
+/**
+ * Build a sender / receiver query
+ */
+public Query srQuery(Alix alix, JspTools tools) throws IOException
+{
+    final Set<Integer> senderIds = tools.getIntSet(SENDER);
+    final Set<Integer> receiverIds = tools.getIntSet(RECEIVER);
+    if (senderIds.size() < 1 && receiverIds.size() < 1) {
+        return null;
+    }
+    final FieldFacet senderFacet = alix.fieldFacet(SENDER);
+    final FieldFacet receiverFacet = alix.fieldFacet(RECEIVER);
+    
+    BooleanQuery.Builder builder = new BooleanQuery.Builder();
+    
+    boolean sended = false;
+    boolean received = false;
+    String form;
+    for (int senderId: senderIds) {
+        form = senderFacet.form(senderId);
+        if (form == null) continue;
+        sended = true;
+        received = false;
+        Query senderQ = new TermQuery(new Term(SENDER, form));
+        for (int receiverId: receiverIds) {
+            form = receiverFacet.form(receiverId);
+            if (form == null) continue;
+            received = true; // has one receiver
+            builder.add(
+                new BooleanQuery.Builder()
+                   .add(senderQ, Occur.MUST)
+                   .add(new TermQuery(new Term(RECEIVER, form)), Occur.MUST)
+                .build(), Occur.SHOULD
+            );
+        }
+        if (!received) builder.add(senderQ, Occur.SHOULD);
+    }
+    if (sended) {
+        return rewrite(builder.build());
+    }
+    // loop only on receiver
+    received = false;
+    for (int receiverId: receiverIds) {
+        form = receiverFacet.form(receiverId);
+        if (form == null) continue;
+        received = true; // has one receiver
+        builder.add(new TermQuery(new Term(RECEIVER, form)), Occur.SHOULD);
+    }
+    return rewrite(builder.build());
+}
+
 private Query orQ(String field, List<String> values) {
     BooleanQuery.Builder b = new BooleanQuery.Builder();
     for (String form: values) b.add(new TermQuery(new Term(field, form)), Occur.SHOULD);
@@ -198,33 +249,11 @@ public Query query(Alix alix, JspTools tools, Set<String> pars) throws IOExcepti
         Query q = corresQuery(alix, tools);
         if (q != null) qbuild.add(q, Occur.MUST);
     }
-    
-    /*
-    for (String par: new String[]{RECEIVER, SENDER}) {
-        if (!pars.contains(par)) continue;
-        final Set<Integer> idSet = tools.getIntSet(par);
-        if (idSet.size() < 1) continue;
-        BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        String field = par;
-        if (CORRES1.equals(par) || CORRES2.equals(par)) field = CORRES;
-        
-        final FieldFacet facet = alix.fieldFacet(field);
-        for (int i: idSet) {
-            String form = facet.form(i);
-            if (form == null) continue;
-            builder.add(new TermQuery(new Term(field, form)), Occur.SHOULD);
-        }
-        BooleanQuery query = builder.build();
-        if (query.clauses().size() < 1) {
-        }
-        else if (query.clauses().size() == 1) {
-            qbuild.add(query.clauses().get(0).getQuery(), Occur.MUST);
-        }
-        else  {
-            qbuild.add(query, Occur.MUST);
-        }
+    // sender - receiver
+    if (pars.contains(SENDER) && pars.contains(RECEIVER)) {
+        Query q = srQuery(alix, tools);
+        if (q != null) qbuild.add(q, Occur.MUST);
     }
-    */
     
     // dates
     if (pars.contains(DATE) || pars.contains(DATE1) || pars.contains(DATE2)) {

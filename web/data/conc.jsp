@@ -113,25 +113,15 @@ while (i < max) {
         lines = doc.kwic(pars.f, include, href.toString(), 200, pars.left, pars.right, gap, expression, repetitions);
         if (lines == null || lines.length < 1) continue;
     }
-    
-    // show simple metadata
-    out.println("<article class=\"kwic\">");
-    out.println("  <header>");
-    out.println(" <!-- docId=" + docId + " -->");
-    out.print("    <a href=\"" + href + "\">");
-    out.print("    <b class=\"n\">"+(i)+")</b>");
-    out.print(doc.get("bibl"));
-    out.println("</a>");
-    out.println("  </header>");
-    if (lines != null) {
-        out.println("  <div class=\"lines\">");
-        for (String l: lines) {
-            out.println("    <div class=\"line\"><small>"+ ++occ +".</small>"+l+"</div>");
-        }
-        out.println("  </div>");
-    }
-    // list of words
-    else {
+    if (lines == null) {
+        out.println("<article class=\"kwic\">");
+        out.println("  <header>");
+        out.println(" <!-- docId=" + docId + " -->");
+        out.print("    <a href=\"" + href + "\">");
+        out.print("    <b class=\"n\">"+(i)+")</b>");
+        out.print(doc.get("bibl"));
+        out.println("</a>");
+        out.println("  </header>");
         out.println("  <div class=\"words\">");
         FormEnum docForms = doc.forms(TEXT, OptionDistrib.CHI2, null);
         docForms.sort(FormEnum.Order.SCORE);
@@ -146,10 +136,32 @@ while (i < max) {
             out.print(docForms.form());
         }
         out.println("  </div>");
+        out.println("</article>");
+    }
+    else {
+        out.println("  <article class=\"kwic\">");
+        for (String l: lines) {
+            out.print("    <div class=\"line\">");
+            out.print("<small>"+ ++occ +".</small>");
+            int date =  Integer.parseInt(doc.get("date"));
+            out.print("<span class=\"date\">" + FieldInt.int2date(date) + "</span>");
+            out.print("<span class=\"sender\" title=\"" + JspTools.escape(doc.get("sender")) + "\">" + doc.get("sender") + "</span>");
+            out.print("<span class=\"receiver\" title=\"" + JspTools.escape(doc.get("receiver")) + "\">" + doc.get("receiver") + "</span>");
+            out.print(l);
+            out.println("</div>");
+        }
+        out.println("  </article>");
+        
+    }
+    /*
+    // show simple metadata
+    // list of words
+    else {
         
     }
     
     out.println("</article>");
+    */
     out.println("&#10;"); // keep that, may be used as a separator
     out.flush(); // send a result
     if (++docs >= pars.limit) break;

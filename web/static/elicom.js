@@ -107,13 +107,22 @@ const Ajix = function() {
         }, '&#10;');
     }
 
+    function blob2form(thing) {
+        if (typeof thing === 'string') {
+            let form = document.forms[thing];
+            if (!form) form = document.getElementById(thing);
+            // check if it is form ?
+            return form;
+        }
+        return thing;
+    }
+
     /**
      * Get form values as url pars
      */
-    function pars(id, ...include) {
-        let form = document.forms[id];
-        if (!form) form = document.getElementById(id);
-        if (!form) return;
+    function pars(form, ...include) {
+        form = blob2form(form);
+        if (!form) return "";
         const formData = new FormData(form);
         // delete empty values, be careful, deletion will modify iterator
         const keys = Array.from(formData.keys());
@@ -134,10 +143,8 @@ const Ajix = function() {
      * @param  {...any} include 
      * @returns 
      */
-    function hasPar(id, ...include) {
-        let form = document.forms[id];
-        if (!form) form = document.getElementById(id);
-        if (!form) return null;
+    function hasPar(form, ...include) {
+        form = blob2form(form);
         if (include.length < 1) return null;
         const formData = new FormData(form);
         for (const name of include) {
@@ -165,6 +172,7 @@ const Ajix = function() {
 
     return {
         divLoad: divLoad,
+        blob2form: blob2form,
         hasPar: hasPar,
         insLine: insLine,
         loadLines: loadLines,
@@ -175,15 +183,378 @@ const Ajix = function() {
 
 }();
 
+const Timeplot = function() {
+    /**
+     * Init a timeplot
+     * @param {} id 
+     * @returns 
+     */
+    function init(timeplot, form) {
+        if (typeof thing === 'string') timeplot = document.getElementById(t);
+        if (!timeplot) return;
+        timeplot.style.position = 'relative'; // ensure
+        timeplot.form = form;
+        const min = parseInt(timeplot.dataset.min, 10);
+        if (isNaN(min)) console.log('[Timeplot] id="' + id + '", a min value is required, ex: data-min="1754"');
+        const max = parseInt(timeplot.dataset.max, 10);
+        if (isNaN(max)) console.log('[Timeplot] id="' + id + '", a max value is required, ex: data-max="1787"');
+        if (isNaN(min) || isNaN(max)) return;
+        const canvas = timeplot.querySelector("canvas");
+        if (canvas) {
+            timeplot.canvas = canvas;
+            canvas.timeplot = timeplot;
+            canvas.form = form;
+            canvas.min = min;
+            canvas.max = max;
+            canvasInit(canvas);
+            // canvas.load(); // no need here, should be done by global update
+        }
+        // get cursors
+        let els = timeplot.querySelectorAll(".cursor");
+        if (els.length == 2) {
+            els[0].right = els[1];
+            els[1].left = els[0];
+            for (let i = 0; i < 2; i++) {
+                els[i].timeplot = timeplot;
+                els[i].canvas = canvas;
+                els[i].addEventListener('mousedown', cursorClick);
+                els[i].input = els[i].querySelector("input");
+                els[i].input.addEventListener('change', cursorChange);
+                els[i].min = min;
+                els[i].max = max;
+            }
+            cursorMove(els[0]); // needs els[1] set
+            cursorMove(els[1]);
+        }
+
+    }
+
+    /**
+     * Update interface
+     */
+    function update() {
+        Elicom.update();
+    }
+
+    /**
+     * 
+     * @param {*} canvas 
+     * @param {*} min 
+     * @param {*} max 
+     */
+    function canvasInit(canvas) {
+        if (!canvas) return;
+        const min = canvas.min;
+        const max = canvas.max;
+        const tooltip = document.createElement("div");
+        tooltip.classList.add('tooltip');
+        tooltip.style.position = 'absolute';
+        tooltip.style.visibility = 'hidden';
+        canvas.parentElement.insertBefore(tooltip, canvas);
+        canvas.tooltip = tooltip;
+        canvas.addEventListener('mouseout', (e) => {
+            tooltip.style.visibility = 'hidden';
+        });
+        canvas.addEventListener('click', canvasClick);
+        canvas.addEventListener('mousemove', canvasMouse);
+        canvas.addEventListener('mouseover', canvasMouse);
+        canvas.load = canvasLoad;
+    }
+
+
+    /**
+     * when mouse down on element attach mouse move and mouse up for document
+     * so that if mouse goes outside element still drags.
+     * Limit to timeplot is not efficient.
+     */
+    function cursorClick(e) {
+        // let click in the input of the cursor
+        let input = Ajix.selfOrAncestor(e.target, 'input');
+        if (input) return;
+        const cursor = e.currentTarget;
+        e.preventDefault();
+        cursor.oldX = e.clientX;
+        const timeplot = cursor.parentNode;
+        document.timeplot = timeplot;
+        document.cursor = cursor;
+        document.onmouseup = cursorDrop;
+        document.onmousemove = cursorDrag;
+    }
+
+    /**
+     * Drag
+     * @param {*} e 
+     */
+    function cursorDrag(e) {
+        const cursor = e.currentTarget.cursor;
+        e.preventDefault();
+        let newX = cursor.oldX - e.clientX; // to calculate how much we have moved
+        cursor.oldX = e.clientX; // store current value to use for next move
+        let left = cursor.offsetLeft - newX;
+        let limit;
+        let x; // get position on which calculate year
+        // left element, has right
+        if (cursor.right) {
+            limit = -cursor.offsetWidth;
+            if (left < limit) left = limit;
+            limit = cursor.timeplot.offsetWidth - cursor.offsetWidth;
+            if (left > limit) left = limit;
+            limit = left + cursor.offsetWidth;
+            if (cursor.right.offsetLeft < limit) {
+                cursor.right.style.left = limit + 'px';
+                cursorValue(cursor.right);
+            }
+
+        } else if (cursor.left) {
+            limit = 0;
+            if (left < limit) left = limit;
+            limit = cursor.timeplot.offsetWidth;
+            if (left > limit) left = limit;
+            limit = left - cursor.left.offsetWidth;
+            if (cursor.left.offsetLeft > limit) {
+                cursor.left.style.left = limit + 'px';
+                cursorValue(cursor.left);
+            }
+        }
+        cursor.style.left = left + "px"; // update left position
+        cursorValue(cursor);
+    }
+
+    /**
+     * Set a value of cursor by position (on drag)
+     * @param {*} cursor 
+     * @returns 
+     */
+    function cursorValue(cursor) {
+        if (!cursor.input) return;
+        let x;
+        if (cursor.right) {
+            x = cursor.offsetLeft + cursor.offsetWidth;
+        } else if (cursor.left) {
+            x = cursor.offsetLeft;
+        }
+        cursor.input.value = x2year(cursor.canvas, x);
+    }
+
+    /**
+     * User change Cursor value by hand
+     * @param {*} e 
+     * @returns 
+     */
+    function cursorChange(e) {
+        const cursor = e.currentTarget.parentElement;
+        cursorMove(cursor);
+        update();
+    }
+    /**
+     * Stop the drag handler
+     * @param {*} e 
+     */
+    function cursorDrop(e) {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        update();
+    }
+
+    /**
+     * Move a cusror by it’s value
+     */
+    function cursorMove(cursor) {
+        let year = parseInt(cursor.input.value, 10);
+        let left;
+        if (cursor.right) {
+            if (isNaN(year) || year < cursor.min) {
+                year = cursor.min;
+                cursor.input.value = year;
+            }
+            let limit = parseInt(cursor.right.input.value, 10);
+            if (isNaN(limit) || limit > cursor.max) limit = cursor.max;
+            if (year > limit) {
+                year = limit;
+                cursor.input.value = year;
+            }
+            left = year2x(cursor.canvas, year) - cursor.offsetWidth;
+
+        } else if (cursor.left) {
+            if (isNaN(year) || year > cursor.max) {
+                year = cursor.max;
+                cursor.input.value = year;
+            }
+            let limit = parseInt(cursor.left.input.value, 10);
+            if (isNaN(limit) || limit < cursor.min) limit = cursor.min;
+            if (year < limit) {
+                year = limit;
+                cursor.input.value = year;
+            }
+            left = year2x(cursor.canvas, year + 0.99);
+        }
+        cursor.style.left = left + 'px';
+
+    }
+
+    /**
+     * Infer a year from a position on the timeplot
+     * @param {*} canvas 
+     * @param {*} x 
+     * @returns 
+     */
+    function x2year(canvas, x) {
+        if (!canvas) return '';
+        const min = canvas.min;
+        const max = canvas.max;
+        const year = min + Math.floor((max - min + 1) * x / canvas.offsetWidth);
+        return year;
+    }
+
+    /**
+     * Infer a position on the timeplot from a year 
+     * @param {*} canvas 
+     * @param {*} year 
+     * @returns 
+     */
+    function year2x(canvas, year) {
+        if (!canvas) return '';
+        const min = canvas.min;
+        const max = canvas.max;
+        const span = (max - min + 1);
+        const x = canvas.offsetWidth * (year - min) / span;
+        return x;
+    }
+
+    /**
+     * Hyper specific 
+     * @param {*} e 
+     * @returns 
+     */
+    function canvasClick(e) {
+        const canvas = e.currentTarget;
+        const year = x2year(canvas, e.offsetX);
+        const form = canvas.form;
+        const conc = document.getElementById('conc');
+        const formData = new FormData(form);
+        formData.set('year1', year);
+        if (conc.loading) return;
+        conc.loading = true;
+        conc.innerText = '';
+        const url = conc.dataset.url + '?' + new URLSearchParams(formData);
+        Ajix.loadLines(url, function(html) {
+            Ajix.insLine(conc, html);
+        }, '&#10;');
+        conc.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    /**
+     * 
+     * @param {*} e 
+     */
+    function canvasMouse(e) {
+        const canvas = e.currentTarget;
+        const x = e.offsetX;
+        const width = canvas.offsetWidth;
+        const year = x2year(canvas, x);
+        const tooltip = canvas.tooltip;
+        tooltip.innerHTML = year;
+        tooltip.style.visibility = "visible";
+        if (width - x > tooltip.offsetWidth * 1.2) {
+            tooltip.classList.remove('right');
+            tooltip.style.right = '';
+            tooltip.style.left = x + 'px';
+        } else {
+            tooltip.classList.add('right');
+            tooltip.style.left = '';
+            tooltip.style.right = (width - x) + 'px';
+        }
+    }
+
+
+
+
+    /**
+     * Load canvas with segments
+     */
+
+    function canvasLoad() {
+        const canvas = this;
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        // clean
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const url = canvas.dataset.url + "?" + Ajix.pars(canvas.form);
+        const max = canvas.max;
+        const min = canvas.min;
+        const span = max - min + 1;
+        let hits;
+        let n = -1;
+
+        Ajix.loadLines(url, function(line) {
+            if (!line) return;
+            if (!line.trim()) return;
+            n++;
+            if (n == 0) {
+                hits = parseInt(line);
+                if (hits > 10000) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.1)';
+                    ctx.lineWidth = 0.5;
+                } else if (hits > 5000) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.2)';
+                    ctx.lineWidth = 0.5;
+                } else if (hits > 1000) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.2)';
+                    ctx.lineWidth = 0.3;
+                } else if (hits > 100) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.5)';
+                    ctx.lineWidth = 1;
+                } else {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 1)';
+                    ctx.lineWidth = 2;
+                }
+                const meta = document.querySelector("form .meta");
+                if (!meta) return;
+                meta.innerHTML = hits + " lettres ";
+                return;
+            }
+            let x = width * (date2float(line) - min) / span;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.closePath();
+            ctx.stroke();
+
+        });
+
+    }
+
+    function date2float(date) {
+        const months = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let year = parseInt(date.substr(0, 4), 10);
+        let days = 0;
+        let m = parseInt(date.substr(5, 2), 10);
+        if (!m) return year;
+        let d = parseInt(date.substr(8, 2), 10);
+        if (isNaN(d)) d = 0;
+        else if (d > 31) d = 30;
+        else d = d - 1;
+        let day = months[m] + d;
+        return year + (day / 365);
+    }
+
+
+
+    return {
+        init: init,
+    }
+}();
+
 const Elicom = function() {
     /** Id of a form with params to send for queries like conc */
     var form = false;
-    /** Sigma instance for this form */
-    var mysig = false;
-    const EOF = '\u000A';
+    /** Register for update */
+    var timeplot;
 
-
-
+    function setTimeplot(div) {
+        timeplot = div;
+    }
     /**
      * Append a corres record to suggestions
      * @param {HTMLDivElement} suggest block where to append suggestions 
@@ -240,90 +611,13 @@ const Elicom = function() {
         });
     }
 
-    function chronograph(id) {
-        const canvas = document.getElementById(id);
-        if (!canvas) return;
-        // clean
-        const ctx = canvas.getContext('2d');
-
-        const width = canvas.width;
-        const height = canvas.height;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
-        const url = canvas.dataset.url + "?" + Ajix.pars(form);
-        let max;
-        let min;
-        let hits;
-        let span;
-        let n = -1;
-        Ajix.loadLines(url, function(line) {
-            if (!line) return;
-            if (!line.trim()) return;
-            n++;
-            if (n == 0) {
-                min = date2float(line);
-                return;
-            }
-            if (n == 1) {
-                max = date2float(line);
-                span = max - min;
-                return;
-            }
-            if (n == 2) {
-                hits = parseInt(line);
-                if (hits > 10000) {
-                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.1)';
-                    ctx.lineWidth = 0.5;
-                } else if (hits > 1000) {
-                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.2)';
-                    ctx.lineWidth = 1;
-                } else if (hits > 100) {
-                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.5)';
-                    ctx.lineWidth = 1;
-                } else {
-                    ctx.strokeStyle = 'rgba(0, 0, 64, 1)';
-                    ctx.lineWidth = 2;
-                }
-                const meta = document.querySelector("#navres .meta");
-                if (!meta) return;
-                meta.innerHTML = hits + " lettres ";
-                return;
-            }
-            let x = width * (date2float(line) - min) / span;
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, height);
-            ctx.closePath();
-            ctx.stroke();
-
-        });
-
-    }
-
-    function date2float(date) {
-        const months = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-        let year = parseInt(date.substr(0, 4), 10);
-        let days = 0;
-        let m = parseInt(date.substr(4, 2), 10);
-        if (!m) return year;
-        days = months[m] + parseInt(date.substr(6, 2), 10);
-        return year + (days / 365);
-    }
-
     /**
      * Update interface with data
      */
-    function update(pushState = false) {
+    function update(pushState = true) {
         Ajix.divLoad('conc', form);
-        // if corres, load relword
-        if (Ajix.hasPar(form, 'corres1', 'corres2')) {
-            Ajix.divLoad('relwords', form);
-        } else {
-            Ajix.divLoad('relwords', form, 'data/chrononymes');
-        }
-        chronograph('chronograph');
-        graphUp();
+        // chronograph('chronograph');
+        if (timeplot) timeplot.canvas.load();
         biject();
         if (pushState) urlUp();
     }
@@ -434,91 +728,13 @@ const Elicom = function() {
                 e.preventDefault();
             });
         }
-        // click on timeline to navigate in results
-        const chronograph = document.getElementById('chronograph');
-        if (chronograph) {
-            const min = parseInt(chronograph.dataset.min);
-            const max = parseInt(chronograph.dataset.max);
-            const span = max - min;
-            const width = chronograph.offsetWidth;
-            const tooltip = document.createElement("div");
-            tooltip.classList.add('tooltip');
-            tooltip.style.position = 'absolute';
-            tooltip.style.display = 'none';
-            chronograph.parentElement.insertBefore(tooltip, chronograph);
-
-            const conc = document.getElementById('conc');
-            chronograph.addEventListener('mouseover', (e) => {
-                const x = e.offsetX;
-                const year = min + Math.floor(span * x / width);
-                tooltip.innerHTML = year;
-                tooltip.style.display = 'block';
-
-                if (width - x > tooltip.offsetWidth * 1.2) {
-                    tooltip.classList.remove('right');
-                    tooltip.style.right = '';
-                    tooltip.style.left = x + 'px';
-                } else {
-                    tooltip.classList.add('right');
-                    tooltip.style.left = '';
-                    tooltip.style.right = (width - x) + 'px';
-                }
-
-            });
-            chronograph.addEventListener('mousemove', (e) => {
-                const x = e.offsetX;
-                const year = min + Math.floor(span * x / width);
-                tooltip.innerHTML = year;
-
-                if (width - x > tooltip.offsetWidth * 1.2) {
-                    tooltip.classList.remove('right');
-                    tooltip.style.right = '';
-                    tooltip.style.left = x + 'px';
-                } else {
-                    tooltip.classList.add('right');
-                    tooltip.style.left = '';
-                    tooltip.style.right = (width - x) + 'px';
-                }
-            });
-            chronograph.addEventListener('mouseout', (e) => {
-                tooltip.style.display = 'none';
-            });
-            chronograph.addEventListener('click', (e) => {
-                const x = e.offsetX;
-                const year = min + Math.floor(span * x / width);
-                const formData = new FormData(_form);
-                formData.set('year1', year);
-                if (conc.loading) return;
-                conc.loading = true;
-                conc.innerText = '';
-                const url = conc.dataset.url + '?' + new URLSearchParams(formData);
-                Ajix.loadLines(url, function(html) {
-                    Ajix.insLine(conc, html);
-                }, '&#10;');
-                conc.scrollIntoView({ behavior: "smooth", block: "start" });
-            });
-        }
     }
-
-    function scrollToView(element) {
-        var offset = element.offset().top;
-        if (!element.is(":visible")) {
-            element.css({ "visibility": "hidden" }).show();
-            var offset = element.offset().top;
-            element.css({ "visibility": "", "display": "" });
-        }
-
-        var visible_area_start = $(window).scrollTop();
-        var visible_area_end = visible_area_start + window.innerHeight;
-
-        if (offset < visible_area_start || offset > visible_area_end) {
-            // Not in view so scroll to it
-            $('html,body').animate({ scrollTop: offset - window.innerHeight / 3 }, 1000);
-            return false;
-        }
-        return true;
-    }
-
+    /**
+     * Click a word and update form
+     * @param {*} links 
+     * @param {*} conc 
+     * @returns 
+     */
     function words(links, conc) {
         const div = document.getElementById(links);
         if (!div) return;
@@ -691,6 +907,7 @@ const Elicom = function() {
                 el.className = "corr";
                 el.id = corr.id;
                 let html = '<span>';
+                // do not displaying counting, it’s visible edges only
                 // if (!right) html += 'de ';
                 // if (right) html += '<small class="count">(' + corr.count + ') </small>';
                 // if (right) html += 'à ';
@@ -703,7 +920,8 @@ const Elicom = function() {
                     el.style.height = height + 'px';
                 }
                 el.dataset.rels = corr.rels;
-                el.addEventListener('click', corrIns);
+                // Motasem don’t like 
+                // el.addEventListener('click', corrIns);
                 el.dataset.corres = corr.corres;
                 if (right) el.dataset.name = 'corres2';
                 else el.dataset.name = 'corres1';
@@ -798,6 +1016,7 @@ const Elicom = function() {
         graphUp: graphUp,
         init: init,
         inputDel: inputDel,
+        setTimeplot: setTimeplot,
         update: update,
         urlUp: urlUp,
         suggestInit: suggestInit,
@@ -863,13 +1082,19 @@ const Bislide = function() {
 
 // update specific to this interface
 (function() {
+    // bottom script
+    const form = document.forms[0];
+    // Build the timeplot
+    const timeplot = document.getElementById('timeplot');
+    Timeplot.init(timeplot, form);
+    Elicom.init('elicom'); // form is required
+    // set timeplot
+    Elicom.setTimeplot(timeplot);
+    Elicom.words('relwords', 'conc');
     window.addEventListener('resize', function(e) {
         Elicom.biject();
+        Timeplot.init(timeplot, form);
     });
-    // bottom script
-    Bislide.init();
-    Elicom.init('elicom'); // form is required
-    Elicom.words('relwords', 'conc');
     // Elicom.pushdiv(document.getElementById('table'));
     // Elicom.graphInit(document.getElementById('graph'));
     const inputs = document.querySelectorAll("input.multiple[data-url]");
@@ -880,5 +1105,5 @@ const Bislide = function() {
     for (var item of document.querySelectorAll("a.inputDel")) {
         item.addEventListener('click', Elicom.inputDel);
     }
-    Elicom.update();
+    Elicom.update(false); // no entry in history
 })();

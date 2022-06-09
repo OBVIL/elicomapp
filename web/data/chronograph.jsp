@@ -45,12 +45,11 @@ if (hits < 1) {
     return; // no docs found
 }
 
-out.println(min);
-out.println(max);
 out.println(hits);
 for (int n = 0; n < hits; n++) {
-    final int date = (Integer)((FieldDoc)docs[n]).fields[0];
-    out.println(date);
+    String date = "" + (Integer)((FieldDoc)docs[n]).fields[0];
+    out.println(date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8));
+    // out.println(date);
     /*
     final String title = FieldInt.int2date(date);
     final float left = Math.round( 10000.0f * (date - min) / span ) / 100.0f;
