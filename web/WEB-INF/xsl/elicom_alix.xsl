@@ -57,17 +57,18 @@ Reçoit une lettre en un seul fichier
           <alix:field name="bibl" type="meta">
             <xsl:if test="tei:correspAction[@type='sent']/tei:date/@when">
               <span class="date">
-                <xsl:value-of select="tei:correspAction[@type='sent']/tei:date/@when"/>
+                <xsl:variable name="date" select="tei:correspAction[@type='sent']/tei:date/@when"/>
+                <xsl:value-of select="substring-before(concat($date, '-00'), '-00')"/>
               </span>
               <xsl:text>, </xsl:text>
             </xsl:if>
-            <xsl:for-each select="(tei:correspAction[@type='sent']/tei:persName)[1]">
+            <xsl:for-each select="(tei:correspAction[@type='sent']/tei:persName)[1][normalize-space(.) != '']">
               <xsl:text>de </xsl:text>
               <b class="sender">
                 <xsl:call-template name="key"/>
               </b>
             </xsl:for-each>
-            <xsl:for-each select="(tei:correspAction[@type='received']/tei:persName)[1]">
+            <xsl:for-each select="(tei:correspAction[@type='received']/tei:persName)[1][normalize-space(.) != '']">
               <xsl:text> à </xsl:text>
               <b class="receiver">
                 <xsl:call-template name="key"/>
