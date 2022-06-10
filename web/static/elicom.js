@@ -1106,6 +1106,25 @@ const Bislide = function() {
     // Elicom.pushdiv(document.getElementById('table'));
     // Elicom.graphInit(document.getElementById('graph'));
     const inputs = document.querySelectorAll("input.multiple[data-url]");
+    const conc = document.getElementById('conc');
+    if (conc) {
+        const name = 'letter';
+        // window.open('', name).close();
+        conc.tab = null;
+        conc.addEventListener('click', function(e) {
+            let a = Ajix.selfOrAncestor(e.target, 'a');
+            if (!a) return;
+            if (!a.href) return;
+            console.log(a);
+            e.preventDefault();
+            e.stopPropagation();
+            if (!conc.tab || conc.tab) {
+                newtab = window.open(a.href, name);
+            } else {
+                conc.tab.location = a.href;
+            }
+        });
+    }
     for (let i = 0; i < inputs.length; i++) {
         Elicom.suggestInit(inputs[i]);
     }
