@@ -331,7 +331,7 @@ form.elicom {
     --time-height: 28px;
     --cursor-pos: -4.8rem;
     margin-left: 4.8rem;
-    margin-right: 4.8rem;
+    margin-right: 4.9rem;
     position: relative;
     line-height: 100%;
 }
@@ -441,12 +441,12 @@ article.kwic div.line>* {
 }
 
 article.kwic div.line .date {
-    flex-basis: 10ex;
+    flex-basis: 9ex;
 }
 
 article.kwic div.line .left {
     display: inline-block;
-    flex-basis: 50ex;
+    flex-basis: 47ex;
     text-align: right;
 }
 
@@ -457,7 +457,7 @@ form .meta {
 
 article.kwic div.line .sender,
 article.kwic div.line .receiver {
-    flex-basis: 15ex;
+    flex-basis: 13ex;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
