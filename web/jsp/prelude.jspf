@@ -127,6 +127,8 @@ public Query qYear(Alix alix, JspTools tools) throws IOException
     if (year1 < fyear.min()) year1 = fyear.min();
     if (year2 > fyear.max()) year2 = fyear.max();
     if (year2 < year1) year2 = year1;
+    // no range query if full span
+    if (year1 == fyear.min() && year2 == fyear.max()) return null;
     return IntPoint.newRangeQuery(YEAR, year1, year2);
 }
 

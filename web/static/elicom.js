@@ -619,6 +619,7 @@ const Elicom = function() {
         // chronograph('chronograph');
         if (timeplot) timeplot.canvas.load();
         biject();
+        Ajix.divLoad('eliforms', form);
         if (pushState) urlUp();
     }
 
@@ -1098,7 +1099,7 @@ const Bislide = function() {
     Elicom.init('elicom'); // form is required
     // set timeplot
     Elicom.setTimeplot(timeplot);
-    Elicom.words('relwords', 'conc');
+    Elicom.words('eliforms', 'conc');
     window.addEventListener('resize', function(e) {
         Elicom.biject();
         Timeplot.init(timeplot, form);

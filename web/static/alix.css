@@ -4,7 +4,7 @@
     --text: #000000;
     --bghi: #808078;
     --texthi: #fff;
-    --bglo: #ddd;
+    --bglo: #ccc;
     --textlo: #666;
     --textlo2: #aaa;
     --border: #eee;
@@ -62,6 +62,38 @@ h4 .occs,
 a.xred,
 .term .occs {
     /* color: var(--bg2); */
+}
+
+::-webkit-input-placeholder {
+    color: var(--textlo2);
+    opacity: 100%;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 85%;
+}
+
+::-moz-placeholder {
+    color: var(--textlo2);
+    opacity: 100%;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 85%;
+}
+
+::-ms-placeholder {
+    color: var(--textlo2);
+    opacity: 100%;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 85%;
+}
+
+::placeholder {
+    color: var(--textlo2);
+    opacity: 100%;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 85%;
 }
 
 mark.mark {
@@ -312,21 +344,43 @@ form.search {
     padding: 10px 2rem 10px 2rem;
 }
 
+button,
 .button,
 input,
-button,
 select {
-    background: var(--bg);
-    color: var(--text);
     outline: none;
-    border-radius: 3px;
-    border: 1px solid var(--borderlo);
+    border: 1px solid var(--bg);
     vertical-align: middle;
     /*
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
   */
+}
+
+input,
+select {
+    background: var(--bg);
+    color: var(--text);
+}
+
+button,
+.button {
+    background: transparent;
+    color: var(--bg);
+    font-weight: bold;
+    line-height: 1.2;
+    color: var(--bg);
+    padding: 0 10px;
+}
+
+button:hover,
+.button:hover {
+    color: var(--text);
+}
+
+button[type="submit"].right {
+    float: right;
 }
 
 fieldset {
@@ -498,18 +552,6 @@ select {
     cursor: pointer;
 }
 
-.button {
-    font-weight: bold;
-    line-height: 1.2;
-    color: var(--bg);
-    padding: 0 10px;
-}
-
-.button:hover {
-    color: var(--bg);
-    background: var(--text);
-}
-
 select {
     /*
   line-height: 1.2em;
@@ -557,33 +599,6 @@ input.num3 {
 input.num4 {
     width: 5.5ex;
     text-align: right;
-}
-
-button[type="submit"].right {
-    float: right;
-}
-
-button[type="button"],
-button[type="reset"],
-button[type="submit"] {
-    background: transparent;
-    color: var(--text);
-    font-size: 102%;
-    /*
-  outline: unset;
-  padding: 0.1em 0.3em;
-  margin: 0 2px 0 0;
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 3px;
-  */
-}
-
-button[type="button"]:hover,
-button[type="reset"]:hover,
-button[type="submit"]:hover {
-    background: var(--text);
-    color: var(--bg);
 }
 
 
@@ -1045,24 +1060,6 @@ details {
 [type=checkbox] {
     margin: 0;
     padding: 0;
-}
-
-::-moz-placeholder,
-::-webkit-input-placeholder {
-    /* does not work */
-    font-style: italic;
-    font-weight: 100;
-    color: #000;
-    font-size: 1rem;
-}
-
-::-ms-input-placeholder {
-    font-style: italic;
-    color: #666;
-}
-
-input::placeholder {
-    color: red;
 }
 
 #gotop,

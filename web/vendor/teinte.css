@@ -693,14 +693,6 @@ input::-moz-focus-inner {
     padding: 0;
 }
 
-button:hover,
-html input[type="button"]:hover,
-input[type="reset"]:hover,
-input[type="submit"]:hover,
-.button:hover {
-    background-color: #FFFFFF;
-}
-
 form a {
     text-decoration: none;
     border-bottom: none;
@@ -742,30 +734,6 @@ input[type="search"]::-webkit-search-decoration {
 
 input.year {
     width: 3rem;
-}
-
-input::-webkit-input-placeholder {
-    color: #AAA !important;
-    font-style: italic !important;
-    font-weight: normal !important;
-}
-
-input::-moz-placeholder {
-    color: #AAA !important;
-    font-style: italic !important;
-    font-weight: normal !important;
-}
-
-input:-moz-placeholder {
-    color: #AAA !important;
-    font-style: italic !important;
-    font-weight: normal !important;
-}
-
-input:-ms-input-placeholder {
-    color: #AAA !important;
-    font-style: italic !important;
-    font-weight: normal !important;
 }
 
 textarea {

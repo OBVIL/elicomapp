@@ -87,9 +87,10 @@ request.setAttribute("scale", sb);
                     </div>
                 </div>
                 <div class="qline">
-                    <button class="field" type="button" name="clear">🞭</button>
-                    <input name="q" class="field" value="${q}" type="text" placeholder="Mot ?"/>
-                    <button class="field" type="submit">▶</button>
+                    <button class="butleft" type="button" name="clear">🞭</button>
+                    <input name="q" value="${q}" type="text" placeholder="Mot ?"/>
+                    <button class="butright" type="submit">▶</button>
+                    <div id="eliforms" data-url="data/eliforms"></div>
                 </div>
                 <div id="send-reiceive" class="center">
                     <div class="left">
