@@ -1048,17 +1048,21 @@ details {
 }
 
 ::-moz-placeholder,
- ::-webkit-input-placeholder {
+::-webkit-input-placeholder {
     /* does not work */
     font-style: italic;
     font-weight: 100;
-    color: #999;
+    color: #000;
     font-size: 1rem;
 }
 
 ::-ms-input-placeholder {
     font-style: italic;
-    color: #999;
+    color: #666;
+}
+
+input::placeholder {
+    color: red;
 }
 
 #gotop,
@@ -1085,10 +1089,7 @@ details {
  * Search results, kwic or snips
  */
 
-article.kwic {
-    text-align: center;
-    margin: 0 1rem;
-}
+article.kwic {}
 
 article.kwic header {
     color: var(--textlo);

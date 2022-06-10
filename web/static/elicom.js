@@ -440,7 +440,7 @@ const Timeplot = function() {
         Ajix.loadLines(url, function(html) {
             Ajix.insLine(conc, html);
         }, '&#10;');
-        conc.scrollIntoView({ behavior: "smooth", block: "start" });
+        // conc.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     /**
@@ -633,7 +633,7 @@ const Elicom = function() {
      * @param {Event} e 
      */
     function inputDel(e) {
-        const label = e.currentTarget.parentNode;
+        const label = e.currentTarget;
         label.parentNode.removeChild(label);
         update(true);
     }
@@ -668,11 +668,12 @@ const Elicom = function() {
         }
 
         const el = document.createElement("label");
+        el.addEventListener('click', inputDel);
         el.className = 'corres';
+        el.title = label;
         const a = document.createElement("a");
         a.innerText = '🞭';
         a.className = 'inputDel';
-        a.addEventListener('click', inputDel);
         el.appendChild(a);
         const input = document.createElement("input");
         input.name = name;
@@ -680,7 +681,12 @@ const Elicom = function() {
         input.value = value;
         el.appendChild(input);
         el.appendChild(document.createTextNode(label));
-        point.parentNode.insertBefore(el, point);
+        // hack
+        if (name == 'sender') {
+            point.parentNode.insertBefore(el, point.nextElementSibling);
+        } else {
+            point.parentNode.insertBefore(el, point);
+        }
         update(true); // update interface
     }
 
@@ -825,7 +831,8 @@ const Elicom = function() {
             }
             const min = json.meta.min;
             const max = json.meta.max;
-            senders.innerHTML = '<header>Expéditeurs</header>';
+            senders.innerHTML = '';
+            // senders.innerHTML = '<header>Expéditeurs</header>';
             corrs(senders, json.data.senders, max);
             let more = json.meta.senders;
             more = more - json.data.senders.length;
@@ -835,7 +842,8 @@ const Elicom = function() {
                 el.innerText = "et " + more + " autres…";
                 senders.appendChild(el);
             }
-            receivers.innerHTML = '<header>Destinataires</header>';
+            receivers.innerHTML = '';
+            // receivers.innerHTML = '<header>Destinataires</header>';
             corrs(receivers, json.data.receivers, max, true);
             more = json.meta.receivers;
             more = more - json.data.receivers.length;
@@ -1102,7 +1110,7 @@ const Bislide = function() {
         Elicom.suggestInit(inputs[i]);
     }
     // corres fields to animate
-    for (var item of document.querySelectorAll("a.inputDel")) {
+    for (var item of document.querySelectorAll("label.corres")) {
         item.addEventListener('click', Elicom.inputDel);
     }
     Elicom.update(false); // no entry in history

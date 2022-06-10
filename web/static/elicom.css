@@ -21,7 +21,7 @@ nav.tabs a:hover {
 }
 
 form.elicom {
-    margin: 1rem 0;
+    margin: 0;
     position: relative;
 }
 
@@ -32,19 +32,19 @@ form.elicom .arelation {
 }
 
 .field {
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     line-height: 100%;
 }
 
-form.elicom input[name=q] {
-    width: 25rem;
-    padding: 0 0.5rem;
+button.field {
+    line-height: 117%;
+    font-size: 20px;
 }
 
-#fields {
-    display: flex;
-    justify-content: space-between;
+form.elicom input[name=q] {
+    width: 15rem;
+    padding: 0 0.5rem;
 }
 
 #relwords {
@@ -80,22 +80,10 @@ form.elicom input[name=q] {
     min-height: 200vh;
 }
 
-
-/*
-#navres {
-    position: sticky;
-    z-index: 5;
-    top: 0;
-    background-color: var(--bglo);
-    padding: 5px 0 5px 1rem;
-    height: 3.5rem;
-    box-shadow: 0px 10px 25px var(--bg);
-}
-*/
-
 #navres .meta {
     font-weight: bold;
     color: #000;
+    text-align: center;
 }
 
 .qline {
@@ -127,8 +115,8 @@ form.elicom fieldset {
 }
 
 form.elicom .suggest {
-    left: 0.75em;
-    right: 0.75em;
+    left: 0;
+    right: 0;
     padding-left: 0;
     padding-right: 0;
     border-left: none;
@@ -136,7 +124,6 @@ form.elicom .suggest {
     z-index: 100;
 }
 
-form.elicom label,
 form.elicom fieldset input[type=text] {
     display: block;
     width: 100%;
@@ -168,8 +155,7 @@ fieldset.multiple label a:hover {
     color: #800;
 }
 
-.values,
-label.corres {
+.values {
     font-size: 105%;
     font-weight: bold;
     color: var(--text);
@@ -257,7 +243,6 @@ header .receiver {
     position: relative;
     display: flex;
     margin: 1rem 0 0 0;
-    height: 23rem;
 }
 
 #biject .relations {
@@ -338,12 +323,16 @@ header .receiver {
 
 /** The timeplot sliders */
 
+form.elicom {
+    --cursor-width: 4.8rem;
+}
+
 .timeplot {
     --time-height: 28px;
-    --cursor-width: 4.8rem;
     --cursor-pos: -4.8rem;
+    margin-left: 4.8rem;
+    margin-right: 4.8rem;
     position: relative;
-    margin: 0 5.1rem 1rem 5.1rem;
     line-height: 100%;
 }
 
@@ -378,7 +367,7 @@ header .receiver {
     text-align: center;
     height: var(--time-height);
     padding: 0;
-    width: calc(var(--cursor-width) - 2px);
+    width: var(--cursor-width);
 }
 
 .timeplot .cursor.left {
@@ -472,4 +461,87 @@ article.kwic div.line .receiver {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+}
+
+
+/* form line with reeivers */
+
+#send-reiceive {
+    display: flex;
+    justify-content: space-between;
+}
+
+#send-reiceive>* {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#send-reiceive .suggest {
+    top: 2rem;
+}
+
+#send-reiceive .left {
+    justify-content: flex-start;
+    width: 45%;
+}
+
+#send-reiceive .right {
+    justify-content: flex-end;
+    width: 45%;
+}
+
+#send-reiceive input[type='text'] {
+    width: 15ex;
+    padding: 0;
+}
+
+.left label.corres {
+    margin-left: 1ex;
+}
+
+.right label.corres {
+    margin-right: 1ex;
+}
+
+label.corres {
+    cursor: pointer;
+    display: block;
+    white-space: nowrap;
+    width: 15ex;
+    margin: 0 2px;
+    background-color: var(--bg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    text-align: left;
+    color: var(--text);
+    border-radius: 0.5em;
+}
+
+label.corres a {
+    text-decoration: none;
+}
+
+#navres {
+    position: sticky;
+    z-index: 5;
+    top: 0;
+    background-color: var(--bglo);
+    box-shadow: 0px 10px 25px var(--bg);
+    padding-top: 1ex;
+    padding-bottom: 1ex;
+}
+
+#biject,
+#conc,
+#navres {
+    padding-left: 16px;
+}
+
+.timeplot,
+#send-reiceive,
+.qline {
+    margin-top: 3px;
+    margin-bottom: 3px;
 }

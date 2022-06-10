@@ -28,7 +28,7 @@ for (String fpar: new String[]{SENDER, RECEIVER}) {
         if (form == null) continue;
         if (idSet.contains(formId)) continue;
         idSet.add(formId);
-        sb.append("<label class=\"corres\"><a class=\"inputDel\">🞭</a> <input type=\"hidden\" name=\"" + fpar +"\" value=\"" + id + "\"/>" + form +"</label>");
+        sb.append("<label title=\"" + JspTools.escape(form) + "\" class=\"corres\"><a class=\"inputDel\">🞭</a> <input type=\"hidden\" name=\"" + fpar +"\" value=\"" + id + "\"/>" + form +"</label>");
     }
     if (form != null) {
         request.setAttribute(fpar, sb);
@@ -86,18 +86,22 @@ request.setAttribute("scale", sb);
                         <input name="year2" class="field" value="${year2}" type="text" />
                     </div>
                 </div>
-            </div>
-            <div id="fields" class="center">
-                <fieldset class="multiple left">
-                <input placeholder="Expéditeur(s)" type="text" class="multiple" data-url="data/sender.ndjson" id="sender" data-name="sender"/>
-                                    
-                    ${sender}
-
-                </fieldset>
-                <fieldset class="multiple right">
-                    ${receiver}
-                    <input placeholder="Destinataires(s)" type="text" class="multiple" data-url="data/receiver.ndjson" id="receiver" data-name="receiver"/>
-                </fieldset>
+                <div class="qline">
+                    <button class="field" type="button" name="clear">🞭</button>
+                    <input name="q" class="field" value="${q}" type="text" placeholder="Mot ?"/>
+                    <button class="field" type="submit">▶</button>
+                </div>
+                <div id="send-reiceive" class="center">
+                    <div class="left">
+                        <input placeholder="Expéditeur(s)" type="text" class="multiple" data-url="data/sender.ndjson" id="sender" data-name="sender"/>
+                        ${sender}
+                    </div>
+                    <div class="meta"></div>
+                    <div class="right">
+                        ${receiver}
+                        <input placeholder="Destinataires(s)" type="text" class="multiple" data-url="data/receiver.ndjson" id="receiver" data-name="receiver"/>
+                    </div>
+                </div>
             </div>
             <div id="biject">
                 <div class="senders">
@@ -105,17 +109,6 @@ request.setAttribute("scale", sb);
                 <svg class="relations" xmlns="http://www.w3.org/2000/svg">
                 </svg>
                 <div class="receivers">
-                </div>
-            </div>
-            <div>
-            <!-- 
-                <div class="meta"> </div>
-             -->
-                <div class="qline">
-                    <span class="meta"></span>
-                    <button type="button" name="clear">🞭</button>
-                    <input name="q" class="field" value="${q}" type="text" placeholder="Mot ?"/>
-                    <button type="submit">▶</button>
                 </div>
             </div>
             <div id="conc" data-url="data/conc">
