@@ -26,7 +26,6 @@ else {
 <tag:template>
     <jsp:attribute name="title">Bases installées [Elicom]</jsp:attribute>
     <jsp:body>
-    ${path}
         <div class="text">
             ${html}
         </div>
