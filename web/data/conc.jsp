@@ -143,8 +143,16 @@ while (i < max) {
         for (String l: lines) {
             out.print("    <div class=\"line\">");
             out.print("<small>"+ ++occ +".</small>");
-            int date =  Integer.parseInt(doc.get("date"));
-            out.print("<span class=\"date\">" + FieldInt.int2date(date) + "</span>");
+            String date = "";
+            String val = doc.get("date");
+            if (val != null) {
+                try {
+                    int w =  Integer.parseInt(val);
+                    date = FieldInt.int2date(w);
+                }
+                catch (Exception e) {}
+            }
+            out.print("<span class=\"date\">" + date + "</span>");
             out.print("<span class=\"sender\" title=\"" + JspTools.escape(doc.get("sender")) + "\">" + doc.get("sender") + "</span>");
             out.print("<span class=\"receiver\" title=\"" + JspTools.escape(doc.get("receiver")) + "\">" + doc.get("receiver") + "</span>");
             out.print(l);

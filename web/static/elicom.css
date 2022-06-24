@@ -478,7 +478,7 @@ article.kwic div.line>* {
 }
 
 article.kwic div.line .date {
-    flex-basis: 9ex;
+    flex-basis: 10ex;
 }
 
 article.kwic div.line .left {
