@@ -73,6 +73,7 @@ request.setAttribute("scale", sb);
     </jsp:attribute>
     <jsp:body>
         <form class="elicom" name="elicom" action="" autocomplete="off">
+            <input type="hidden" name="base" value="${param.base}"/>
             <div id="navres">
                 <div data-min="${yearmin}" data-max="${yearmax}" id="timeplot" class="timeplot">
                     <div class="ticks">${scale}</div>

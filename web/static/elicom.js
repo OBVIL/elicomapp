@@ -493,21 +493,18 @@ const Timeplot = function() {
             n++;
             if (n == 0) {
                 hits = parseInt(line);
-                /*
                 if (hits > 10000) {
                     ctx.strokeStyle = 'rgba(0, 0, 64, 0.1)';
                     ctx.lineWidth = 0.5;
                 } else if (hits > 5000) {
                     ctx.strokeStyle = 'rgba(0, 0, 64, 0.2)';
                     ctx.lineWidth = 0.5;
-                } else 
-                */
-                if (hits > 100) {
-                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.3)';
-                    ctx.lineWidth = 0.5;
-                } else {
-                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.3)';
+                } else if (hits > 100) {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.5)';
                     ctx.lineWidth = 1;
+                } else {
+                    ctx.strokeStyle = 'rgba(0, 0, 64, 0.8)';
+                    ctx.lineWidth = 2;
                 }
                 const meta = document.querySelector("form .meta");
                 if (!meta) return;
