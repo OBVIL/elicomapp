@@ -1111,7 +1111,6 @@ article.kwic header a {
     color: var(--textlo);
 }
 
-article.kwic header b,
 article.kwic header small {
     font-weight: bold;
     color: var(--bg2);

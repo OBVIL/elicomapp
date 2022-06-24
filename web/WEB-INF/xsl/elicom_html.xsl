@@ -26,29 +26,71 @@
 
   <xsl:template match="
       tei:text
-    | tei:body
     ">
     <xsl:apply-templates/>
   </xsl:template>
+
   <xsl:template match="tei:teiHeader">
     <div class="teiHeader">
       <xsl:apply-templates select="tei:fileDesc/tei:sourceDesc/tei:msDesc/tei:msIdentifier"/>
       <xsl:apply-templates select="tei:fileDesc/tei:sourceDesc/tei:msDesc/tei:listBibl"/>
     </div>
   </xsl:template>
-  <xsl:template match="
-      tei:opener
-    | tei:closer
-    | tei:address
-    | tei:addrLine
-    | tei:postscript
-    | tei:opener/tei:stamp
-    | tei:closer/tei:stamp
-    | tei:body/tei:stamp
-    ">
-    <div class="{local-name()}">
+  
+  <xsl:template match="tei:body">
+    <!-- Seen in Elicom -->
+    <xsl:choose>
+      <xsl:when test="count(tei:div) = 1">
+        <xsl:apply-templates select="tei:div/node()"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="tei:div[@type = 'letter']">
+    <section>
+      <xsl:attribute name="class">
+        <xsl:value-of select="normalize-space(concat('letter ', @type))"/>
+      </xsl:attribute>
       <xsl:apply-templates/>
-    </div>
+    </section>
+  </xsl:template>
+  
+  <xsl:template match="
+      tei:address
+    | tei:addrLine
+    | tei:div/tei:bibl
+    | tei:epigraph/tei:bibl
+    | tei:closer
+    | tei:epigraph
+    | tei:opener
+    | tei:postscript
+    | tei:sp
+    | tei:speaker
+    | tei:stage
+    | tei:body/tei:stamp
+    | tei:closer/tei:stamp
+    | tei:opener/tei:stamp
+    ">
+    <!-- avoid empty tags
+        <closer>
+          <salute/>
+          <signed/>
+        </closer>
+        <postscript>
+          <p/>
+        </postscript>    
+    -->
+    <xsl:variable name="cont">
+      <xsl:apply-templates/>
+    </xsl:variable>
+    <xsl:if test="$cont != ''">
+      <div class="{local-name()}">
+        <xsl:copy-of select="$cont"/>
+      </div>
+    </xsl:if>
   </xsl:template>
   <xsl:template match="tei:p">
     <p>
@@ -69,6 +111,7 @@
   </xsl:template>
   <xsl:template match="
       tei:date
+    | tei:name
     | tei:persName
     | tei:placeName
     | tei:rs
@@ -351,6 +394,8 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  
   <!-- note in body without call -->
   <xsl:template match="tei:body/tei:note"/>
   <xsl:template match="tei:note">

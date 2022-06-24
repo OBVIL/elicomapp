@@ -52,30 +52,6 @@ Reçoit une lettre en un seul fichier
       <xsl:text>&#10;  </xsl:text>
       <alix:field name="type" type="meta">letter</alix:field>
       
-      <!-- Build a bibl line -->
-        <xsl:for-each select="tei:teiHeader/tei:profileDesc/tei:correspDesc">
-          <alix:field name="bibl" type="meta">
-            <xsl:if test="tei:correspAction[@type='sent']/tei:date/@when">
-              <span class="date">
-                <xsl:variable name="date" select="tei:correspAction[@type='sent']/tei:date/@when"/>
-                <xsl:value-of select="substring-before(concat($date, '-00'), '-00')"/>
-              </span>
-              <xsl:text>, </xsl:text>
-            </xsl:if>
-            <xsl:for-each select="(tei:correspAction[@type='sent']/tei:persName)[1][normalize-space(.) != '']">
-              <xsl:text>de </xsl:text>
-              <b class="sender">
-                <xsl:call-template name="key"/>
-              </b>
-            </xsl:for-each>
-            <xsl:for-each select="(tei:correspAction[@type='received']/tei:persName)[1][normalize-space(.) != '']">
-              <xsl:text> à </xsl:text>
-              <b class="receiver">
-                <xsl:call-template name="key"/>
-              </b>
-            </xsl:for-each>
-          </alix:field>
-        </xsl:for-each>
       
       <xsl:apply-templates mode="alix"/>
       <xsl:text>&#10;</xsl:text>
@@ -119,7 +95,15 @@ Reçoit une lettre en un seul fichier
       <article class="letter">
         <!-- Id ? -->
         <div class="body">
-          <xsl:apply-templates/>
+          <!-- Seen in Elicom -->
+          <xsl:choose>
+            <xsl:when test="count(tei:div) = 1">
+              <xsl:apply-templates select="tei:div/node()"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates/>
+            </xsl:otherwise>
+          </xsl:choose>
         </div>
         <xsl:if test=".//tei:note">
           <xsl:processing-instruction name="index_off"/>
@@ -133,6 +117,117 @@ Reçoit une lettre en un seul fichier
     </alix:field>
     <xsl:text>&#10;</xsl:text>
   </xsl:template>
+
+  <!-- -->
+  <xsl:template match="tei:correspDesc" mode="alix">
+    <alix:field name="bibl" type="meta">
+      <xsl:if test="tei:correspAction[@type='sent']/tei:date/@when">
+        <span class="date">
+          <xsl:variable name="date" select="tei:correspAction[@type='sent']/tei:date/@when"/>
+          <xsl:value-of select="substring-before(concat($date, '-00'), '-00')"/>
+        </span>
+        <xsl:text>, </xsl:text>
+      </xsl:if>
+      <xsl:variable name="de">
+        <xsl:for-each select="tei:correspAction[@type='sent']/tei:persName">
+          <xsl:if test="position() != 1"> ; </xsl:if>
+          <b class="sender">
+            <xsl:choose>
+              <xsl:when test="normalize-space(.)">
+                <xsl:apply-templates mode="value"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:call-template name="key"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </b>
+        </xsl:for-each>
+      </xsl:variable>
+      <xsl:if test="$de != ''">
+        <xsl:text> de </xsl:text>
+        <xsl:copy-of select="$de"/>
+      </xsl:if>
+      <xsl:variable name="a">
+        <xsl:for-each select="tei:correspAction[@type='received']/tei:persName">
+          <xsl:if test="position() != 1"> ; </xsl:if>
+          <b class="receiver">
+            <xsl:choose>
+              <xsl:when test="normalize-space(.)">
+                <xsl:apply-templates mode="value"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:call-template name="key"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </b>
+        </xsl:for-each>
+      </xsl:variable>
+      <xsl:if test="$a != ''">
+        <xsl:text> à </xsl:text>
+        <xsl:copy-of select="$a"/>
+      </xsl:if>
+      <xsl:text>.</xsl:text>
+    </alix:field>
+    <!-- ensure one and only date, seen, more than one sent block -->
+    <xsl:apply-templates select="(tei:correspAction[@type='sent']/tei:date[@when])[1]" mode="alix"/>
+    <xsl:apply-templates select="(tei:correspAction[@type='received']/tei:date[@when])[1]" mode="alix"/>
+    <xsl:apply-templates select="tei:correspAction/tei:persName" mode="alix"/>
+  </xsl:template>
+
+  <xsl:template match="tei:correspAction[@type='sent']/tei:date" mode="alix">
+    <xsl:variable name="date">
+      <xsl:call-template name="date"/>
+    </xsl:variable>
+    <xsl:if test="normalize-space($date) != ''">
+      <alix:field type="int" name="date">
+        <xsl:attribute name="value">
+          <xsl:call-template name="date-int">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
+      <alix:field type="int" name="year">
+        <xsl:attribute name="value">
+          <xsl:call-template name="year">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="tei:correspAction[@type='received']/tei:date" mode="alix">
+    <xsl:variable name="date">
+      <xsl:call-template name="date"/>
+    </xsl:variable>
+    <!-- if more than one, let it cry ? -->
+    <xsl:if test="normalize-space($date) != ''">
+      <xsl:text>&#10;  </xsl:text>
+      <alix:field type="int" name="dateReceived">
+        <xsl:attribute name="value">
+          <xsl:call-template name="date-int">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
+      <alix:field type="int" name="yearReceived">
+        <xsl:attribute name="value">
+          <xsl:call-template name="year">
+            <xsl:with-param name="date">
+              <xsl:value-of select="$date"/>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:attribute>
+      </alix:field>
+    </xsl:if>
+  </xsl:template>
+  
 
   <!-- One or more sender -->
   <xsl:template match="tei:correspAction[@type='sent']/tei:persName" mode="alix">
@@ -341,61 +436,6 @@ Reçoit une lettre en un seul fichier
 
   <xsl:template match="tei:note" mode="value"/>
   
-  <xsl:template match="tei:correspAction[@type='sent']/tei:date" mode="alix">
-    <xsl:variable name="date">
-      <xsl:call-template name="date"/>
-    </xsl:variable>
-    <!-- if more than one, let it cry ? -->
-    <xsl:if test="normalize-space($date) != '' and not(preceding-sibling::tei:date)">
-      <xsl:text>&#10;  </xsl:text>
-      <alix:field type="int" name="date">
-        <xsl:attribute name="value">
-          <xsl:call-template name="date-int">
-            <xsl:with-param name="date">
-              <xsl:value-of select="$date"/>
-            </xsl:with-param>
-          </xsl:call-template>
-        </xsl:attribute>
-      </alix:field>
-      <alix:field type="int" name="year">
-        <xsl:attribute name="value">
-          <xsl:call-template name="year">
-            <xsl:with-param name="date">
-              <xsl:value-of select="$date"/>
-            </xsl:with-param>
-          </xsl:call-template>
-        </xsl:attribute>
-      </alix:field>
-    </xsl:if>
-  </xsl:template>
-
-  <xsl:template match="tei:correspAction[@type='received']/tei:date" mode="alix">
-    <xsl:variable name="date">
-      <xsl:call-template name="date"/>
-    </xsl:variable>
-    <!-- if more than one, let it cry ? -->
-    <xsl:if test="normalize-space($date) != ''  and not(preceding-sibling::tei:date)">
-      <xsl:text>&#10;  </xsl:text>
-      <alix:field type="int" name="dateReceived">
-        <xsl:attribute name="value">
-          <xsl:call-template name="date-int">
-            <xsl:with-param name="date">
-              <xsl:value-of select="$date"/>
-            </xsl:with-param>
-          </xsl:call-template>
-        </xsl:attribute>
-      </alix:field>
-      <alix:field type="int" name="yearReceived">
-        <xsl:attribute name="value">
-          <xsl:call-template name="year">
-            <xsl:with-param name="date">
-              <xsl:value-of select="$date"/>
-            </xsl:with-param>
-          </xsl:call-template>
-        </xsl:attribute>
-      </alix:field>
-    </xsl:if>
-  </xsl:template>
 
   <!-- Get xml date from an element -->
   <xsl:template name="date">

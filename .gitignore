@@ -1,5 +1,6 @@
 /build/
 /work/
+test.*
 .*.swp
 /web/WEB-INF/*.xml
 !/web/WEB-INF/web.xml

@@ -119,7 +119,7 @@ while (i < max) {
         out.println(" <!-- docId=" + docId + " -->");
         out.print("    <a href=\"" + href + "\">");
         out.print("    <b class=\"n\">"+(i)+")</b>");
-        out.print(doc.get("title"));
+        out.print(doc.get("bibl"));
         out.println("</a>");
         out.println("  </header>");
         out.println("  <div class=\"words\">");

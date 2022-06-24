@@ -568,7 +568,14 @@ const Elicom = function() {
             return;
         }
         // maybe meta
-        if (!data.text || !data.id) {
+        if (
+            typeof data.text === 'undefined' ||
+            typeof data.id === 'undefined' ||
+            data.text === null ||
+            data.text === '' ||
+            data.id === null ||
+            data.id === ''
+        ) {
             return;
         }
 

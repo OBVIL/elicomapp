@@ -14,9 +14,14 @@ for (Map.Entry<String, Alix> entry : Alix.pool.entrySet()) {
 sb.append("\n</ul>\n");
 // load page as a string
 String path = pageContext.getServletContext().getRealPath("/html/bases.html");
-String html = Files.readString(Paths.get(path));
-html = html.replace("${bases}", sb.toString());
-request.setAttribute("html", html);
+if ((new File(path)).exists()) {
+    String html = Files.readString(Paths.get(path));
+    html = html.replace("${bases}", sb.toString());
+    request.setAttribute("html", html);
+}
+else {
+    request.setAttribute("html", sb);
+}
 %>
 <tag:template>
     <jsp:attribute name="title">Bases installées [Elicom]</jsp:attribute>

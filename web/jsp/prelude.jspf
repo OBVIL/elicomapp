@@ -2,6 +2,7 @@
 <%-- Jsp prelude for elicom, will be include to all jsp by a web.xml conf --%>
 <%@ taglib prefix="tag" tagdir="/WEB-INF/tags" %>
 
+<%@ page import="java.io.File"%>
 <%@ page import="java.io.IOException"%>
 <%@ page import="java.nio.file.*"%>
 <%@ page import="java.text.*"%>
