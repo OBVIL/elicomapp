@@ -7,4 +7,5 @@
 !/web/WEB-INF/urlrewrite.xml
 /web/WEB-INF/bases
 /web/WEB-INF/*.csv
+/web/
 

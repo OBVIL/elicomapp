@@ -31,12 +31,12 @@ if (docId < 0) {
     return;
 }
 final Doc doc = new Doc(alix, docId);
-request.setAttribute("title", ML.detag(doc.doc().get("bibl")) ); // transmitted to template
+request.setAttribute("title", ML.detag(doc.doc().get("title")) ); // transmitted to template
 
 body.append("<div class=\"row\">\n");
 body.append("<div class=\"text\">\n");
 body.append("<div class=\"bibl\">");
-body.append(doc.doc().get("bibl"));
+body.append(doc.doc().get("title"));
 body.append("</div>\n");
 
 StringBuilder keywords = new StringBuilder();
@@ -84,12 +84,12 @@ TopDocs topDocs;
 topDocs = searcher.search(mlt, 20);
 ScoreDoc[] hits = topDocs.scoreDocs;
 final String href = "?id=";
-final HashSet<String> DOC_SHORT = new HashSet<String>(Arrays.asList(new String[] {Names.ALIX_ID, Names.ALIX_BOOKID, "bibl"}));
+final HashSet<String> DOC_SHORT = new HashSet<String>(Arrays.asList(new String[] {Names.ALIX_ID, Names.ALIX_BOOKID, "title"}));
 for (ScoreDoc hit: hits) {
     if (hit.doc == docId) continue;
     Document aDoc = alix.reader().document(hit.doc, DOC_SHORT);
     body.append("<a class=\"bibl\" href=\"" + href + aDoc.get(Names.ALIX_ID) +"\">");
-    body.append(aDoc.get("bibl"));
+    body.append(aDoc.get("title"));
     body.append("</a>");
 }
 body.append("</nav>\n");

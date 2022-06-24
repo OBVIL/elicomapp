@@ -48,6 +48,8 @@ if (hits < 1) {
 out.println(hits);
 for (int n = 0; n < hits; n++) {
     String date = "" + (Integer)((FieldDoc)docs[n]).fields[0];
+    if (date.length() < 4) continue;
+    
     out.println(date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8));
     // out.println(date);
     /*
