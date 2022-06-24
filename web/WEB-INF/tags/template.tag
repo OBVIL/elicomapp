@@ -7,22 +7,20 @@
 <%@attribute name="inc" fragment="true" %>
 <%!
 
-static public String link(final String hrefHome, final String path, final String href, final String label, final String hint)
+static public String link(final String path, String href, final String label, final String hint)
 {
     StringBuilder sb = new StringBuilder();
     sb.append("<a");
-    sb.append(" href=\"");
-    if ("".equals(href) && "".equals(hrefHome)) {
-        sb.append("./");
+    sb.append(" class=\"tab");
+    if (path.equals("/"+href)) {
+        sb.append(" selected");
+        // index ?
     }
-    else if ("".equals(href)) {
-        sb.append(hrefHome);
-    }
-    else {
-        sb.append(hrefHome).append(href);
-    }
+    sb.append("\"");
+    if ("".equals(href)) href=".";
+    sb.append(" href=\"").append(href);
+    /* no pars
     boolean first = true;
-    /* ? 
     for (String par: tab.pars()) {
         String value = request.getParameter(par);
         if (value == null) continue;
@@ -39,12 +37,6 @@ static public String link(final String hrefHome, final String path, final String
     */
     sb.append("\"");
     if (hint != null) sb.append(" title=\"").append(hint).append("\"");
-    sb.append(" class=\"tab");
-    if (path.equals("/"+href)) {
-        sb.append(" selected");
-        // index ?
-    }
-    sb.append("\"");
     sb.append(">");
     sb.append(label);
     sb.append("</a>");
@@ -56,7 +48,12 @@ static public String link(final String hrefHome, final String path, final String
 JspTools tools = new JspTools((javax.servlet.jsp.PageContext)jspContext);
 String q = tools.getString("q", "");
 String path = (String)request.getAttribute("path");
+String page = path.substring(path.lastIndexOf("/"));
+
 String hrefHome = (String)request.getAttribute("hrefHome");
+
+
+
 %>
 <!DOCTYPE html>
 <html lang="fr">
@@ -71,10 +68,12 @@ String hrefHome = (String)request.getAttribute("hrefHome");
     </head>
     <body>
         <header id="header">
+            <%  %>
             <nav class="tabs">
-                <%= link(hrefHome, path, "apropos", "Présentation", null) %>
-                <%= link(hrefHome, path, "", "Explorer les correspondances", null) %>
-                <%= link(hrefHome, path, "aide", "Aide et contact", null) %>
+                <%= link(path, hrefHome + ".", "⌂", null) %>
+                <%= link(page, "about", "Présentation", null) %>
+                <%= link(page, "", "Explorer les correspondances", null) %>
+                <%= link(page, "help", "Aide et contact", null) %>
             </nav>
             <jsp:invoke fragment="header"/>
         </header>
@@ -83,7 +82,7 @@ String hrefHome = (String)request.getAttribute("hrefHome");
             <jsp:doBody/>
         </main>
         <footer id="footer">
-            <nav>———
+            <nav>
             </nav>
         </footer>
         <script src="${hrefHome}static/elicom.js">//</script>

@@ -25,10 +25,10 @@
     <filter>
         <filter-name>UrlRewriteFilter</filter-name>
         <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
-        <!-- for dev -->
         <init-param>
+            <!-- for dev -->
             <param-name>confReloadCheckInterval</param-name>
-            <param-value>10</param-value>
+            <param-value>1</param-value>
         </init-param>
         <init-param>
             <param-name>logLevel</param-name>
@@ -49,6 +49,11 @@
             <url-pattern>*.jsp</url-pattern>
             <page-encoding>UTF-8</page-encoding>
             <include-prelude>/jsp/prelude.jspf</include-prelude>
+        </jsp-property-group>
+        <jsp-property-group>
+            <!-- Ensure HTML encoding when included -->
+            <url-pattern>*.html</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
         </jsp-property-group>
     </jsp-config>
 </web-app>

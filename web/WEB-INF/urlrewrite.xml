@@ -8,10 +8,20 @@
 -->
 <urlrewrite>
 
+    
+
+    <rule>
+        <name>Welcome page</name>
+        <from>^/$</from>
+        <set name="path">$0</set>
+        <to last="true" qsappend="true">/jsp/bases.jsp</to>
+    </rule>
+
+
     <rule>
         <name>Resource exists</name>
         <condition type="request-filename" operator="isfile"/>
-        <to last="true">-</to>
+        <to last="true" qsappend="true">-</to>
     </rule>
 
 
@@ -19,7 +29,6 @@
         <name>Data, correspondents suggestion</name>
         <condition type="request-filename" operator="notfile"/>
         <from>^/data/(corres1|corres2|receiver|sender)(\.ndjson|\.js|\.json)?$</from>
-        <set name="path">$0</set>
         <to last="true">/data/corres.jsp?f=$1&amp;ext=$2</to>
     </rule>
 
@@ -28,17 +37,43 @@
         <name>Data multi formats</name>
         <condition type="request-filename" operator="notfile"/>
         <from>^/data/([^\./]+)(\.csv|\.js|\.json|\.ndjson|\.tsv|\.txt)?$</from>
-        <set name="path">$0</set>
         <to last="true">/data/$1.jsp?ext=$2</to>
+    </rule>
+
+    <rule>
+        <name>Welcome page of a base</name>
+        <from>^/([^\./]+)/$</from>
+        <set name="path">$0</set>
+        <to last="true">/jsp/desk.jsp?base=$1</to>
+    </rule>
+
+    <rule>
+        <name>A letter</name>
+        <from>^/([^\./]+)/doc.jsp</from>
+        <set name="path">$0</set>
+        <to last="true" qsappend="true">/jsp/doc.jsp?base=$1</to>
+    </rule>
+
+    <rule>
+        <name>Static pages, root</name>
+        <from>^/([^\./]+)$</from>
+        <set name="path">$0</set>
+        <to last="true" qsappend="true">/jsp/html.jsp?page=$1</to>
+    </rule>
+    
+    <rule>
+        <name>Static pages in a base</name>
+        <from>^/([^\./]+)/([^\./]+)$</from>
+        <set name="path">$0</set>
+        <to last="true" qsappend="true">/jsp/html.jsp?base=$1&amp;page=$2</to>
     </rule>
 
 
     <rule>
         <name>Catch all</name>
-        <condition type="request-filename" operator="notfile"/>
-        <condition type="request-filename" operator="notdir"/>
+        <set name="mess">404</set>
         <set name="path">$0</set>
-        <to last="true">/jsp/page.jsp</to>
+        <to last="true">/jsp/html.jsp</to>
     </rule>
 
 
@@ -53,6 +88,13 @@
  -->
 <!-- 
 
+    <condition type="attribute" name="html" operator="isfile"/>
+    <rule>
+        <name>Set global request attributes</name>
+        <note>Bad to have the initial path, reexecuted on request forward</note>
+        <condition type="request-filename" operator="notfile"/>
+        <set name="path">$0</set>
+    </rule>
 
     <rule>
         <note>

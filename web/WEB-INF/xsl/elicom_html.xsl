@@ -3,7 +3,26 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns="http://www.w3.org/1999/xhtml" 
   xmlns:tei="http://www.tei-c.org/ns/1.0" exclude-result-prefixes="tei">
-  <xsl:output encoding="UTF-8" indent="yes" media-type="text/html" method="xml"/>
+  <xsl:output encoding="UTF-8" indent="yes" media-type="text/html" method="xml" omit-xml-declaration="yes"/>
+
+  
+  <xsl:template match="tei:TEI">
+    <article class="elicom letter">
+      
+      <header>
+        <h1>
+          <xsl:apply-templates select="/tei:TEI/tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title/node()"/>
+        </h1>
+        <xsl:apply-templates select="tei:teiHeader"/>
+      </header>
+      <div class="text">
+        <xsl:apply-templates select="tei:text"/>
+      </div>
+      <footer class="footnotes">
+        <xsl:apply-templates select="tei:text" mode="footnote"/>
+      </footer>
+    </article>
+  </xsl:template>
 
   <xsl:template match="
       tei:text
@@ -60,6 +79,16 @@
     </span>
   </xsl:template>
   
+  <xsl:template match="tei:del">
+    <del class="{normalize-space(concat(local-name(), ' ', @type))}">
+      <xsl:apply-templates/>
+    </del>
+  </xsl:template>
+  <xsl:template match="tei:add">
+    <ins class="{normalize-space(concat(local-name(), ' ', @type))}">
+      <xsl:apply-templates/>
+    </ins>
+  </xsl:template>
   <xsl:template match="tei:hi">
     <xsl:variable name="rend" select="concat(' ', normalize-space(@rend), ' ')"/>
     <xsl:choose>
@@ -361,9 +390,14 @@
   
   <!-- specific Voltaire -->
   <xsl:template match="tei:ptr"/>
+  
+  <!-- See unknow elements -->
   <xsl:template match="*">
-    <b class="el">&lt;<xsl:value-of select="name()"/>&gt;</b>
+    <xsl:message terminate="no">
+      <xsl:text>&lt;</xsl:text>
+      <xsl:value-of select="name()"/>
+      <xsl:text>&gt;</xsl:text>
+    </xsl:message>
     <xsl:apply-templates/>
-    <b class="el">&lt;/<xsl:value-of select="name()"/>&gt;</b>
   </xsl:template>
 </xsl:transform>

@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%!
 
+
 %>
 <%
 JspTools tools = new JspTools(pageContext);
@@ -66,7 +67,7 @@ for (; year < (max - mod /2); year += mod) {
 sb.append("<div class=\"last\" style=\"right: 0%\">" + max + "</div>");
 request.setAttribute("scale", sb);
 %>
-<t:elicom>
+<tag:template>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
     <jsp:attribute name="head">
     </jsp:attribute>
@@ -75,7 +76,7 @@ request.setAttribute("scale", sb);
             <div id="navres">
                 <div data-min="${yearmin}" data-max="${yearmax}" id="timeplot" class="timeplot">
                     <div class="ticks">${scale}</div>
-                    <canvas id="chronograph" data-url="data/chronograph.txt" width="2000" height="100">
+                    <canvas id="chronograph" data-url="../data/chronograph.txt" width="2000" height="100">
                     </canvas>
                     <div class="cursor left">
                         <span>◀ ▶</span>
@@ -90,21 +91,21 @@ request.setAttribute("scale", sb);
                     <button class="butleft" type="button" name="clear">🞭</button>
                     <input name="q" value="${q}" type="text" placeholder="Mot ?"/>
                     <button class="butright" type="submit">▶</button>
-                    <div id="eliforms" data-url="data/eliforms"></div>
+                    <div id="eliforms" data-url="../data/eliforms"></div>
                 </div>
                 <div id="send-reiceive" class="center">
                     <div class="left">
-                        <input placeholder="Expéditeur(s)" type="text" class="multiple" data-url="data/sender.ndjson" id="sender" data-name="sender"/>
+                        <input placeholder="Expéditeur(s)" type="text" class="multiple" data-url="../data/sender.ndjson" id="sender" data-name="sender"/>
                         ${sender}
                     </div>
                     <div class="meta"></div>
                     <div class="right">
                         ${receiver}
-                        <input placeholder="Destinataires(s)" type="text" class="multiple" data-url="data/receiver.ndjson" id="receiver" data-name="receiver"/>
+                        <input placeholder="Destinataires(s)" type="text" class="multiple" data-url="../data/receiver.ndjson" id="receiver" data-name="receiver"/>
                     </div>
                 </div>
             </div>
-            <div id="biject">
+            <div id="biject" data-url="../data/biject.json">
                 <div class="senders">
                 </div>
                 <svg class="relations" xmlns="http://www.w3.org/2000/svg">
@@ -112,8 +113,8 @@ request.setAttribute("scale", sb);
                 <div class="receivers">
                 </div>
             </div>
-            <div id="conc" data-url="data/conc">
+            <div id="conc" data-url="../data/conc">
             </div>
         </form>
     </jsp:body>
-</t:elicom>
+</tag:template>

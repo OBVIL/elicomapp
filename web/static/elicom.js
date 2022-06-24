@@ -614,13 +614,12 @@ const Elicom = function() {
     /**
      * Update interface with data
      */
-    function update(pushState = true) {
-        Ajix.divLoad('conc', form);
-        // chronograph('chronograph');
-        if (timeplot) timeplot.canvas.load();
-        biject();
-        Ajix.divLoad('eliforms', form);
-        if (pushState) urlUp();
+    function update(...exclude) {
+        if (!exclude.includes('conc')) Ajix.divLoad('conc', form);
+        if (!exclude.includes('timeplot') && timeplot) timeplot.canvas.load();
+        if (!exclude.includes('biject')) biject();
+        if (!exclude.includes('eliforms')) Ajix.divLoad('eliforms', form);
+        if (!exclude.includes('url')) urlUp();
     }
 
     function urlUp() {
@@ -636,7 +635,7 @@ const Elicom = function() {
     function inputDel(e) {
         const label = e.currentTarget;
         label.parentNode.removeChild(label);
-        update(true);
+        update();
     }
 
     /**
@@ -688,7 +687,7 @@ const Elicom = function() {
         } else {
             point.parentNode.insertBefore(el, point);
         }
-        update(true); // update interface
+        update(); // update interface
     }
 
     /**
@@ -725,13 +724,13 @@ const Elicom = function() {
         if (!_form) return;
         form = id;
         _form.addEventListener('submit', (e) => {
-            update(true);
+            update();
             e.preventDefault();
         });
         if (_form.clear) {
             _form.clear.addEventListener('click', (e) => {
                 _form.q.value = '';
-                update(true);
+                update();
                 e.preventDefault();
             });
         }
@@ -749,10 +748,7 @@ const Elicom = function() {
             let a = Ajix.selfOrAncestor(e.target, 'a');
             if (!a) return;
             document.forms[form].q.value = a.innerText;
-            Ajix.divLoad(conc, form);
-            chronograph('chronograph');
-            biject();
-            urlUp(); // p
+            Elicom.update('eliforms');
         });
     }
 
@@ -808,6 +804,7 @@ const Elicom = function() {
     function biject(id = 'biject') {
         const cont = document.getElementById(id);
         if (!cont) return;
+        let url = cont.dataset.url;
         let els;
         els = cont.getElementsByClassName("senders");
         if (els.length != 1) return;
@@ -820,7 +817,7 @@ const Elicom = function() {
         const svg = els[0];
         // get data
         const pars = Ajix.pars(form);
-        var url = 'data/biject.json' + "?" + pars;
+        url += "?" + pars;
         const hmin = 16;
         const hmax = 100;
         Ajix.loadJson(url, function(json) {
@@ -1064,7 +1061,7 @@ const Bislide = function() {
 
     function change() {
 
-        Elicom.update(true);
+        Elicom.update();
     }
 
     function input() {
@@ -1120,7 +1117,7 @@ const Bislide = function() {
             e.preventDefault();
             e.stopPropagation();
             if (!conc.tab || conc.tab) {
-                newtab = window.open(a.href, name);
+                conc.tab = window.open(a.href, name);
             } else {
                 conc.tab.location = a.href;
             }
@@ -1133,5 +1130,5 @@ const Bislide = function() {
     for (var item of document.querySelectorAll("label.corres")) {
         item.addEventListener('click', Elicom.inputDel);
     }
-    Elicom.update(false); // no entry in history
+    Elicom.update('url'); // no entry in history
 })();

@@ -244,7 +244,8 @@ Reçoit une lettre en un seul fichier
     </xsl:variable>
     <xsl:variable name="str3">
       <xsl:choose>
-        <xsl:when test="contains($str2, '[')">
+        <!--  Voltaire [François Marie Arouet] ; [unknown] -->
+        <xsl:when test="contains(normalize-space($str2), ' [')">
           <xsl:value-of select="normalize-space(substring-before($str2, '['))"/>
         </xsl:when>
         <xsl:otherwise>

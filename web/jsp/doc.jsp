@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@taglib prefix="tag" tagdir="/WEB-INF/tags" %>
 
 <%@ page import="org.apache.lucene.document.Document"%>
 <%@ page import="org.apache.lucene.index.IndexReader"%>
@@ -31,7 +31,7 @@ if (docId < 0) {
     return;
 }
 final Doc doc = new Doc(alix, docId);
-request.setAttribute("title", doc.doc().get("bibl")); // transmitted to template
+request.setAttribute("title", ML.detag(doc.doc().get("bibl")) ); // transmitted to template
 
 body.append("<div class=\"row\">\n");
 body.append("<div class=\"text\">\n");
@@ -95,7 +95,7 @@ for (ScoreDoc hit: hits) {
 body.append("</nav>\n");
 body.append("</div>\n");
 %>
-<t:elicom>
+<tag:template>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
     <jsp:body>${body}</jsp:body>
-</t:elicom>
+</tag:template>
