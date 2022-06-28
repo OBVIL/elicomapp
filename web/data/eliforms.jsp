@@ -8,7 +8,6 @@ private String html(FormEnum forms) {
     return html;
 }
 
-final static TagFilter tagsStrict = new TagFilter().nostop(true).setGroup(Tag.SUB).setGroup(Tag.NAME);
 
 %>
 <%
@@ -27,6 +26,7 @@ if (alix == null) {
 }
 //-----------
 // parameters
+final String q = tools.getString(Q, null);
 String fname = tools.getString("f", TEXT);
 FieldText ftext = alix.fieldText(fname);
 TagFilter tags = null;
@@ -38,27 +38,53 @@ final int limit = 30;
 // data
 
 FormEnum forms = null;
-Query q = query(alix, tools, Set.of(SENDER, RECEIVER, YEAR1, YEAR2));
+Query qfilter = query(alix, tools, Set.of(SENDER, RECEIVER, YEAR1, YEAR2));
 
 BitSet filter = null;
-if (q != null) {
+if (qfilter != null) {
     IndexSearcher searcher = alix.searcher();
     CollectorBits colBits = new CollectorBits(searcher);
-    searcher.search(q, colBits);
+    searcher.search(qfilter, colBits);
     filter = colBits.bits();
     if (filter.cardinality() < 1) filter = null;
 }
-if (filter == null) {
-    forms = ftext.forms(null, tagsStrict, OptionDistrib.TFIDF);
+
+String[] words = alix.tokenize(q, TEXT);
+int[] pivotIds = ftext.formIds(words, filter);
+
+/*
+if (q == null) {
+    dic = ftext.forms(filter, cat.tags(), distrib);
+    dic.sort(OptionOrder.SCORE.order(), count);
+} 
+else if (pivotIds == null) {
+    // what should be done here ?
+}
+*/
+
+if (pivotIds != null && pivotIds.length > 0) {
+    final int left = 5;
+    final int right = 5;
+    OptionMI mi = OptionMI.JACCARD;
+    FieldRail rail = alix.fieldRail(fname);
+    forms = ftext.forms();
+    forms.filter = filter; // corpus
+    forms.tags = tags;
+    long found = rail.coocs(forms, pivotIds, left, right, mi); // populate the wordlist
+}
+else if (filter == null) {
+    forms = ftext.forms(null, tags, OptionDistrib.TFIDF);
 }
 else {
-    forms = ftext.forms(filter, tagsStrict, OptionDistrib.TFIDF);
+    forms = ftext.forms(filter, tags, OptionDistrib.TFIDF);
 }
 forms.sort(FormEnum.Order.SCORE, limit);
+if (pivotIds != null) Arrays.sort(pivotIds);
 while (forms.hasNext()) {
     forms.next();
+    // pass found 
+    if (pivotIds != null && Arrays.binarySearch(pivotIds, forms.formId()) >= 0 ) continue;
     out.println(html(forms));
 }
-// FormEnum forms = 
 
 %> 

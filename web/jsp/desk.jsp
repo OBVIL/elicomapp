@@ -35,7 +35,7 @@ for (String fpar: new String[]{SENDER, RECEIVER}) {
         request.setAttribute(fpar, sb);
     }
 }
-OptionCat cat = (OptionCat) tools.getEnum("cat", OptionCat.ALL);
+OptionCat cat = (OptionCat) tools.getEnum("cat", OptionCat.NOSTOP);
 request.setAttribute("cats", cat.options("ALL, NOSTOP, SUB, NAME, VERB, ADJ, ADV"));
 OptionDistrib distrib = (OptionDistrib) tools.getEnum("distrib", OptionDistrib.BM25);
 request.setAttribute("distribs", distrib.options("OCCS, BM25, TFIDF"));
@@ -66,6 +66,8 @@ for (; year < (max - mod /2); year += mod) {
 
 sb.append("<div class=\"last\" style=\"right: 0%\">" + max + "</div>");
 request.setAttribute("scale", sb);
+request.setAttribute("cat", cat.options("NOSTOP, SUB, NAME, VERB, ADJ, ADV, ALL"));
+
 %>
 <tag:template>
     <jsp:attribute name="title">${title} [Elicom]</jsp:attribute>
@@ -93,6 +95,10 @@ request.setAttribute("scale", sb);
                     <input name="q" value="${q}" type="text" placeholder="Mot ?"/>
                     <button class="butright" type="submit">▶</button>
                     <div id="eliforms" data-url="../data/eliforms"></div>
+                    <select name="cat" class="cat">
+                        <option></option>
+                        ${cat}
+                    </select>
                 </div>
                 <div id="send-reiceive" class="center">
                     <div class="left">

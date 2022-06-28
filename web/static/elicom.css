@@ -128,6 +128,10 @@ form .meta {
     align-items: center;
 }
 
+select.cat {
+    text-align: right;
+}
+
 form.elicom fieldset {
     position: relative;
     border-color: var(--borderlo);

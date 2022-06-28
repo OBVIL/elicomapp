@@ -618,12 +618,30 @@ const Elicom = function() {
     /**
      * Update interface with data
      */
-    function update(...exclude) {
-        if (!exclude.includes('conc')) Ajix.divLoad('conc', form);
-        if (!exclude.includes('timeplot') && timeplot) timeplot.canvas.load();
-        if (!exclude.includes('biject')) biject();
-        if (!exclude.includes('eliforms')) Ajix.divLoad('eliforms', form);
-        if (!exclude.includes('url')) urlUp();
+    function update(include = "", exclude = "") {
+        const operations = {
+            conc: function() {
+                Ajix.divLoad('conc', form)
+            },
+            timeplot: function() {
+                if (!timeplot) return;
+                else timeplot.canvas.load();
+            },
+            biject: biject,
+            eliforms: function() {
+                Ajix.divLoad('eliforms', form);
+            },
+            url: urlUp,
+        }
+        let incs = [];
+        if (include) incs = include.split(/[,.\s]+/);
+        let excs = [];
+        if (exclude) excs = exclude.split(/[,.\s]+/);
+        for (const op in operations) {
+            if (incs.length > 0 && !incs.includes(op)) continue;
+            if (excs.length > 0 && excs.includes(op)) continue;
+            operations[op]();
+        }
     }
 
     function urlUp() {
@@ -1134,5 +1152,25 @@ const Bislide = function() {
     for (var item of document.querySelectorAll("label.corres")) {
         item.addEventListener('click', Elicom.inputDel);
     }
-    Elicom.update('url'); // no entry in history
+    Elicom.update(null, 'url'); // no entry in history
+    if (form['cat']) {
+        const select = form['cat'];
+        select.addEventListener("change", function(e) {
+            Elicom.update("eliforms");
+        });
+
+        /*
+        const key = "elicom.cat";
+        // on load last value
+        window.addEventListener("load", function(e) {
+            const value = localStorage.getItem(id);
+            if (value) {
+                select.value = value;
+                show(value);
+            }
+        })
+
+        */
+
+    }
 })();
