@@ -91,9 +91,9 @@ request.setAttribute("cat", cat.options("NOSTOP, SUB, NAME, VERB, ADJ, ADV, ALL"
                     </div>
                 </div>
                 <div class="qline">
-                    <button class="butleft" type="button" name="clear">🞭</button>
+                    <button type="button" name="clear">🞭</button>
                     <input name="q" value="${q}" type="text" placeholder="Mot ?"/>
-                    <button class="butright" type="submit">▶</button>
+                    <button type="submit">▶</button>
                     <div id="eliforms" data-url="../data/eliforms"></div>
                     <select name="cat" class="cat">
                         <option></option>
@@ -120,7 +120,9 @@ request.setAttribute("cat", cat.options("NOSTOP, SUB, NAME, VERB, ADJ, ADV, ALL"
                 <div class="receivers">
                 </div>
             </div>
-            <div id="conc" data-url="../data/conc">
+            <div class="centering">
+                <div id="conc" data-url="../data/conc">
+                </div>
             </div>
         </form>
     </jsp:body>

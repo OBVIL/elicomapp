@@ -43,8 +43,8 @@ article.snip mark,
 table.sortable th,
 button.magnify,
 a.reset,
-.sortable td.title a:hover,
-article.res header a:hover,
+.sortable td.title a[href]:hover,
+article.res header a[href]:hover,
 
 /* title in short result */
 
@@ -69,7 +69,6 @@ a.xred,
     opacity: 100%;
     font-weight: normal;
     font-style: italic;
-    font-size: 85%;
 }
 
 ::-moz-placeholder {
@@ -77,7 +76,6 @@ a.xred,
     opacity: 100%;
     font-weight: normal;
     font-style: italic;
-    font-size: 85%;
 }
 
 ::-ms-placeholder {
@@ -85,7 +83,6 @@ a.xred,
     opacity: 100%;
     font-weight: normal;
     font-style: italic;
-    font-size: 85%;
 }
 
 ::placeholder {
@@ -93,7 +90,6 @@ a.xred,
     opacity: 100%;
     font-weight: normal;
     font-style: italic;
-    font-size: 85%;
 }
 
 mark.mark {
@@ -111,26 +107,6 @@ mark:target,
 b.mark:target {
     border: 0.2px solid var(--textlo);
     background: transparent;
-}
-
-html {
-    scrollbar-color: var(--textlo) var(--bglo);
-}
-
-::-webkit-scrollbar {
-    background: var(--bglo);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--textlo);
-    border-radius: 20px;
-    /* roundness of the scroll thumb */
-    border: 3px solid transparent;
-    /* creates padding around scroll thumb */
-}
-
-div::-webkit-scrollbar-thumb {
-    background: var(--bg);
 }
 
 body {
@@ -172,7 +148,7 @@ nav.tabs a {
 }
 
 nav.tabs a.selected,
-nav.tabs a:hover {
+nav.tabs a[href]:hover {
     /*
     background-color: var(--bghi);
     color: var(--texthi);
@@ -251,7 +227,7 @@ a {
     color: var(--link);
 }
 
-a:hover {
+a[href]:hover {
     text-decoration: underline;
 }
 
@@ -930,7 +906,7 @@ td.form a.ADJ {
     color: var(--text);
 }
 
-td.form a:hover {
+td.form a[href]:hover {
     text-decoration: none;
     color: var(--text3);
     background-color: var(--bg3);
@@ -967,7 +943,7 @@ table.sortable th.q i {
     color: #92897F;
 }
 
-#chapters a:hover,
+#chapters a[href]:hover,
 .gutter {
     background: #E1DDCF;
 }
@@ -981,7 +957,7 @@ header.biblbar {
 header.biblbar,
 header.biblbar a {}
 
-header.biblbar a:hover {
+header.biblbar a[href]:hover {
     color: #000;
 }
 
@@ -1121,7 +1097,7 @@ article.kwic header a {
     display: block;
 }
 
-article.kwic header a:hover {
+article.kwic header a[href]:hover {
     text-decoration: none;
 }
 
@@ -1130,7 +1106,7 @@ div.line a {
     color: var(--link);
 }
 
-article.kwic div.line a:hover {
+article.kwic div.line a[href]:hover {
     text-decoration: none;
 }
 
@@ -1202,7 +1178,7 @@ a.form {
   */
 }
 
-#ruloccs a:hover {
+#ruloccs a[href]:hover {
     background-color: var(--bg2);
 }
 
@@ -1219,8 +1195,8 @@ a.form {
     border-radius: 5px;
 }
 
-#rulhi a:hover,
-#ruloccs a:hover {
+#rulhi a[href]:hover,
+#ruloccs a[href]:hover {
     z-index: 10;
     text-decoration: none;
     background-color: var(--text);
@@ -1241,7 +1217,7 @@ a.form {
     padding: 0 0.5rem;
 }
 
-#chapters>a:hover {
+#chapters>a[href]:hover {
     text-decoration: none;
 }
 

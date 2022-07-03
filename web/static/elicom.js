@@ -770,7 +770,7 @@ const Elicom = function() {
             let a = Ajix.selfOrAncestor(e.target, 'a');
             if (!a) return;
             document.forms[form].q.value = a.innerText;
-            Elicom.update('eliforms');
+            Elicom.update();
         });
     }
 
@@ -1153,7 +1153,7 @@ const Bislide = function() {
         item.addEventListener('click', Elicom.inputDel);
     }
     Elicom.update(null, 'url'); // no entry in history
-    if (form['cat']) {
+    if (form && form['cat']) {
         const select = form['cat'];
         select.addEventListener("change", function(e) {
             Elicom.update("eliforms");

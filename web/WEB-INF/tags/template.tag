@@ -7,35 +7,40 @@
 <%@attribute name="inc" fragment="true" %>
 <%!
 
-static public String link(final String path, String href, final String label, final String hint)
+String path;
+
+
+static public String link(String href, final String label, boolean selected, final String hint)
 {
     StringBuilder sb = new StringBuilder();
     sb.append("<a");
     sb.append(" class=\"tab");
-    if (path.equals("/"+href)) {
+    if (selected) {
         sb.append(" selected");
         // index ?
     }
     sb.append("\"");
-    if ("".equals(href)) href=".";
-    sb.append(" href=\"").append(href);
-    /* no pars
-    boolean first = true;
-    for (String par: tab.pars()) {
-        String value = request.getParameter(par);
-        if (value == null) continue;
-        value = JspTools.escape(value);
-        if (first) {
-            first = false;
-            sb.append("?");
+    if (href != null) {
+        sb.append(" href=\"").append(href);
+        // if ("".equals(href)) href=".";
+        /* no pars
+        boolean first = true;
+        for (String par: tab.pars()) {
+            String value = request.getParameter(par);
+            if (value == null) continue;
+            value = JspTools.escape(value);
+            if (first) {
+                first = false;
+                sb.append("?");
+            }
+            else {
+                sb.append("&amp;");
+            }
+            sb.append(par).append("=").append(value);
         }
-        else {
-            sb.append("&amp;");
-        }
-        sb.append(par).append("=").append(value);
+        */
+        sb.append("\"");
     }
-    */
-    sb.append("\"");
     if (hint != null) sb.append(" title=\"").append(hint).append("\"");
     sb.append(">");
     sb.append(label);
@@ -47,11 +52,9 @@ static public String link(final String path, String href, final String label, fi
 <%
 JspTools tools = new JspTools((javax.servlet.jsp.PageContext)jspContext);
 String q = tools.getString("q", "");
-String path = (String)request.getAttribute("path");
-String page = path.substring(path.lastIndexOf("/"));
+path = (String)request.getAttribute("path");
 
 String hrefHome = (String)request.getAttribute("hrefHome");
-
 
 
 %>
@@ -70,10 +73,28 @@ String hrefHome = (String)request.getAttribute("hrefHome");
         <header id="header">
             <%  %>
             <nav class="tabs">
-                <%= link(path, hrefHome + ".", "⌂", null) %>
-                <%= link(page, "about", "Présentation", null) %>
-                <%= link(page, "", "Explorer les correspondances", null) %>
-                <%= link(page, "help", "Aide et contact", null) %>
+                <%
+boolean selected = false;
+selected = ("/".equals(path))?true:false;
+out.println(link(hrefHome + ".", "Accueil", selected, null));
+String hrefBase = null;
+if (path.length() > 2 && path.indexOf('/', 2) > 0) {
+    hrefBase = "";
+    for (int i = path.indexOf('/', 2) + 1, len = path.length(); i < len; i++) {
+        if (path.charAt(i) == '/') {
+            hrefBase += "../";
+        }
+    }
+    hrefBase += ".";
+    selected = (path.matches("^/[^/]+/$"))?true:false;
+}
+out.println(link(hrefBase, "Explorer les correspondances", selected, null));
+
+
+selected = ("/aide".equals(path))?true:false;
+out.println(link(hrefHome + "aide", "Aide et contact", selected, null));
+
+                %>
             </nav>
             <jsp:invoke fragment="header"/>
         </header>

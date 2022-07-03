@@ -34,7 +34,7 @@ final Doc doc = new Doc(alix, docId);
 request.setAttribute("title", ML.detag(doc.doc().get("bibl")) ); // transmitted to template
 
 body.append("<div class=\"row\">\n");
-body.append("<div class=\"text\">\n");
+body.append("<div class=\"letter\">\n");
 body.append("<div class=\"bibl\">");
 body.append(doc.doc().get("bibl"));
 body.append("</div>\n");
@@ -78,10 +78,10 @@ else {
 body.append("</div>\n");
 Query mlt = qBuilder.build();
 body.append("<nav class=\"seealso\">\n");
-body.append("<h5>Sur les mêmes sujets…</h5>\n");
+body.append("<header>Sur les mêmes sujets…</header>\n");
 IndexSearcher searcher = alix.searcher();
 TopDocs topDocs;
-topDocs = searcher.search(mlt, 20);
+topDocs = searcher.search(mlt, 10);
 ScoreDoc[] hits = topDocs.scoreDocs;
 final String href = "?id=";
 final HashSet<String> DOC_SHORT = new HashSet<String>(Arrays.asList(new String[] {Names.ALIX_ID, Names.ALIX_BOOKID, "bibl"}));

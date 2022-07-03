@@ -3,6 +3,31 @@ html {
     overflow-y: scroll;
 }
 
+html {
+    scrollbar-color: var(--text) var(--bghi);
+}
+
+::-webkit-scrollbar {
+    background: var(--bghi);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text);
+    border-radius: 20px;
+    /* roundness of the scroll thumb */
+    border: 3px solid transparent;
+    /* creates padding around scroll thumb */
+}
+
+html,
+body {
+    background-color: var(--bglo);
+}
+
+body {
+    border-left: 16px solid var(--bghi);
+}
+
 #header {
     position: relative;
 }
@@ -14,7 +39,7 @@ nav.tabs {
 }
 
 nav.tabs a.selected,
-nav.tabs a:hover {
+nav.tabs a[href]:hover {
     border-bottom: 1px solid var(--bglo);
     background-color: var(--bglo);
     color: var(--bg);
@@ -31,20 +56,17 @@ form.elicom .arelation {
     justify-content: space-between;
 }
 
-#send-reiceive input,
-.cursor input,
-.qline input,
+input,
+select,
 .qline button {
     font-size: 22px;
-    font-weight: bold;
     line-height: 100%;
     padding-top: 0;
     padding-bottom: 0;
 }
 
 .qline button {
-    padding: 3px 5px;
-    line-height: 90%;
+    padding: 2.2px 5px;
 }
 
 #send-reiceive input {
@@ -107,13 +129,6 @@ form.elicom input[name=q] {
     text-overflow: ellipsis;
 }
 
-#conc {
-    margin-top: 2rem;
-    scroll-margin: 5rem;
-    min-height: 200vh;
-    min-width: 170ex;
-}
-
 form .meta {
     font-weight: bold;
     padding: 0 1rem;
@@ -126,10 +141,6 @@ form .meta {
 .qline {
     display: flex;
     align-items: center;
-}
-
-select.cat {
-    text-align: right;
 }
 
 form.elicom fieldset {
@@ -328,7 +339,7 @@ header .receiver {
 
 #biject .receivers header {
     font-weight: bold;
-    justify-content: rig ht;
+    justify-content: right;
 }
 
 #biject .senders .more {
@@ -348,6 +359,7 @@ header .receiver {
     justify-content: left;
 }
 
+#biject .more,
 #biject .corr {
     font-size: 85%;
 }
@@ -365,14 +377,13 @@ header .receiver {
 /** The timeplot sliders */
 
 form.elicom {
-    --cursor-width: 4.8rem;
+    --cursor-width: 4.7rem;
 }
 
 .timeplot {
-    --time-height: 28px;
-    --cursor-pos: -4.8rem;
-    margin-left: 5rem;
-    margin-right: 5rem;
+    --time-height: 28.2px;
+    margin-left: var(--cursor-width);
+    margin-right: var(--cursor-width);
     position: relative;
     line-height: 100%;
 }
@@ -389,7 +400,6 @@ form.elicom {
     padding: 0;
     /** needed */
     width: var(--cursor-width);
-    background-color: var(--bglo);
     cursor: col-resize;
     top: 0;
     position: absolute;
@@ -404,22 +414,30 @@ form.elicom {
 .timeplot .cursor input {
     display: block;
     border-radius: 0;
-    border: none;
+    /* border: none; */
+    background-color: var(--bglo);
     text-align: center;
-    height: var(--time-height);
     padding: 0;
-    width: var(--cursor-width);
+    width: 100%;
 }
 
 .timeplot .cursor.left {
-    left: var(--cursor-pos);
+    left: var(--cursor-width);
     border-right: solid 3px #fff;
     text-align: right;
 }
 
+.timeplot .cursor.left input {
+    border-right: none;
+}
+
 .timeplot .cursor.right {
-    right: var(--cursor-pos);
+    right: var(--cursor-width);
     border-left: solid 3px #fff;
+}
+
+.timeplot .cursor.right input {
+    border-left: none;
 }
 
 .timeplot .ticks {
@@ -468,35 +486,88 @@ form.elicom {
     border-right: 1px solid #000;
 }
 
-article.kwic div.line {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-end;
-    gap: 1ex;
+.centering {
+    border-top: 1px solid var(--bg);
+    margin-top: 2rem;
 }
 
-article.kwic div.line>* {
+#conc {
+    scroll-margin: 5rem;
+    min-height: 200vh;
+    width: 140ex;
+    flex-shrink: 4;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.concline {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1ex;
+    justify-content: flex-start;
+    color: inherit;
+    /* align <small> */
+    align-items: center;
+}
+
+.concline.words {
+    border-bottom: 1px solid var(--bg);
+}
+
+.concline>* {
     display: inline-block;
     text-align: left;
 }
 
-article.kwic div.line .date {
-    flex-basis: 10ex;
-}
-
-article.kwic div.line .left {
-    display: inline-block;
-    flex-basis: 47ex;
+.concline>.num {
+    flex-basis: 4ex;
     text-align: right;
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 
-article.kwic div.line .sender,
-article.kwic div.line .receiver {
-    flex-basis: 13ex;
+.concline>.date {
+    flex-basis: 11ex;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.concline>.sender,
+.concline>.receiver {
+    width: 13ex;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+a.concline:hover {
+    background-color: var(--bg);
+    text-decoration: none;
+}
+
+.concline .pivot {
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.concline .left,
+.concline .right {
+    flex-basis: 42ex;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.concline .left {
+    text-align: right;
+    /* for ellipsis on the left */
+    direction: rtl;
+}
+
+.concline>.words {
+    padding: 4px 0;
 }
 
 
@@ -531,31 +602,39 @@ article.kwic div.line .receiver {
     text-align: right;
 }
 
+input,
+select {
+    background: inherit;
+    color: var(--text);
+}
 
-/*
-#send-reiceive ::-webkit-input-placeholder {
+input:focus {
+    background: var(--bg);
+}
+
+::-webkit-input-placeholder {
     color: var(--bg);
     font-style: normal;
 }
 
-#send-reiceive ::-moz-placeholder {
+::-moz-placeholder {
     color: var(--bg);
     font-style: normal;
 }
 
-#send-reiceive ::-ms-placeholder {
+::-ms-placeholder {
     color: var(--bg);
     font-style: normal;
 }
 
-#send-reiceive ::placeholder {
+::placeholder {
     color: var(--bg);
     font-style: normal;
 }
-*/
 
+select.cat,
 #send-reiceive input[type='text'] {
-    width: 13ex;
+    width: 14ex;
     padding: 0 0.5ex;
 }
 
@@ -591,15 +670,15 @@ label.corres a {
     z-index: 5;
     top: 0;
     background-color: var(--bglo);
-    box-shadow: 0px 10px 25px var(--bg);
+    border-bottom: 1px var(--bg) solid;
     padding-top: 1ex;
     padding-bottom: 1ex;
 }
 
 #biject,
-#conc,
 #navres {
-    padding-left: 16px;
+    padding-left: 50px;
+    padding-right: 50px;
 }
 
 .timeplot,
@@ -608,10 +687,14 @@ label.corres a {
     margin-top: 10px;
 }
 
+select.cat {}
+
 #eliforms {
-    padding: 0 1ex;
+    padding: 0 0.5ex 0 0.5ex;
     white-space: nowrap;
+    width: 100%;
     overflow: hidden;
+    text-overflow: "";
 }
 
 #eliforms a {
@@ -625,4 +708,44 @@ label.corres a {
 
 #eliforms a:hover {
     background-color: var(--bg);
+}
+
+div.letter {
+    font-size: 19px;
+    width: 50rem;
+    padding: 2rem;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+nav.seealso {
+    font-size: 16px;
+    width: 15rem;
+    padding: 0;
+}
+
+nav.seealso>a.bibl,
+nav.seealso>header {
+    padding: 0.3rem 0 0.3rem 1rem;
+}
+
+nav.seealso>header {
+    font-weight: bold;
+    border-top: 1px solid var(--bg);
+    border-bottom: 1px solid var(--bg);
+    color: var(--bg);
+}
+
+.seealso b {
+    font-weight: normal;
+}
+
+main>div.row {
+    margin-top: 2rem;
+}
+
+mark.mark {
+    border: none;
+    color: var(--link);
+    background-color: var(--bglo);
 }

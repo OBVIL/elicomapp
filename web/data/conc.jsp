@@ -97,6 +97,9 @@ boolean expression = false;
 if (forms == null) expression = false;
 else expression = pars.expression;
 int occ = 0;
+
+
+
 while (i < max) {
     final int docId = scoreDocs[i].doc;
     i++; // loop now
@@ -108,21 +111,27 @@ while (i < max) {
     String href = pars.href + "&amp;q=" + JspTools.escUrl(pars.q) + "&amp;id=" + doc.id() + "&amp;start=" + i + "&amp;sort=" + pars.sort.name();
     
     // if search key words 
-    String[] lines = null;
+    List<String[]> lines = null;
     if (forms != null && forms.length > 0) {
-        lines = doc.kwic(pars.f, include, href.toString(), 200, pars.left, pars.right, gap, expression, repetitions);
-        if (lines == null || lines.length < 1) continue;
+        lines = doc.kwic(pars.f, include, 200, 60, 60, gap, expression, repetitions);
+        if (lines == null || lines.size() < 1) continue;
+    }
+    String date = "";
+    String val = doc.get("date");
+    if (val != null) {
+        try {
+            int w =  Integer.parseInt(val);
+            date = FieldInt.int2date(w);
+        }
+        catch (Exception e) {}
     }
     if (lines == null) {
-        out.println("<article class=\"kwic\">");
-        out.println("  <header>");
-        out.println(" <!-- docId=" + docId + " -->");
-        out.print("    <a href=\"" + href + "\">");
-        out.print("    <b class=\"n\">"+(i)+")</b>");
-        out.print(doc.get("bibl"));
-        out.println("</a>");
-        out.println("  </header>");
-        out.println("  <div class=\"words\">");
+        out.println("  <a class=\"concline words\" href=\"" + href + "\">");
+        out.println("    <small class=\"num\">" + i +"</small>");
+        out.println("    <span class=\"date\">" + date + "</span>");
+        out.println("    <span class=\"sender\" title=\"" + JspTools.escape(doc.get("sender")) + "\">" + doc.get("sender") + "</span>");
+        out.println("    <span class=\"receiver\" title=\"" + JspTools.escape(doc.get("receiver")) + "\">" + doc.get("receiver") + "</span>");
+        out.print("    <span class=\"words\">");
         FormEnum docForms = doc.forms(TEXT, OptionDistrib.CHI2, null);
         docForms.sort(FormEnum.Order.SCORE);
         first = true;
@@ -135,31 +144,21 @@ while (i < max) {
             else out.println(", ");
             out.print(docForms.form());
         }
-        out.println("  </div>");
-        out.println("</article>");
+        out.println("    </span>");
+        out.println("  </a>");
     }
     else {
-        out.println("  <article class=\"kwic\">");
-        for (String l: lines) {
-            out.print("    <div class=\"line\">");
-            out.print("<small>"+ ++occ +".</small>");
-            String date = "";
-            String val = doc.get("date");
-            if (val != null) {
-                try {
-                    int w =  Integer.parseInt(val);
-                    date = FieldInt.int2date(w);
-                }
-                catch (Exception e) {}
-            }
-            out.print("<span class=\"date\">" + date + "</span>");
-            out.print("<span class=\"sender\" title=\"" + JspTools.escape(doc.get("sender")) + "\">" + doc.get("sender") + "</span>");
-            out.print("<span class=\"receiver\" title=\"" + JspTools.escape(doc.get("receiver")) + "\">" + doc.get("receiver") + "</span>");
-            out.print(l);
-            out.println("</div>");
+        for (String[] l: lines) {
+            out.println("  <a class=\"concline\" href=\""+ href + "#" + l[0] +"\">");
+            out.println("    <small class=\"num\">" + ++occ +"</small>");
+            out.println("    <span class=\"date\">" + date + "</span>");
+            out.println("    <span class=\"sender\" title=\"" + JspTools.escape(doc.get("sender")) + "\">" + ML.detag(doc.get("sender")) + "</span>");
+            out.println("    <span class=\"receiver\" title=\"" + JspTools.escape(doc.get("receiver")) + "\">" + ML.detag(doc.get("receiver")) + "</span>");
+            out.println("    <span class=\"left\">" + l[1] + "</span>");
+            out.println("    <span class=\"pivot\">" + l[2] + "</span>");
+            out.println("    <span class=\"right\">" + l[3] + "</span>");
+            out.println("  </a>");
         }
-        out.println("  </article>");
-        
     }
     /*
     // show simple metadata
@@ -168,11 +167,11 @@ while (i < max) {
         
     }
     
-    out.println("</article>");
     */
     out.println("&#10;"); // keep that, may be used as a separator
     out.flush(); // send a result
     if (++docs >= pars.limit) break;
     continue;
 }
+
 %>
