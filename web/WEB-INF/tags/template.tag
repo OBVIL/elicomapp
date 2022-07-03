@@ -78,6 +78,7 @@ boolean selected = false;
 selected = ("/".equals(path))?true:false;
 out.println(link(hrefHome + ".", "Accueil", selected, null));
 String hrefBase = null;
+selected = false;
 if (path.length() > 2 && path.indexOf('/', 2) > 0) {
     hrefBase = "";
     for (int i = path.indexOf('/', 2) + 1, len = path.length(); i < len; i++) {
