@@ -489,6 +489,7 @@ form.elicom {
 .centering {
     border-top: 1px solid var(--bg);
     margin-top: 2rem;
+    padding-top: 2rem;
 }
 
 #conc {
@@ -618,6 +619,7 @@ input:focus {
 }
 
 ::-moz-placeholder {
+    opacity:  1;
     color: var(--bg);
     font-style: normal;
 }
@@ -632,9 +634,22 @@ input:focus {
     font-style: normal;
 }
 
+.multiple::-webkit-input-placeholder {
+    color: var(--text);
+}
+
+.multiple::-moz-placeholder {
+    color: var(--text);
+}
+
+.multiple::placeholder {
+    color: var(--text);
+}
+
+
 select.cat,
 #send-reiceive input[type='text'] {
-    width: 14ex;
+    width: 15ex;
     padding: 0 0.5ex;
 }
 

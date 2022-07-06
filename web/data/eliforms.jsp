@@ -82,6 +82,7 @@ forms.sort(FormEnum.Order.SCORE, limit);
 if (pivotIds != null) Arrays.sort(pivotIds);
 while (forms.hasNext()) {
     forms.next();
+    if (forms.freq() < 1) break;
     // pass found 
     if (pivotIds != null && Arrays.binarySearch(pivotIds, forms.formId()) >= 0 ) continue;
     out.println(html(forms));
