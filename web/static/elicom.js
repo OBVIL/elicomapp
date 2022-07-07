@@ -941,7 +941,7 @@ const Elicom = function() {
                 // if (right) html += 'à ';
                 html += corr.label;
                 // if (!right) 
-                html += ' <small class="count">(' + corr.count + ')</small>';
+                html += ' <small class="count">(' + corr.freq + ')</small>';
                 html += '</span>';
                 el.innerHTML = html;
                 let height = hmax * (corr.count / max) + 4;

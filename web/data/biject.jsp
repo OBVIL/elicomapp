@@ -36,21 +36,36 @@ if (bits.cardinality() < 1) {
 
 // loop on relevant docs to get edges
 FieldFacet corresField = alix.fieldFacet(CORRES);
+
 FieldFacet senderField = alix.fieldFacet(SENDER);
 BitSet senderBits = new FixedBitSet(senderField.size()); // to count senders
+int[] senderFreqs = new int[senderField.size()];
+
 FieldFacet receiverField = alix.fieldFacet(RECEIVER);
 BitSet receiverBits = new FixedBitSet(receiverField.size()); // to count senders
+int[] receiverFreqs = new int[receiverField.size()];
+
 EdgeQueue edges = new EdgeQueue(true); // directed graph, 
 for (
     int docId = bits.nextSetBit(0), max = bits.length();
     docId < max;
     docId = bits.nextSetBit(docId + 1)
 ) {
-    // get sender ids and receiver id
+    // get sender ids and receiver id, update freqs
     int[] senderIds = senderField.formIds(docId);
-    if (senderIds == null) continue;
+    if (senderIds != null) {
+        for (int sid: senderIds) senderFreqs[sid]++;
+    }
     int[] receiverIds = receiverField.formIds(docId);
+    if (receiverIds != null) {
+        for (int rid: receiverIds) receiverFreqs[rid]++;
+    }
+    
+    // update counts
+
+    if (senderIds == null) continue;
     if (receiverIds == null) continue;
+
     for (int sid: senderIds) {
         senderBits.set(sid);
         for (int rid: receiverIds) {
@@ -129,6 +144,7 @@ for (Map.Entry<Integer, Long> entry : list) {
         + ", \"id\": \"s" + id + "\""
         + ", \"label\": " + JSONWriter.valueToString(form)
         + ", \"count\": " + count
+        + ", \"freq\": " + senderFreqs[id]
         + ", \"rels\": " + sendersRels.get(id)
         + ", \"corres\": " + corresField.formId(form)
         + "}");
@@ -162,6 +178,7 @@ for (Map.Entry<Integer, Long> entry : list) {
         + ", \"id\": \"r" + id + "\""
         + ", \"label\": " + JSONWriter.valueToString(form)
         + ", \"count\": " + count
+        + ", \"freq\": " + receiverFreqs[id]
         + ", \"rels\": " + receiversRels.get(id)
         + ", \"corres\": " + corresField.formId(form)
         + "}");
