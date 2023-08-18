@@ -90,7 +90,7 @@ if (forms == null || forms.length < 1) {
 final FieldText ftext = alix.fieldText(field);
 final FieldRail frail = alix.fieldRail(field);
 // build filter from form
-Query qFilter = query(alix, tools, GRAPH_PARS);
+Query qFilter = query(alix, tools, Set.of(SENDER, RECEIVER, YEAR1, YEAR2));
 BitSet filter = filter(alix, qFilter);
 int[] pivotIds = ftext.formIds(forms, filter);
 if (pivotIds == null) {

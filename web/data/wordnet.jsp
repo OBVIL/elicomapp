@@ -41,7 +41,7 @@ if (scorer == null) {
 final FieldText ftext = alix.fieldText(field);
 final FieldRail frail = alix.fieldRail(field);
 // define the partition filter
-Query qFilter = query(alix, tools, GRAPH_PARS);
+Query qFilter = query(alix, tools, Set.of(SENDER, RECEIVER, YEAR1, YEAR2));
 BitSet filter = filter(alix, qFilter);
 
 //get nodes and sort them
